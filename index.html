@@ -1410,7 +1410,7 @@
         return;
       }
       state.submitting = false;
-      state.submitError = t("submitError");
+      state.submitError = t("submitError") + " (" + (err.message || "Unknown error") + ")";
       render();
     }
   }
