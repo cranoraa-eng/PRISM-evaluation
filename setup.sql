@@ -81,6 +81,9 @@ begin
 end;
 $$;
 
+drop policy if exists "Allow authenticated reads only" on responses;
+drop policy if exists "Allow authenticated soft-delete" on responses;
+
 -- Allow authenticated users to read non-deleted responses
 create policy "Allow authenticated reads only"
   on responses
