@@ -5,9 +5,10 @@ create table if not exists responses (
   submitted_at    timestamptz not null default now(),
   respondent_name text,
   respondent_age  int,
-  respondent_sex  text not null,
+  respondent_sex  text,
   respondent_user_type text not null,
-  duration_of_use text not null,
+  consent_given   boolean not null default false,
+  consent_date    timestamptz,
   answers         jsonb not null default '{}'::jsonb,
   comments        text
 );

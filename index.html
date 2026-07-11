@@ -401,6 +401,40 @@
   }
   #prism-root .response-counter b { color: var(--ink); font-size: 15px; }
 
+  #prism-root .consent-box {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    max-height: 340px;
+    overflow-y: auto;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  #prism-root .consent-box p { margin: 0 0 12px; }
+  #prism-root .consent-box p:last-child { margin-bottom: 0; }
+  #prism-root .consent-label {
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    padding: 12px 16px;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    transition: border-color 0.15s;
+  }
+  #prism-root .consent-label:hover { border-color: var(--ink-2); }
+  #prism-root .consent-label input[type=checkbox] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: var(--ink);
+  }
+
   #prism-root .saved-indicator {
     position: fixed;
     bottom: 20px;
@@ -580,6 +614,7 @@
 
   var STEPS = [
     { id: "welcome", kind: "welcome" },
+    { id: "consent", kind: "consent", label: "Consent" },
     { id: "info", kind: "info", label: "Your Info" },
     {
       id: "usability", kind: "survey", label: "Usability",
@@ -611,6 +646,8 @@
     answers: {},
     respondent: { name: "", age: "", sex: "", userType: "", userTypeOther: "" },
     comments: "",
+    consentGiven: false,
+    consentDate: null,
     submitting: false,
     submitError: null,
     responseId: null,
@@ -628,7 +665,8 @@
       stepIndex: state.stepIndex,
       answers: state.answers,
       respondent: state.respondent,
-      comments: state.comments
+      comments: state.comments,
+      consentGiven: state.consentGiven
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
@@ -645,6 +683,7 @@
         state.answers = saved.answers || {};
         state.respondent = saved.respondent || state.respondent;
         state.comments = saved.comments || "";
+        state.consentGiven = saved.consentGiven || false;
       }
     } catch (e) {}
   }
@@ -695,7 +734,6 @@
 
   function infoMissing() {
     var m = [];
-    if (!state.respondent.sex) m.push("sex");
     if (!state.respondent.userType) m.push("userType");
     if (state.respondent.userType === "IT Expert" && !state.respondent.userTypeOther.trim()) m.push("userTypeOther");
     if (state.respondent.age && (isNaN(state.respondent.age) || +state.respondent.age < 5 || +state.respondent.age > 100)) m.push("age");
@@ -770,17 +808,43 @@
         '<h1 class="title serif">PRISM Evaluation Questionnaire</h1>' +
         '<p class="subtitle">Portal for Records, Information, and School Management</p>' +
         '<div class="rule"></div>' +
-        '<p>This questionnaire gathers your honest assessment of PRISM. Your responses help evaluate the system\u2019s usability, functional suitability, and overall user satisfaction as a school management portal. All information you provide is treated confidentially and used solely for research purposes.</p>' +
+        '<p>This questionnaire gathers your honest assessment of PRISM. Your responses help evaluate the system\u2019s usability, functional suitability, and overall user satisfaction as a school management portal.</p>' +
+        '<p>Your participation is <b>voluntary</b> and your responses are <b>confidential</b>. You must be at least <b>18 years of age</b> (or have parental consent) to participate. You may withdraw at any time before submission by closing the form.</p>' +
         '<div class="meta">' +
           '<div><b>' + TOTAL_ITEMS + ' statements</b>3 sections</div>' +
           '<div><b>~6\u20138 min</b>estimated time</div>' +
           '<div><b>4-point scale</b>Strongly Disagree \u2192 Strongly Agree</div>' +
         '</div>' +
-        '<button type="button" class="btn btn-primary" id="start-btn">Begin Questionnaire</button>' +
+        '<button type="button" class="btn btn-primary" id="start-btn">Proceed to Consent</button>' +
         counterHtml +
         '<p style="margin-top:24px;font-size:11px;color:var(--muted);"><a href="admin.html" style="color:var(--muted);text-decoration:underline;">Researcher Dashboard</a></p>' +
       '</div>'
     );
+  }
+
+  function renderConsent() {
+    var html = '<div class="content">';
+    html += '<h2 class="section-title serif">Informed Consent</h2>';
+    html += '<p class="section-note">Please read the following information carefully before proceeding.</p>';
+    html += '<div class="banner error' + (state._consentTouched && !state.consentGiven ? " show" : "") + '">You must agree to participate before continuing.</div>';
+    html += '<div class="consent-box">';
+    html += '<p><b>Study Title:</b> Evaluation of PRISM (Portal for Records, Information, and School Management)</p>';
+    html += '<p><b>Purpose:</b> This survey gathers your honest assessment of PRISM\u2019s usability, functional suitability, and overall user satisfaction. Results will be used for research and improvement of the system.</p>';
+    html += '<p><b>Voluntary Participation:</b> Your participation is completely voluntary. You may withdraw at any time before submitting by closing the form. Your progress will be saved automatically if you wish to continue later.</p>';
+    html += '<p><b>Confidentiality:</b> All responses are treated as confidential. Any information you provide (name, age, sex, user type) will be used solely for research purposes and will not be shared in identifiable form. Names are optional and disassociated from analysis.</p>';
+    html += '<p><b>Data Storage:</b> Responses are stored securely in a cloud database (Supabase) with restricted access. Only the researcher has access to the raw data. Data will be retained for the duration of the research study and may be retained for up to 3 years for archival purposes.</p>';
+    html += '<p><b>Age Requirement:</b> By participating, you confirm that you are at least 18 years of age or have obtained parental or guardian consent.</p>';
+    html += '<p><b>Risks and Benefits:</b> There are no known risks associated with this survey. Your responses will help improve the PRISM system for the benefit of the school community.</p>';
+    html += '<p><b>Contact:</b> For questions or concerns about this study, or to request withdrawal of your response after submission, please contact the researcher. Your response reference ID (provided after submission) will be required for withdrawal requests.</p>';
+    html += '<p><b>Ethics Clearance:</b> This study has been reviewed in accordance with established research ethics guidelines.</p>';
+    html += '</div>';
+    html += '<div class="field" style="margin-top:18px;">';
+    html += '<label class="field-label consent-label">';
+    html += '<input type="checkbox" id="f-consent"' + (state.consentGiven ? ' checked' : '') + ' /> ';
+    html += 'I have read and understood the information above. I voluntarily agree to participate in this study.</label>';
+    html += '</div>';
+    html += '</div>';
+    return html;
   }
 
   function renderInfo() {
@@ -798,8 +862,8 @@
     html += '<div class="field"><label class="field-label">Age <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
       '<input type="number" id="f-age" value="' + esc(r.age) + '" placeholder="e.g. 24" min="5" max="100" /></div>';
 
-    html += '<div class="field"><label class="field-label">Sex <span class="req">*</span></label><div class="choice-grid">' +
-      SEX_OPTIONS.map(function(o) {
+    html += '<div class="field"><label class="field-label">Sex <span style="font-weight:400;color:var(--muted)">(optional)</span></label><div class="choice-grid">' +
+      SEX_OPTIONS.concat(["Prefer not to say"]).map(function(o) {
         return '<button type="button" class="choice-pill' + (r.sex === o ? " selected" : "") + '" data-field="sex" data-val="' + esc(o) + '">' + esc(o) + '</button>';
       }).join("") + '</div></div>';
 
@@ -836,6 +900,7 @@
         '<h2 class="serif">Thank you for your response</h2>' +
         '<p>Your evaluation has been recorded and will help improve the PRISM school management portal.</p>' +
         '<div class="response-id">Reference: ' + esc(state.responseId || "") + '</div>' +
+        '<p style="font-size:12.5px;color:var(--muted);">Save your reference ID if you wish to withdraw your response later. Contact the researcher and provide this ID to request deletion.</p>' +
         '<div><button type="button" class="btn btn-ghost" id="restart-btn">Submit Another Response</button></div>' +
       '</div>'
     );
@@ -870,6 +935,7 @@
     inner += renderProgress();
 
     if (step.kind === "welcome") inner += renderWelcome();
+    else if (step.kind === "consent") inner += renderConsent();
     else if (step.kind === "info") inner += renderInfo();
     else if (step.kind === "survey") inner += renderSurveyStep(step, missing);
     else if (step.kind === "comments") inner += renderComments();
@@ -895,7 +961,8 @@
       state = {
         stepIndex: 0, answers: {},
         respondent: { name: "", age: "", sex: "", userType: "", userTypeOther: "" },
-        comments: "", submitting: false, submitError: null, responseId: null, responseCount: state.responseCount
+        comments: "", consentGiven: false, consentDate: null,
+        submitting: false, submitError: null, responseId: null, responseCount: state.responseCount
       };
       clearProgress();
       render();
@@ -920,6 +987,13 @@
         saveProgress();
         render();
       });
+    });
+
+    var consentCheck = root.querySelector("#f-consent");
+    if (consentCheck) consentCheck.addEventListener("change", function(e) {
+      state.consentGiven = e.target.checked;
+      state.consentDate = state.consentGiven ? new Date().toISOString() : null;
+      saveProgress();
     });
 
     var nameInput = root.querySelector("#f-name");
@@ -953,6 +1027,10 @@
   }
 
   function handleNext(step) {
+    if (step.kind === "consent") {
+      state._consentTouched = true;
+      if (!state.consentGiven) { render(); focusFirstError(); return; }
+    }
     if (step.kind === "info") {
       state._infoTouched = true;
       var missing = infoMissing();
@@ -1000,6 +1078,8 @@
       respondent_user_type: state.respondent.userType === "IT Expert"
         ? state.respondent.userTypeOther
         : state.respondent.userType,
+      consent_given: state.consentGiven,
+      consent_date: state.consentDate,
       answers: state.answers,
       comments: state.comments || null
     };

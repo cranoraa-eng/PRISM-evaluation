@@ -895,8 +895,8 @@
       }
     });
     var overallMean = mean(allVals);
+    var consentCount = r.filter(function(res) { return res.consent_given; }).length;
     var userTypes = {};
-    r.forEach(function(res) {
       var t = res.respondent_user_type || "Unknown";
       userTypes[t] = (userTypes[t] || 0) + 1;
     });
@@ -906,6 +906,7 @@
     html += '<div class="stat-card"><div class="label">Overall Mean</div><div class="value">' + overallMean.toFixed(2) + '</div><div class="note">' + interpret(overallMean).label + '</div></div>';
     html += '<div class="stat-card"><div class="label">Items Rated</div><div class="value">' + TOTAL_ITEMS + '</div><div class="note">statements per respondent</div></div>';
     html += '<div class="stat-card"><div class="label">User Types</div><div class="value">' + Object.keys(userTypes).length + '</div><div class="note">categories represented</div></div>';
+    html += '<div class="stat-card"><div class="label">Consent Rate</div><div class="value">' + (n ? (consentCount / n * 100).toFixed(0) : 0) + '%</div><div class="note">' + consentCount + ' of ' + n + ' consented</div></div>';
     html += '</div>';
 
     html += '<div class="section-heading">Section Mean Summary</div>';
@@ -1425,7 +1426,7 @@
     html += '<th><button class="sort-btn" data-sort="ref" style="all:unset;cursor:pointer;font-weight:inherit">Reference' + sortArrow("ref") + '</button></th>';
     html += '<th><button class="sort-btn" data-sort="date" style="all:unset;cursor:pointer;font-weight:inherit">Submitted' + sortArrow("date") + '</button></th>';
     html += '<th><button class="sort-btn" data-sort="name" style="all:unset;cursor:pointer;font-weight:inherit">Name' + sortArrow("name") + '</button></th>';
-    html += '<th>Age</th><th>Sex</th><th>User Type</th>';
+    html += '<th>Age</th><th>Sex</th><th>User Type</th><th>Consent</th>';
     for (var k = 1; k <= TOTAL_ITEMS; k++) html += '<th>Q' + k + '</th>';
     html += '<th><button class="sort-btn" data-sort="mean" style="all:unset;cursor:pointer;font-weight:inherit">Mean' + sortArrow("mean") + '</button></th>';
     html += '<th>Comments</th></tr></thead><tbody>';
@@ -1464,6 +1465,7 @@
       html += '<td>' + (res.respondent_age || "\u2014") + '</td>';
       html += '<td>' + esc(res.respondent_sex || "\u2014") + '</td>';
       html += '<td>' + esc(res.respondent_user_type || "\u2014") + '</td>';
+      html += '<td style="text-align:center">' + (res.consent_given ? '<span style="color:var(--success)">&#10003;</span>' : '<span style="color:var(--error)">&#10007;</span>') + '</td>';
       for (var k2 = 1; k2 <= TOTAL_ITEMS; k2++) {
         var v2 = (res.answers || {})[String(k2)];
         html += '<td style="text-align:center">' + (v2 || "\u2014") + '</td>';
@@ -1796,7 +1798,7 @@
   function exportCSV() {
     var r = STATE.filteredResponses;
     if (!r.length) return;
-    var headers = ["Reference","Submitted","Name","Age","Sex","User Type"];
+    var headers = ["Reference","Submitted","Name","Age","Sex","User Type","Consent"];
     for (var k = 1; k <= TOTAL_ITEMS; k++) headers.push("Q" + k);
     headers.push("Mean","Comments");
     var rows = [headers.join(",")];
@@ -1809,7 +1811,7 @@
       var m = mean(vals);
       var ref = res.id ? res.id.slice(0, 8).toUpperCase() : "";
       var dt = res.submitted_at || "";
-      var line = [ref, dt, res.respondent_name || "", res.respondent_age || "", res.respondent_sex || "", res.respondent_user_type || ""]
+      var line = [ref, dt, res.respondent_name || "", res.respondent_age || "", res.respondent_sex || "", res.respondent_user_type || "", res.consent_given ? "Yes" : "No"]
         .concat(vals).concat([m.toFixed(2), res.comments || ""]);
       rows.push(line.map(function(c) { return '"' + String(c).replace(/"/g, '""').replace(/^[=+\-@\t\r]/, "'") + '"'; }).join(","));
     });
@@ -1983,7 +1985,7 @@
     }
 
     /* ---- Sheet 1: All Responses ---- */
-    var hdrs = ["Reference","Submitted","Name","Age","Sex","User Type"];
+    var hdrs = ["Reference","Submitted","Name","Age","Sex","User Type","Consent"];
     for (var q = 1; q <= TOTAL_ITEMS; q++) hdrs.push("Q" + q);
     hdrs.push("Mean","Interpretation","Comments");
     var rows1 = [];
@@ -2004,37 +2006,38 @@
         res.respondent_name || "",
         res.respondent_age || "",
         res.respondent_sex || "",
-        res.respondent_user_type || ""
+        res.respondent_user_type || "",
+        res.consent_given ? "Yes" : "No"
       ].concat(vals).concat([+m.toFixed(2), interp.label, res.comments || ""]));
     });
     var widths1 = [
-      { wch: 12 }, { wch: 21 }, { wch: 20 }, { wch: 8 }, { wch: 12 }, { wch: 14 }
+      { wch: 12 }, { wch: 21 }, { wch: 20 }, { wch: 8 }, { wch: 12 }, { wch: 14 }, { wch: 8 }
     ];
     for (var qc = 1; qc <= TOTAL_ITEMS; qc++) widths1.push({ wch: 6 });
     widths1.push({ wch: 10 }, { wch: 18 }, { wch: 42 });
-    var centerCols1 = { 0: true, 1: true, 3: true, 4: true };
-    for (var ci = 6; ci < 6 + TOTAL_ITEMS; ci++) centerCols1[ci] = true;
-    centerCols1[6 + TOTAL_ITEMS] = true;
+    var centerCols1 = { 0: true, 1: true, 3: true, 4: true, 6: true };
+    for (var ci = 7; ci < 7 + TOTAL_ITEMS; ci++) centerCols1[ci] = true;
+    centerCols1[7 + TOTAL_ITEMS] = true;
     var wrapCols1 = { 2: true, 5: true };
-    wrapCols1[8 + TOTAL_ITEMS] = true;
+    wrapCols1[9 + TOTAL_ITEMS] = true;
     var wrapHints1 = { 2: 18, 5: 14 };
-    wrapHints1[8 + TOTAL_ITEMS] = 36;
+    wrapHints1[9 + TOTAL_ITEMS] = 36;
     var ws1 = createSheet("All Responses", hdrs, rows1, {
       widths: widths1,
       centerCols: centerCols1,
       wrapCols: wrapCols1,
       wrapHints: wrapHints1,
-      meanCol: 6 + TOTAL_ITEMS
+      meanCol: 7 + TOTAL_ITEMS
     });
     for (var rowIdx1 = 0; rowIdx1 < rows1.length; rowIdx1++) {
       var sheetRowIdx = rowIdx1 + 5;
       var excelRowNum = sheetRowIdx + 1;
-      var meanCellAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 6 + TOTAL_ITEMS });
-      var startQAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 6 }).replace(/\d+$/, "");
-      var endQAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 6 + TOTAL_ITEMS - 1 }).replace(/\d+$/, "");
+      var meanCellAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 7 + TOTAL_ITEMS });
+      var startQAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 7 }).replace(/\d+$/, "");
+      var endQAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 7 + TOTAL_ITEMS - 1 }).replace(/\d+$/, "");
       if (ws1[meanCellAddr]) {
         ws1[meanCellAddr].f = "AVERAGE(" + startQAddr + excelRowNum + ":" + endQAddr + excelRowNum + ")";
-        ws1[meanCellAddr].v = rows1[rowIdx1][6 + TOTAL_ITEMS];
+        ws1[meanCellAddr].v = rows1[rowIdx1][7 + TOTAL_ITEMS];
         ws1[meanCellAddr].t = "n";
         ws1[meanCellAddr].z = "0.00";
       }
