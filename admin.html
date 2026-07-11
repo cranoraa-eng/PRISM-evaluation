@@ -574,14 +574,15 @@
     filteredResponses: [],
     activeTab: "overview",
     exportOpen: false,
-    filters: (function() {
-      try { return JSON.parse(sessionStorage.getItem("prism_filters")) || { userType: "all", dateFrom: "", dateTo: "", search: "" }; }
-      catch(e) { return { userType: "all", dateFrom: "", dateTo: "", search: "" }; }
-    })(),
+    filters: { userType: "", dateFrom: "", dateTo: "", search: "" },
     page: 1,
     pageSize: 25,
     selectedIds: {},
-    charts: {}
+    charts: {},
+    userRole: "admin",
+    idleTimer: null,
+    detailResponse: null,
+    savedPages: {}
   };
 
   var SECTIONS = [
@@ -912,7 +913,7 @@
     html += '<div class="actions">';
     html += '<a href="index.html" class="btn btn-ghost">Back to Form</a>';
     html += '<div class="export-menu"><button class="btn btn-ghost" id="export-toggle" aria-label="Export" aria-haspopup="true" aria-expanded="false">&#8681; Export</button>';
-    html += '<div class="export-dropdown" id="export-dropdown" role="menu"><button id="export-excel" role="menuitem">Export Excel</button><button id="export-csv" role="menuitem">Export CSV</button><button id="export-json" role="menuitem">Export JSON</button></div></div>';
+    html += '<div class="export-dropdown" id="export-dropdown" role="menu"><button id="export-excel" role="menuitem">Export Excel</button><button id="export-csv" role="menuitem">Export CSV</button><button id="export-json" role="menuitem">Export JSON</button><button id="export-spss" role="menuitem">Export SPSS Syntax</button></div></div>';
     html += '<button class="btn btn-ghost" id="refresh-btn" aria-label="Refresh data">&#8635; Refresh</button>';
     html += '<button class="btn btn-danger" id="logout-btn" aria-label="Logout">Logout</button>';
     html += '</div></div>';
@@ -1006,10 +1007,10 @@
     html += '</div>';
 
     html += '<div class="chart-grid">';
-    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Mean Scores</h3><p class="chart-subtitle">Average rating per section across all respondents</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">BAR</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-bar" style="font-size:11px;padding:3px 8px;">Save</button></div></div><canvas id="chart-bar" height="100"></canvas></div>';
-    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Radar</h3><p class="chart-subtitle">Performance overview by section</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">RADAR</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-radar" style="font-size:11px;padding:3px 8px;">Save</button></div></div><canvas id="chart-radar"></canvas></div>';
-    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">DOUGHNUT</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-sex" style="font-size:11px;padding:3px 8px;">Save</button></div></div><canvas id="chart-sex"></canvas></div>';
-    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>User Type Distribution</h3><p class="chart-subtitle">Respondents by role</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">DOUGHNUT</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-type" style="font-size:11px;padding:3px 8px;">Save</button></div></div><canvas id="chart-type"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Mean Scores</h3><p class="chart-subtitle">Average rating per section across all respondents</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">BAR</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-bar" data-format="png" style="font-size:11px;padding:3px 8px;">PNG</button><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-bar" data-format="svg" style="font-size:11px;padding:3px 8px;">SVG</button></div></div><canvas id="chart-bar" height="100"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Radar</h3><p class="chart-subtitle">Performance overview by section</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">RADAR</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-radar" data-format="png" style="font-size:11px;padding:3px 8px;">PNG</button><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-radar" data-format="svg" style="font-size:11px;padding:3px 8px;">SVG</button></div></div><canvas id="chart-radar"></canvas></div>';
+    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">DOUGHNUT</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-sex" data-format="png" style="font-size:11px;padding:3px 8px;">PNG</button><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-sex" data-format="svg" style="font-size:11px;padding:3px 8px;">SVG</button></div></div><canvas id="chart-sex"></canvas></div>';
+    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>User Type Distribution</h3><p class="chart-subtitle">Respondents by role</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">DOUGHNUT</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-type" data-format="png" style="font-size:11px;padding:3px 8px;">PNG</button><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-type" data-format="svg" style="font-size:11px;padding:3px 8px;">SVG</button></div></div><canvas id="chart-type"></canvas></div>';
     html += '</div>';
     html += '</div>';
     return html;
@@ -1469,6 +1470,22 @@
     return SORT.dir === 1 ? " \u25B2" : " \u25BC";
   }
 
+  function hasQualityFlags(res) {
+    var flags = [];
+    var vals = [];
+    for (var k = 1; k <= TOTAL_ITEMS; k++) {
+      var v = (res.answers || {})[String(k)];
+      if (v) vals.push(v);
+    }
+    var m = mean(vals);
+    var sd = vals.length > 1 ? stdDev(vals) : 0;
+    if (sd < 0.3 && vals.length >= 5) flags.push("Straight-line");
+    if (res.time_taken_sec !== null && res.time_taken_sec < 120) flags.push("Speeder");
+    var missingCount = TOTAL_ITEMS - vals.length;
+    if (missingCount > 3) flags.push(missingCount + " missing");
+    return flags;
+  }
+
   function renderResponses(r) {
     var html = '<div class="panel active">';
     if (!r.length) {
@@ -1493,7 +1510,7 @@
     html += '<th><button class="sort-btn" data-sort="ref" style="all:unset;cursor:pointer;font-weight:inherit">Reference' + sortArrow("ref") + '</button></th>';
     html += '<th><button class="sort-btn" data-sort="date" style="all:unset;cursor:pointer;font-weight:inherit">Submitted' + sortArrow("date") + '</button></th>';
     html += '<th><button class="sort-btn" data-sort="name" style="all:unset;cursor:pointer;font-weight:inherit">Name' + sortArrow("name") + '</button></th>';
-    html += '<th>Age</th><th>Sex</th><th>User Type</th><th>Consent</th>';
+    html += '<th>Age</th><th>Sex</th><th>User Type</th><th>Consent</th><th>Consent v</th><th>Flags</th>';
     for (var k = 1; k <= TOTAL_ITEMS; k++) html += '<th>Q' + k + '</th>';
     html += '<th><button class="sort-btn" data-sort="mean" style="all:unset;cursor:pointer;font-weight:inherit">Mean' + sortArrow("mean") + '</button></th>';
     html += '<th>Comments</th></tr></thead><tbody>';
@@ -1524,7 +1541,8 @@
       var m = mean(vals);
       var interp = interpret(m);
       var dt = res.submitted_at ? new Date(res.submitted_at).toLocaleDateString("en-US", { year:"numeric", month:"short", day:"numeric" }) : "\u2014";
-      html += '<tr>';
+      var flags = hasQualityFlags(res);
+      html += '<tr class="resp-row" data-id="' + res.id + '">';
       html += '<td><input type="checkbox" class="row-select" data-id="' + res.id + '" ' + (STATE.selectedIds[res.id] ? 'checked' : '') + ' /></td>';
       html += '<td>' + startRow + '</td>';
       startRow++;
@@ -1535,6 +1553,8 @@
       html += '<td>' + esc(res.respondent_sex || "\u2014") + '</td>';
       html += '<td>' + esc(res.respondent_user_type || "\u2014") + '</td>';
       html += '<td style="text-align:center">' + (res.consent_given ? '<span style="color:var(--success)">&#10003;</span>' : '<span style="color:var(--error)">&#10007;</span>') + '</td>';
+      html += '<td style="font-size:11px;color:var(--muted);text-align:center">' + esc(res.consent_version || "v1.0") + '</td>';
+      html += '<td style="font-size:11px;max-width:100px;">' + (flags.length ? flags.map(function(f) { return '<span style="display:inline-block;background:#FFF3CD;color:#856404;padding:1px 6px;border-radius:4px;margin:1px;font-size:10px;">' + f + '</span>'; }).join("") : '<span style="color:var(--success)">&#10003;</span>') + '</td>';
       for (var k2 = 1; k2 <= TOTAL_ITEMS; k2++) {
         var v2 = (res.answers || {})[String(k2)];
         html += '<td style="text-align:center">' + (v2 || "\u2014") + '</td>';
@@ -1734,23 +1754,117 @@
 
   /* render */
   function render() {
+    var app = document.getElementById("app");
     if (!STATE.loggedIn) {
-      root.innerHTML = renderLogin();
+      app.innerHTML = renderLogin();
       attachLoginHandlers();
       return;
     }
     if (STATE.loading) {
-      root.innerHTML = '<div class="loading"><div class="spinner"></div>Loading responses from Supabase...</div>';
+      app.innerHTML = '<div style="padding:60px;text-align:center;color:var(--muted);font-size:14px;">Loading responses\u2026</div>';
       return;
     }
     if (STATE.loadError) {
-      root.innerHTML = '<div class="loading"><div style="color:var(--error);font-size:18px;font-weight:700;margin-bottom:8px;">Error Loading Data</div><div style="font-size:13px;color:var(--muted);max-width:500px;margin:0 auto;">' + esc(STATE.loadError) + '</div><button class="btn btn-primary" style="margin-top:20px;" onclick="location.reload()">Retry</button></div>';
+      app.innerHTML = '<div style="padding:60px;text-align:center;"><p style="color:var(--error);">' + esc(STATE.loadError) + '</p><button class="btn btn-primary" onclick="location.reload()">Retry</button></div>';
       return;
     }
-    applyFilters();
-    root.innerHTML = renderDashboard();
+    app.innerHTML = renderDashboard() + renderDetailModal();
+    if (STATE.detailResponse) showDetailModal(STATE.detailResponse);
     attachDashboardHandlers();
-    if (STATE.filteredResponses.length) initCharts(STATE.filteredResponses);
+  }
+
+  /* ---- Response Detail Modal ---- */
+  function renderDetailModal() {
+    return (
+      '<div id="detail-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(22,35,61,0.5);z-index:1000;overflow-y:auto;" onclick="if(event.target===this)closeDetailModal()">' +
+        '<div id="detail-modal-content" style="max-width:700px;margin:40px auto;background:#fff;border-radius:12px;padding:28px 32px;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.2);">' +
+          '<button onclick="closeDetailModal()" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink-2);" aria-label="Close">&times;</button>' +
+          '<div id="detail-modal-body"></div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function showDetailModal(res) {
+    var overlay = document.getElementById("detail-modal-overlay");
+    var body = document.getElementById("detail-modal-body");
+    if (!overlay || !body) return;
+    var vals = [];
+    for (var k = 1; k <= TOTAL_ITEMS; k++) {
+      var v = (res.answers || {})[String(k)];
+      if (v) vals.push(v);
+    }
+    var m = mean(vals);
+    var interp = interpret(m);
+    var flags = hasQualityFlags(res);
+    var html = '<h2 style="margin:0 0 4px;font-size:18px;">Response Detail</h2>';
+    html += '<p style="color:var(--muted);font-size:12px;margin:0 0 18px;">Reference: <code>' + esc(res.id || "") + '</code></p>';
+
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;font-size:13px;">';
+    html += '<div><b>Submitted</b><br>' + (res.submitted_at ? new Date(res.submitted_at).toLocaleString() : "\u2014") + '</div>';
+    html += '<div><b>Name</b><br>' + esc(res.respondent_name || "\u2014") + '</div>';
+    html += '<div><b>Age</b><br>' + (res.respondent_age || "\u2014") + '</div>';
+    html += '<div><b>Sex</b><br>' + esc(res.respondent_sex || "\u2014") + '</div>';
+    html += '<div><b>User Type</b><br>' + esc(res.respondent_user_type || "\u2014") + '</div>';
+    html += '<div><b>Consent</b><br>' + (res.consent_given ? "Yes" : "No") + ' (v' + esc(res.consent_version || "1.0") + ')</div>';
+    html += '<div><b>Time Taken</b><br>' + (res.time_taken_sec ? Math.round(res.time_taken_sec / 60) + " min " + (res.time_taken_sec % 60) + " sec" : "\u2014") + '</div>';
+    html += '<div><b>Locale</b><br>' + esc(res.locale || "en") + '</div>';
+    html += '<div><b>Overall Mean</b><br>' + m.toFixed(2) + ' (' + interp.label + ')</div>';
+    html += '<div><b>Quality Flags</b><br>' + (flags.length ? flags.join(", ") : "None") + '</div>';
+    html += '</div>';
+
+    html += '<h3 style="font-size:14px;margin:0 0 8px;">Answers by Section</h3>';
+    var itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      html += '<div style="margin-bottom:10px;">';
+      html += '<div style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:4px;">' + esc(sec.title) + '</div>';
+      sec.items.forEach(function(text) {
+        var av = (res.answers || {})[String(itemNum)];
+        html += '<div style="display:flex;justify-content:space-between;font-size:12px;padding:2px 0;border-bottom:1px solid var(--line);">';
+        html += '<span style="flex:1;padding-right:12px;">' + esc(text) + '</span>';
+        html += '<span style="font-weight:700;width:30px;text-align:center;">' + (av || "\u2014") + '</span>';
+        html += '</div>';
+        itemNum++;
+      });
+      html += '</div>';
+    });
+
+    if (res.comments) {
+      html += '<h3 style="font-size:14px;margin:12px 0 6px;">Comments</h3>';
+      html += '<p style="font-size:12.5px;color:var(--ink-2);background:var(--paper);padding:10px 12px;border-radius:8px;">' + esc(res.comments) + '</p>';
+    }
+
+    html += '<div style="display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line);">';
+    html += '<button class="btn btn-ghost btn-sm" onclick="closeDetailModal()" style="font-size:12px;">Close</button>';
+    html += '</div>';
+
+    body.innerHTML = html;
+    overlay.style.display = "block";
+  }
+
+  function closeDetailModal() {
+    var overlay = document.getElementById("detail-modal-overlay");
+    if (overlay) overlay.style.display = "none";
+    STATE.detailResponse = null;
+  }
+
+  function loadResponses() {
+    STATE.loading = true;
+    render();
+    supabaseClient.from("responses").select("*").order("submitted_at", { ascending: false }).then(function(res) {
+      if (res.error) {
+        STATE.loadError = res.error.message;
+        STATE.loading = false;
+        render();
+        return;
+      }
+      STATE.responses = res.data || [];
+      STATE.loading = false;
+      STATE.loadError = null;
+      applyFilters();
+      render();
+      if (STATE.filteredResponses.length) initCharts(STATE.filteredResponses);
+    });
   }
 
   function showToast(msg) {
@@ -1760,6 +1874,20 @@
     el.classList.add("show");
     clearTimeout(el._hide);
     el._hide = setTimeout(function() { el.classList.remove("show"); }, 2500);
+  }
+
+  var IDLE_TIMEOUT_MS = 15 * 60 * 1000; /* 15 minutes */
+
+  function resetIdleTimer() {
+    if (STATE.idleTimer) clearTimeout(STATE.idleTimer);
+    if (STATE.loggedIn) {
+      STATE.idleTimer = setTimeout(function() {
+        supabaseClient.auth.signOut();
+        STATE.loggedIn = false;
+        sessionStorage.removeItem("prism_admin");
+        render();
+      }, IDLE_TIMEOUT_MS);
+    }
   }
 
   function attachLoginHandlers() {
@@ -1778,9 +1906,14 @@
           if (btn) { btn.textContent = originalText; btn.disabled = false; }
           return;
         }
-        STATE.loggedIn = true;
-        sessionStorage.setItem("prism_admin", "1");
-        loadResponses();
+        /* Check admin role */
+        supabaseClient.from("admin_roles").select("role").eq("user_id", res.data.user.id).maybeSingle().then(function(roleRes) {
+          STATE.userRole = roleRes.data ? roleRes.data.role : "viewer";
+          STATE.loggedIn = true;
+          sessionStorage.setItem("prism_admin", "1");
+          resetIdleTimer();
+          loadResponses();
+        });
       });
     }
     if (btn) btn.addEventListener("click", doLogin);
@@ -1798,7 +1931,9 @@
 
     document.querySelectorAll(".tab").forEach(function(t) {
       t.addEventListener("click", function() {
+        STATE.savedPages[STATE.activeTab] = STATE.page;
         STATE.activeTab = t.getAttribute("data-tab");
+        STATE.page = STATE.savedPages[STATE.activeTab] || 1;
         render();
       });
     });
@@ -1811,7 +1946,7 @@
       supabaseClient.auth.signOut();
       STATE.loggedIn = false;
       sessionStorage.removeItem("prism_admin");
-      STATE.responses = [];
+      if (STATE.idleTimer) clearTimeout(STATE.idleTimer);
       render();
     });
 
@@ -1843,6 +1978,8 @@
     if (exportJson) exportJson.addEventListener("click", function() { exportJSON(); });
     var exportExcel = document.getElementById("export-excel");
     if (exportExcel) exportExcel.addEventListener("click", function() { exportExcelFile(); });
+    var exportSpss = document.getElementById("export-spss");
+    if (exportSpss) exportSpss.addEventListener("click", function() { exportSPSS(); });
 
     var fType = document.getElementById("f-type");
     var fFrom = document.getElementById("f-from");
@@ -1894,15 +2031,44 @@
       });
     });
 
+    /* response detail modal on row click */
+    document.querySelectorAll(".resp-row").forEach(function(row) {
+      row.addEventListener("click", function(e) {
+        if (e.target.closest("input, button, a")) return;
+        var id = row.getAttribute("data-id");
+        var res = STATE.responses.find(function(r) { return r.id === id; });
+        if (res) { STATE.detailResponse = res; render(); }
+      });
+    });
+
+    /* Idle timeout reset on user activity */
+    function resetIdleActivity() { resetIdleTimer(); }
+    document.addEventListener("click", resetIdleActivity);
+    document.addEventListener("keydown", resetIdleActivity);
+    document.addEventListener("mousemove", resetIdleActivity);
+    document.addEventListener("scroll", resetIdleActivity);
+
     /* chart download */
     document.querySelectorAll(".chart-download-btn").forEach(function(btn) {
       btn.addEventListener("click", function() {
         var canvasId = btn.getAttribute("data-canvas");
         var canvas = document.getElementById(canvasId);
         if (!canvas) return;
+        var format = btn.getAttribute("data-format") || "png";
         var link = document.createElement("a");
-        link.download = canvasId + ".png";
-        link.href = canvas.toDataURL("image/png");
+        link.download = canvasId + "." + format;
+        if (format === "svg") {
+          var svg = canvas.parentNode.querySelector("svg");
+          if (svg) {
+            var svgData = new XMLSerializer().serializeToString(svg);
+            link.href = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
+          } else {
+            link.href = canvas.toDataURL("image/png");
+            link.download = canvasId + ".png";
+          }
+        } else {
+          link.href = canvas.toDataURL("image/png");
+        }
         link.click();
         showToast("Chart saved as " + link.download);
       });
@@ -1918,10 +2084,16 @@
   async function bulkDelete() {
     var ids = Object.keys(STATE.selectedIds);
     if (!ids.length) { showToast("No responses selected."); return; }
+    if (STATE.userRole === "viewer") { showToast("Viewers cannot delete responses."); return; }
     if (!confirm("Delete " + ids.length + " selected response(s)? This action cannot be undone.")) return;
     try {
-      var { error } = await supabaseClient.from("responses").delete().in("id", ids);
-      if (error) throw error;
+      /* Soft delete via RPC */
+      var { data, error } = await supabaseClient.rpc("soft_delete_responses", { p_ids: ids });
+      if (error) {
+        /* Fallback: direct update */
+        var { error: updErr } = await supabaseClient.from("responses").update({ deleted_at: new Date().toISOString() }).in("id", ids);
+        if (updErr) throw updErr;
+      }
       STATE.selectedIds = {};
       showToast("Deleted " + ids.length + " response(s).");
       loadResponses();
@@ -1992,6 +2164,62 @@
     a.click();
     URL.revokeObjectURL(url);
     showToast("JSON exported (" + r.length + " responses)");
+  }
+
+  function exportSPSS() {
+    var r = STATE.filteredResponses;
+    if (!r.length) { showToast("No data to export."); return; }
+    var lines = [];
+    lines.push("* SPSS Syntax for PRISM Evaluation Data");
+    lines.push("* Generated " + new Date().toISOString().slice(0,10));
+    lines.push("");
+    lines.push("DATA LIST FILE=\"prism_data.csv\" FREE (");
+    lines.push("  /ID (A8)");
+    lines.push("  Submitted (ADATE10)");
+    lines.push("  Name (A50)");
+    lines.push("  Age (F3)");
+    lines.push("  Sex (A20)");
+    lines.push("  UserType (A50)");
+    lines.push("  Consent (F1)");
+    for (var q = 1; q <= TOTAL_ITEMS; q++) {
+      lines.push("  Q" + q + " (F1)");
+    }
+    lines.push("  Mean (F4.2)");
+    lines.push("  Comments (A500).");
+    lines.push("");
+    lines.push("VARIABLE LABELS");
+    lines.push("  ID \"Response ID\"");
+    lines.push("  Submitted \"Submission Date\"");
+    lines.push("  Name \"Respondent Name\"");
+    for (var qi = 1; qi <= TOTAL_ITEMS; qi++) {
+      lines.push("  Q" + qi + " \"Item " + qi + "\"");
+    }
+    lines.push("  Mean \"Overall Mean\".");
+    lines.push("");
+    lines.push("VALUE LABELS");
+    for (var q2 = 1; q2 <= TOTAL_ITEMS; q2++) {
+      lines.push("  Q" + q2);
+    }
+    lines.push("  1 \"Strongly Disagree\"");
+    lines.push("  2 \"Disagree\"");
+    lines.push("  3 \"Agree\"");
+    lines.push("  4 \"Strongly Agree\".");
+    lines.push("");
+    lines.push("VARIABLE LEVEL Q1 TO Q" + TOTAL_ITEMS + " (ORDINAL).");
+    lines.push("");
+    lines.push("DESCRIPTIVES VARIABLES=Q1 TO Q" + TOTAL_ITEMS + " Mean /STATISTICS=MEAN STDDEV MIN MAX.");
+    lines.push("");
+    lines.push("RELIABILITY /VARIABLES=Q1 TO Q" + TOTAL_ITEMS + " /SCALE(PRISM) ALL /MODEL=ALPHA /SUMMARY=TOTAL.");
+    lines.push("");
+    lines.push("CORRELATIONS /VARIABLES=Q1 TO Q" + TOTAL_ITEMS + " /STATISTICS DESCRIPTIVES.");
+    var blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "prism_syntax_" + new Date().toISOString().slice(0,10) + ".sps";
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("SPSS syntax exported (" + r.length + " responses)");
   }
 
   function exportExcelFile() {

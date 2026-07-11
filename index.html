@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="prism-html">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PRISM Evaluation Questionnaire</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
   const SUPABASE_URL  = "https://qwkkpmxpmugkrlspbiri.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3a2twbXhwbXVna3Jsc3BiaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NjQwMDEsImV4cCI6MjA5OTM0MDAwMX0.HT3V9wXTEm0ehxoqgChUEDrqetPKwnB1fanGwHWtDdI";
@@ -12,6 +13,7 @@
 </script>
 </head>
 <body>
+<a href="#prism-content" class="skip-link" id="skip-link">Skip to content</a>
 <div id="prism-root"></div>
 <style>
   #prism-root {
@@ -391,6 +393,41 @@
   #prism-root .error-state { padding: 40px 36px; text-align: center; }
   #prism-root .error-state p { color: var(--error); font-size: 14px; margin-bottom: 16px; }
 
+  #prism-root .offline-banner {
+    background: #FFF3CD;
+    border: 1px solid #FFEAA7;
+    color: #856404;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin: 0 0 18px;
+    display: none;
+  }
+  #prism-root .offline-banner.show { display: block; }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 999;
+    padding: 8px 16px;
+    background: var(--ink, #16233D);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0 0 8px 0;
+  }
+  .skip-link:focus { left: 0; top: 0; }
+
+  #prism-root .turnstile-wrap {
+    margin: 18px 0;
+    display: flex;
+    justify-content: center;
+    min-height: 65px;
+  }
+
+  #prism-root .cf-turnstile { transform: scale(0.9); transform-origin: center; }
+
   #prism-root .response-counter {
     text-align: center;
     font-size: 12.5px;
@@ -569,6 +606,119 @@
   "use strict";
 
   var STORAGE_KEY = "prism_form_progress";
+  var OFFLINE_QUEUE_KEY = "prism_offline_queue";
+  var CSRF_TOKEN_KEY = "prism_csrf";
+  var SURVEY_START_KEY = "prism_survey_start";
+
+  var i18n = {
+    en: {
+      skip: "Skip to content",
+      step: "Step",
+      of: "of",
+      proceed: "Proceed to Consent",
+      next: "Next",
+      back: "Back",
+      submit: "Submit Questionnaire",
+      submitting: "Submitting\u2026",
+      exit: "Exit",
+      exitConfirm: "Are you sure you want to exit? Your progress will be saved.",
+      submitConfirm: "You are about to submit your evaluation. This action cannot be undone. Continue?",
+      rateLimit: "Please wait at least 30 seconds between submissions.",
+      submitError: "We couldn\u2019t save your response. Please check your connection and try again.",
+      consentRequired: "You must agree to participate before continuing.",
+      infoRequired: "Please complete the required fields marked with *.",
+      surveyRequired: "Please answer every statement before continuing.",
+      queued: "Response saved offline. It will be submitted when your connection is restored.",
+      lastSaved: "Last saved at",
+      queuedTitle: "Queued for submission"
+    },
+    fil: {
+      skip: "Laktawan ang nilalaman",
+      step: "Hakbang",
+      of: "ng",
+      proceed: "Tuloy sa Pahintulot",
+      next: "Susunod",
+      back: "Bumalik",
+      submit: "Isumite ang Talatanungan",
+      submitting: "Isinusumite\u2026",
+      exit: "Lumabas",
+      exitConfirm: "Sigurado ka bang gusto mong lumabas? Naka-save ang iyong progreso.",
+      submitConfirm: "Isusumite mo na ang iyong pagsusuri. Hindi ito maaaring ibalik. Magpatuloy?",
+      rateLimit: "Mangyaring maghintay ng 30 segundo bago muling magsumite.",
+      submitError: "Hindi na-save ang iyong sagot. Pakisuri ang iyong koneksyon at subukan muli.",
+      consentRequired: "Kailangan mong pumayag bago magpatuloy.",
+      infoRequired: "Pakikumpleto ang mga kinakailangang field na may *.",
+      surveyRequired: "Pakisagutan ang lahat ng pahayag bago magpatuloy.",
+      queued: "Ang sagot ay naka-save offline. Isusumite ito kapag bumalik ang iyong koneksyon.",
+      lastSaved: "Huling na-save noong",
+      queuedTitle: "Nakapila para isumite"
+    }
+  };
+
+  function t(key) {
+    var lang = document.documentElement.lang || "en";
+    var langMap = i18n[lang] || i18n.en;
+    return langMap[key] || i18n.en[key] || key;
+  }
+
+  function getDeviceInfo() {
+    var info = { screen: screen.width + "x" + screen.height, touch: "ontouchstart" in window };
+    try { info.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) {}
+    try { info.platform = navigator.platform; } catch(e) {}
+    return info;
+  }
+
+  function getUserAgent() {
+    try { return navigator.userAgent; } catch(e) { return ""; }
+  }
+
+  function getCsrfToken() {
+    var token = sessionStorage.getItem(CSRF_TOKEN_KEY);
+    if (!token) {
+      var arr = new Uint8Array(16);
+      crypto.getRandomValues(arr);
+      token = Array.from(arr, function(b) { return b.toString(16).padStart(2, "0"); }).join("");
+      sessionStorage.setItem(CSRF_TOKEN_KEY, token);
+    }
+    return token;
+  }
+
+  function setLang(l) {
+    document.documentElement.lang = l;
+    try { localStorage.setItem("prism_lang", l); } catch(e) {}
+    render();
+  }
+
+  /* ---- offline queue ---- */
+  function queueSubmission(payload) {
+    var queue = [];
+    try {
+      var raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
+      if (raw) queue = JSON.parse(raw);
+    } catch(e) {}
+    queue.push(payload);
+    try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue)); } catch(e) {}
+  }
+
+  async function flushOfflineQueue() {
+    var queue = [];
+    try {
+      var raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
+      if (!raw) return;
+      queue = JSON.parse(raw);
+    } catch(e) { return; }
+    if (!queue.length) return;
+    var remaining = [];
+    for (var i = 0; i < queue.length; i++) {
+      try {
+        var { error } = await supabaseClient.from("responses").insert([queue[i]]);
+        if (error) { remaining.push(queue[i]); }
+      } catch(e) { remaining.push(queue[i]); }
+    }
+    try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(remaining)); } catch(e) {}
+  }
+
+  window.addEventListener("online", flushOfflineQueue);
 
   var usabilityItems = [
     "PRISM is easy to access and use for my school-related activities.",
@@ -652,10 +802,15 @@
     comments: "",
     consentGiven: false,
     consentDate: null,
+    consentVersion: "v1.0",
     submitting: false,
     submitError: null,
     responseId: null,
-    responseCount: null
+    responseCount: null,
+    sessionId: null,
+    surveyStartTime: null,
+    lang: "en",
+    turnstileToken: null
   };
 
   var SEX_OPTIONS = ["Male", "Female"];
@@ -674,12 +829,20 @@
         state.respondent = saved.respondent || state.respondent;
         state.comments = saved.comments || "";
         state.consentGiven = saved.consentGiven || false;
+        state.consentDate = saved.consentDate || null;
+        state.consentVersion = saved.consentVersion || "v1.0";
+        state.surveyStartTime = saved.surveyStartTime || null;
+        state.sessionId = saved.sessionId || null;
+        state.lang = saved.lang || "en";
       }
+      try { var lang = localStorage.getItem("prism_lang"); if (lang) state.lang = lang; document.documentElement.lang = state.lang; } catch(e) {}
+      if (!state.sessionId) { state.sessionId = genId(); }
     } catch (e) {}
   }
 
   function clearProgress() {
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    try { localStorage.removeItem(SURVEY_START_KEY); } catch (e) {}
   }
 
   var savedTimer = null;
@@ -692,7 +855,12 @@
         answers: state.answers,
         respondent: state.respondent,
         comments: state.comments,
-        consentGiven: state.consentGiven
+        consentGiven: state.consentGiven,
+        consentDate: state.consentDate,
+        consentVersion: state.consentVersion,
+        surveyStartTime: state.surveyStartTime,
+        sessionId: state.sessionId,
+        lang: state.lang
       };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
@@ -759,8 +927,10 @@
     var pct = Math.round((idx / total) * 100);
     return (
       '<div class="progress-wrap">' +
-        '<div class="progress-label"><span>Step ' + idx + ' of ' + total + ' — ' + esc(step.label) + '</span><span>' + pct + '%</span></div>' +
-        '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="progress-label"><span>' + t("step") + ' ' + idx + ' ' + t("of") + ' ' + total + ' — ' + esc(step.label) + '</span><span>' + pct + '%</span></div>' +
+        '<div class="progress-track" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100" aria-label="' + t("step") + ' ' + idx + ' ' + t("of") + ' ' + total + '">' +
+          '<div class="progress-fill" style="width:' + pct + '%"></div>' +
+        '</div>' +
       '</div>'
     );
   }
@@ -779,25 +949,25 @@
     ];
     var btns = opts.map(function(o) {
       var sel = val === o.v ? " selected" : "";
-      return '<button type="button" class="likert-btn' + sel + '" data-num="' + item.num + '" data-val="' + o.v + '" aria-pressed="' + (val === o.v) + '"><b>' + o.v + '</b>' + o.l + '</button>';
+      return '<button type="button" class="likert-btn' + sel + '" data-num="' + item.num + '" data-val="' + o.v + '" role="radio" aria-checked="' + (val === o.v) + '" aria-label="' + o.v + ' - ' + o.l + '"><b>' + o.v + '</b>' + o.l + '</button>';
     }).join("");
     return (
-      '<div class="item' + (invalid ? " invalid" : "") + '" data-item="' + item.num + '">' +
+      '<div class="item' + (invalid ? " invalid" : "") + '" data-item="' + item.num + '"' + (invalid ? ' aria-invalid="true"' : '') + '>' +
         '<div class="item-row">' +
-          '<div class="item-num">' + item.num + '</div>' +
-          '<div class="item-text">' + esc(item.text) + '</div>' +
-          '<div class="likert">' + btns + '</div>' +
+          '<div class="item-num" aria-hidden="true">' + item.num + '</div>' +
+          '<div class="item-text" id="item-label-' + item.num + '">' + esc(item.text) + '</div>' +
+          '<div class="likert" role="radiogroup" aria-labelledby="item-label-' + item.num + '">' + btns + '</div>' +
         '</div>' +
       '</div>'
     );
   }
 
   function renderSurveyStep(step, missing) {
-    var html = '<div class="content">';
+    var html = '<div class="content" id="prism-content">';
     html += '<h2 class="section-title serif">' + esc(step.title) + '</h2>';
     if (step.note) html += '<p class="section-note">' + esc(step.note) + '</p>';
-    html += '<div class="scale-key"><span><b>4</b> Strongly Agree</span><span><b>3</b> Agree</span><span><b>2</b> Disagree</span><span><b>1</b> Strongly Disagree</span></div>';
-    html += '<div class="banner error' + (missing.length ? " show" : "") + '">Please answer every statement before continuing.</div>';
+    html += '<div class="scale-key" role="group" aria-label="Response scale"><span><b>4</b> Strongly Agree</span><span><b>3</b> Agree</span><span><b>2</b> Disagree</span><span><b>1</b> Strongly Disagree</span></div>';
+    html += '<div class="banner error' + (missing.length ? " show" : "") + '" role="alert">' + t("surveyRequired") + '</div>';
     step.groups.forEach(function(g) {
       if (g.heading) html += '<div class="group-heading">' + esc(g.heading) + '</div>';
       g.items.forEach(function(it) {
@@ -814,7 +984,7 @@
       counterHtml = '<div class="response-counter"><b>' + state.responseCount + '</b> responses collected so far</div>';
     }
     return (
-      '<div class="welcome">' +
+      '<div class="welcome" id="prism-content">' +
         '<p class="eyebrow">Research Instrument</p>' +
         '<h1 class="title serif">PRISM Evaluation Questionnaire</h1>' +
         '<p class="subtitle">Portal for Records, Information, and School Management</p>' +
@@ -826,18 +996,18 @@
           '<div><b>~6\u20138 min</b>estimated time</div>' +
           '<div><b>4-point scale</b>Strongly Disagree \u2192 Strongly Agree</div>' +
         '</div>' +
-        '<button type="button" class="btn btn-primary" id="start-btn">Proceed to Consent</button>' +
+        '<button type="button" class="btn btn-primary" id="start-btn">' + t("proceed") + '</button>' +
         counterHtml +
       '</div>'
     );
   }
 
   function renderConsent() {
-    var html = '<div class="content">';
+    var html = '<div class="content" id="prism-content">';
     html += '<h2 class="section-title serif">Informed Consent</h2>';
     html += '<p class="section-note">Please read the following information carefully before proceeding.</p>';
-    html += '<div class="banner error' + (state._consentTouched && !state.consentGiven ? " show" : "") + '">You must agree to participate before continuing.</div>';
-    html += '<div class="consent-box">';
+    html += '<div class="banner error' + (state._consentTouched && !state.consentGiven ? " show" : "") + '" role="alert">' + t("consentRequired") + '</div>';
+    html += '<div class="consent-box" tabindex="0">';
     html += '<p><b>Study Title:</b> Evaluation of PRISM (Portal for Records, Information, and School Management)</p>';
     html += '<p><b>Purpose:</b> This survey gathers your honest assessment of PRISM\u2019s usability, functional suitability, and overall user satisfaction. Results will be used for research and improvement of the system.</p>';
     html += '<p><b>Voluntary Participation:</b> Your participation is completely voluntary. You may withdraw at any time before submitting by closing the form. Your progress will be saved automatically if you wish to continue later.</p>';
@@ -847,10 +1017,11 @@
     html += '<p><b>Risks and Benefits:</b> There are no known risks associated with this survey. Your responses will help improve the PRISM system for the benefit of the school community.</p>';
     html += '<p><b>Contact:</b> For questions or concerns about this study, or to request withdrawal of your response after submission, please contact the researcher. Your response reference ID (provided after submission) will be required for withdrawal requests.</p>';
     html += '<p><b>Ethics Clearance:</b> This study has been reviewed in accordance with established research ethics guidelines.</p>';
+    html += '<p><b>Consent Version:</b> ' + esc(state.consentVersion) + '</p>';
     html += '</div>';
     html += '<div class="field" style="margin-top:18px;">';
-    html += '<label class="field-label consent-label">';
-    html += '<input type="checkbox" id="f-consent"' + (state.consentGiven ? ' checked' : '') + ' /> ';
+    html += '<label class="field-label consent-label" for="f-consent">';
+    html += '<input type="checkbox" id="f-consent"' + (state.consentGiven ? ' checked' : '') + ' aria-required="true" /> ';
     html += 'I have read and understood the information above. I voluntarily agree to participate in this study.</label>';
     html += '</div>';
     html += '</div>';
@@ -861,44 +1032,55 @@
     var r = state.respondent;
     var missing = infoMissing();
     var showBanner = state._infoTouched && missing.length;
-    var html = '<div class="content">';
+    var html = '<div class="content" id="prism-content">';
     html += '<h2 class="section-title serif">Respondent Information</h2>';
     html += '<p class="section-note">A few quick details before you begin.</p>';
-    html += '<div class="banner error' + (showBanner ? " show" : "") + '">Please complete the required fields marked with *.</div>';
+    html += '<div class="banner error' + (showBanner ? " show" : "") + '" role="alert">' + t("infoRequired") + '</div>';
 
-    html += '<div class="field"><label class="field-label">Name <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
-      '<input type="text" id="f-name" value="' + esc(r.name) + '" placeholder="Your name" /></div>';
+    html += '<div class="field"><label class="field-label" for="f-name">Name <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
+      '<input type="text" id="f-name" value="' + esc(r.name) + '" placeholder="Your name" autocomplete="name" /></div>';
 
-    html += '<div class="field"><label class="field-label">Age <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
-      '<input type="number" id="f-age" value="' + esc(r.age) + '" placeholder="e.g. 24" min="5" max="100" /></div>';
+    html += '<div class="field"><label class="field-label" for="f-age">Age <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
+      '<input type="number" id="f-age" value="' + esc(r.age) + '" placeholder="e.g. 24" min="5" max="100" autocomplete="age" aria-describedby="age-hint" />' +
+      '<span id="age-hint" style="font-size:11.5px;color:var(--muted);display:block;margin-top:4px;">Must be between 5 and 100</span></div>';
 
-    html += '<div class="field"><label class="field-label">Sex <span style="font-weight:400;color:var(--muted)">(optional)</span></label><div class="choice-grid">' +
+    html += '<div class="field"><span class="field-label" id="sex-label">Sex <span style="font-weight:400;color:var(--muted)">(optional)</span></span><div class="choice-grid" role="radiogroup" aria-labelledby="sex-label">' +
       SEX_OPTIONS.concat(["Prefer not to say"]).map(function(o) {
-        return '<button type="button" class="choice-pill' + (r.sex === o ? " selected" : "") + '" data-field="sex" data-val="' + esc(o) + '">' + esc(o) + '</button>';
+        return '<button type="button" class="choice-pill' + (r.sex === o ? " selected" : "") + '" data-field="sex" data-val="' + esc(o) + '" role="radio" aria-checked="' + (r.sex === o) + '">' + esc(o) + '</button>';
       }).join("") + '</div></div>';
 
-    html += '<div class="field"><label class="field-label">User Type <span class="req">*</span></label><div class="choice-grid">' +
+    html += '<div class="field"><span class="field-label" id="usertype-label">User Type <span class="req">*</span> <span aria-hidden="true" style="color:var(--error)">*</span></span><div class="choice-grid" role="radiogroup" aria-labelledby="usertype-label">' +
       USER_TYPE_OPTIONS.map(function(o) {
-        return '<button type="button" class="choice-pill' + (r.userType === o ? " selected" : "") + '" data-field="userType" data-val="' + esc(o) + '">' + esc(o) + '</button>';
+        return '<button type="button" class="choice-pill' + (r.userType === o ? " selected" : "") + '" data-field="userType" data-val="' + esc(o) + '" role="radio" aria-checked="' + (r.userType === o) + '">' + esc(o) + '</button>';
       }).join("") + '</div></div>';
 
     if (r.userType === "IT Expert") {
-      html += '<div class="field"><label class="field-label">Please specify <span class="req">*</span></label>' +
-        '<input type="text" id="f-usertype-other" value="' + esc(r.userTypeOther) + '" placeholder="Your role" /></div>';
+      html += '<div class="field"><label class="field-label" for="f-usertype-other">Please specify <span class="req">*</span></label>' +
+        '<input type="text" id="f-usertype-other" value="' + esc(r.userTypeOther) + '" placeholder="Your role" aria-required="true" /></div>';
     }
+
+    /* Language selector */
+    html += '<div class="field" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line);">';
+    html += '<span class="field-label" id="lang-label">Language / Wika</span>';
+    html += '<div class="choice-grid" role="radiogroup" aria-labelledby="lang-label">';
+    html += '<button type="button" class="choice-pill' + (state.lang === "en" ? " selected" : "") + '" data-action="setlang" data-val="en" role="radio" aria-checked="' + (state.lang === "en") + '">English</button>';
+    html += '<button type="button" class="choice-pill' + (state.lang === "fil" ? " selected" : "") + '" data-action="setlang" data-val="fil" role="radio" aria-checked="' + (state.lang === "fil") + '">Filipino</button>';
+    html += '</div></div>';
 
     html += '</div>';
     return html;
   }
 
   function renderComments() {
-    var html = '<div class="content">';
+    var html = '<div class="content" id="prism-content">';
     html += '<h2 class="section-title serif">Additional Comments</h2>';
     html += '<p class="section-note">Optional \u2014 share any comments, concerns, or suggestions for improving PRISM.</p>';
-    html += '<div class="field"><textarea id="f-comments" placeholder="Type your feedback here...">' + esc(state.comments) + '</textarea></div>';
+    html += '<div class="offline-banner' + (state._isOffline ? " show" : "") + '" role="status">' + t("queued") + '</div>';
+    html += '<div class="field"><label class="field-label" for="f-comments">Comments</label><textarea id="f-comments" placeholder="Type your feedback here...">' + esc(state.comments) + '</textarea></div>';
     if (state.submitError) {
-      html += '<div class="banner error show">' + esc(state.submitError) + '</div>';
+      html += '<div class="banner error show" role="alert">' + esc(state.submitError) + '</div>';
     }
+    html += '<div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey="0x4AAAAAAAW4t_lYhFwTmSZE" data-callback="onTurnstileSuccess"></div></div>';
     html += '</div>';
     return html;
   }
@@ -919,14 +1101,14 @@
   function renderFooterNav(step) {
     var isFirstNav = NAV_STEPS.indexOf(step) === 0;
     var isLastNav = NAV_STEPS.indexOf(step) === NAV_STEPS.length - 1;
-    var nextLabel = isLastNav ? (state.submitting ? "Submitting\u2026" : "Submit Questionnaire") : "Next";
+    var nextLabel = isLastNav ? (state.submitting ? t("submitting") : t("submit")) : t("next");
     return (
       '<div class="footer-nav">' +
-        '<button type="button" class="btn btn-ghost" id="exit-btn" style="font-size:12px;padding:8px 14px;">&#10005; Exit</button>' +
+        '<button type="button" class="btn btn-ghost" id="exit-btn" style="font-size:12px;padding:8px 14px;" aria-label="' + t("exit") + '">&#10005; ' + t("exit") + '</button>' +
         '<div class="spacer"></div>' +
         (isFirstNav
           ? '<span></span>'
-          : '<button type="button" class="btn btn-ghost" id="back-btn">Back</button>') +
+          : '<button type="button" class="btn btn-ghost" id="back-btn">' + t("back") + '</button>') +
         '<button type="button" class="btn btn-primary" id="next-btn"' + (state.submitting ? " disabled" : "") + '>' + nextLabel + '</button>' +
       '</div>'
     );
@@ -958,10 +1140,16 @@
     attachHandlers(step);
   }
 
+  /* Turnstile callback */
+  window.onTurnstileSuccess = function(token) {
+    state.turnstileToken = token;
+  };
+
   function attachHandlers(step) {
     var startBtn = root.querySelector("#start-btn");
     if (startBtn) startBtn.addEventListener("click", function() {
       state.stepIndex += 1;
+      state.surveyStartTime = state.surveyStartTime || Date.now();
       saveProgress();
       render();
     });
@@ -971,8 +1159,11 @@
       state = {
         stepIndex: 0, answers: {},
         respondent: { name: "", age: "", sex: "", userType: "", userTypeOther: "" },
-        comments: "", consentGiven: false, consentDate: null,
-        submitting: false, submitError: null, responseId: null, responseCount: state.responseCount
+        comments: "", consentGiven: false, consentDate: null, consentVersion: "v1.0",
+        submitting: false, submitError: null, responseId: null,
+        responseCount: state.responseCount,
+        sessionId: genId(), surveyStartTime: null, lang: state.lang,
+        turnstileToken: null
       };
       clearProgress();
       render();
@@ -991,7 +1182,15 @@
     root.querySelectorAll(".choice-pill").forEach(function(btn) {
       btn.addEventListener("click", function() {
         var field = btn.getAttribute("data-field");
+        var action = btn.getAttribute("data-action");
         var val = btn.getAttribute("data-val");
+        if (action === "setlang") {
+          state.lang = state.lang === val ? state.lang : val;
+          document.documentElement.lang = state.lang;
+          saveProgress();
+          render();
+          return;
+        }
         state.respondent[field] = state.respondent[field] === val ? "" : val;
         if (field === "userType" && state.respondent[field] !== "IT Expert") state.respondent.userTypeOther = "";
         saveProgress();
@@ -1017,7 +1216,7 @@
 
     var exitBtn = root.querySelector("#exit-btn");
     if (exitBtn) exitBtn.addEventListener("click", function() {
-      if (confirm("Are you sure you want to exit? Your progress will be saved.")) {
+      if (confirm(t("exitConfirm"))) {
         state.stepIndex = 0;
         saveProgress();
         render();
@@ -1063,8 +1262,12 @@
   }
 
   function focusFirstError() {
-    var bad = root.querySelector(".item.invalid, .banner.error.show");
-    if (bad) bad.scrollIntoView({ behavior: "smooth", block: "center" });
+    var bad = root.querySelector(".item.invalid, .banner.error.show, [aria-invalid=true]");
+    if (bad) {
+      bad.scrollIntoView({ behavior: "smooth", block: "center" });
+      var firstInput = bad.querySelector("button, input, textarea, [tabindex]");
+      if (firstInput) firstInput.focus({ preventScroll: true });
+    }
   }
 
   function genId() {
@@ -1076,23 +1279,34 @@
 
   async function submitResponse() {
     if (state.submitting) return;
-    if (!confirm("You are about to submit your evaluation. This action cannot be undone. Continue?")) return;
+    if (!confirm(t("submitConfirm"))) return;
+
+    /* Check Turnstile */
+    if (!state.turnstileToken) {
+      state.submitError = "Please complete the verification check.";
+      render();
+      return;
+    }
+
     var lastSub = parseInt(localStorage.getItem("prism_last_submit") || "0");
     if (Date.now() - lastSub < RATE_LIMIT_MS) {
-      state.submitError = "Please wait at least 30 seconds between submissions.";
+      state.submitError = t("rateLimit");
       state.submitting = false;
       render();
       return;
     }
+
     state.submitting = true;
     state.submitError = null;
     render();
 
     var id = genId();
+    var timeTaken = state.surveyStartTime ? Math.round((Date.now() - state.surveyStartTime) / 1000) : null;
+
     var payload = {
       id: id,
       submitted_at: new Date().toISOString(),
-      respondent_name: state.respondent.name || null,
+      respondent_name: state.respondent.name ? state.respondent.name.replace(/<[^>]*>/g, "").trim() : null,
       respondent_age: state.respondent.age ? Number(state.respondent.age) : null,
       respondent_sex: state.respondent.sex,
       respondent_user_type: state.respondent.userType === "IT Expert"
@@ -1100,9 +1314,32 @@
         : state.respondent.userType,
       consent_given: state.consentGiven,
       consent_date: state.consentDate,
+      consent_version: state.consentVersion,
       answers: state.answers,
-      comments: state.comments || null
+      comments: state.comments ? state.comments.replace(/<[^>]*>/g, "").trim() : null,
+      session_id: state.sessionId,
+      csrf_token: getCsrfToken(),
+      device_info: getDeviceInfo(),
+      user_agent: getUserAgent(),
+      time_taken_sec: timeTaken,
+      locale: state.lang,
+      survey_version: "1.0",
+      response_started_at: state.surveyStartTime ? new Date(state.surveyStartTime).toISOString() : null,
+      timings: { started_at: state.surveyStartTime, submitted_at: Date.now() }
     };
+
+    /* Offline queue */
+    if (!navigator.onLine) {
+      queueSubmission(payload);
+      state.submitting = false;
+      state._isOffline = true;
+      try { localStorage.setItem("prism_last_submit", String(Date.now())); } catch(e) {}
+      state.responseId = id.slice(0, 8).toUpperCase();
+      state.stepIndex = STEPS.length - 1;
+      clearProgress();
+      render();
+      return;
+    }
 
     try {
       var { error } = await supabaseClient
@@ -1119,8 +1356,20 @@
       render();
     } catch (err) {
       console.error("Submit error:", err);
+      /* Try offline queue if network error */
+      if (!navigator.onLine || err.message === "Failed to fetch") {
+        queueSubmission(payload);
+        state.submitting = false;
+        state._isOffline = true;
+        try { localStorage.setItem("prism_last_submit", String(Date.now())); } catch(e) {}
+        state.responseId = id.slice(0, 8).toUpperCase();
+        state.stepIndex = STEPS.length - 1;
+        clearProgress();
+        render();
+        return;
+      }
       state.submitting = false;
-      state.submitError = "We couldn't save your response. Please check your connection and try again.";
+      state.submitError = t("submitError");
       render();
     }
   }
@@ -1137,6 +1386,7 @@
   loadProgress();
   fetchResponseCount().then(function() { render(); });
   render();
+  flushOfflineQueue();
 })();
 </script>
 </body>
