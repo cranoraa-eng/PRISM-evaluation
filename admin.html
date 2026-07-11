@@ -362,7 +362,7 @@
   }
   .chart-card canvas { width: 100% !important; }
   .chart-card-wide { grid-column: 1 / -1; }
-  .chart-card-half canvas { max-height: 280px; }
+  .chart-card-half canvas { max-height: 240px; }
 
   @media (max-width: 640px) {
     .panel { padding: 16px 14px; }
@@ -716,8 +716,8 @@
 
     html += '<div class="chart-grid">';
     html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Mean Scores</h3><p class="chart-subtitle">Average rating per section across all respondents</p></div><span class="chart-badge">BAR</span></div><canvas id="chart-bar" height="100"></canvas></div>';
-    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown of survey respondents</p></div><span class="chart-badge">DOUGHNUT</span></div><canvas id="chart-sex" height="70"></canvas></div>';
-    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>Section Radar</h3><p class="chart-subtitle">Performance overview by section</p></div><span class="chart-badge">RADAR</span></div><canvas id="chart-radar"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Radar</h3><p class="chart-subtitle">Performance overview by section</p></div><span class="chart-badge">RADAR</span></div><canvas id="chart-radar"></canvas></div>';
+    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown</p></div><span class="chart-badge">DOUGHNUT</span></div><canvas id="chart-sex"></canvas></div>';
     html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>User Type Distribution</h3><p class="chart-subtitle">Respondents by role</p></div><span class="chart-badge">DOUGHNUT</span></div><canvas id="chart-type"></canvas></div>';
     html += '</div>';
     html += '</div>';
