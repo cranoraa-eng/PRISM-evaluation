@@ -1997,6 +1997,8 @@
   function exportExcelFile() {
     var r = STATE.filteredResponses;
     if (!r.length) return;
+    
+    console.log("Starting Excel export with", r.length, "responses");
 
     var now = new Date();
     var exportedOn = now.toLocaleString("en-US", {
@@ -2069,7 +2071,9 @@
 
     function setStyle(ws, rowIdx, colIdx, style) {
       var addr = XLSX.utils.encode_cell({ r: rowIdx, c: colIdx });
-      if (!ws[addr]) ws[addr] = { t: "s", v: "" };
+      if (!ws[addr]) {
+        ws[addr] = { t: "s", v: "" };
+      }
       ws[addr].s = style;
     }
 
@@ -2639,6 +2643,8 @@
 
     /* ---- Build workbook ---- */
     var wb = XLSX.utils.book_new();
+    console.log("Sheet ws1 sample cell A5:", ws1.A5);
+    console.log("Sample styled cell:", ws1[XLSX.utils.encode_cell({ r: 5, c: 0 })]);
     XLSX.utils.book_append_sheet(wb, ws1, "All Responses");
     XLSX.utils.book_append_sheet(wb, ws2, "Mean Scores");
     XLSX.utils.book_append_sheet(wb, ws3, "Item Means");
