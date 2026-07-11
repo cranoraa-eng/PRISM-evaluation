@@ -854,10 +854,11 @@
     var nextLabel = isLastNav ? (state.submitting ? "Submitting\u2026" : "Submit Questionnaire") : "Next";
     return (
       '<div class="footer-nav">' +
+        '<button type="button" class="btn btn-ghost" id="exit-btn" style="font-size:12px;padding:8px 14px;">&#10005; Exit</button>' +
+        '<div class="spacer"></div>' +
         (isFirstNav
           ? '<span></span>'
           : '<button type="button" class="btn btn-ghost" id="back-btn">Back</button>') +
-        '<div class="spacer"></div>' +
         '<button type="button" class="btn btn-primary" id="next-btn"' + (state.submitting ? " disabled" : "") + '>' + nextLabel + '</button>' +
       '</div>'
     );
@@ -936,6 +937,16 @@
     if (otherInput) otherInput.addEventListener("input", function(e) { state.respondent.userTypeOther = e.target.value; saveProgress(); });
     var commentsInput = root.querySelector("#f-comments");
     if (commentsInput) commentsInput.addEventListener("input", function(e) { state.comments = e.target.value; saveProgress(); });
+
+    var exitBtn = root.querySelector("#exit-btn");
+    if (exitBtn) exitBtn.addEventListener("click", function() {
+      if (confirm("Are you sure you want to exit? Your progress will be saved.")) {
+        state.stepIndex = 0;
+        saveProgress();
+        render();
+        root.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
 
     var backBtn = root.querySelector("#back-btn");
     if (backBtn) backBtn.addEventListener("click", function() {
