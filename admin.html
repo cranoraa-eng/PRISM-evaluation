@@ -376,6 +376,69 @@
     canvas { max-width: 100% !important; }
   }
 
+  /* Methodology */
+  .method-box {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    font-size: 13.5px;
+    color: var(--ink-2);
+  }
+  .method-box p { margin: 0 0 8px; }
+  .method-box p:last-child { margin-bottom: 0; }
+  .method-formula {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+    padding: 14px;
+    margin: 10px 0;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    letter-spacing: 0.04em;
+  }
+  .method-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 6px 0;
+  }
+  .method-table th, .method-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .method-table th {
+    background: var(--paper);
+    font-weight: 700;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+  }
+  .method-table tr:last-child td { border-bottom: none; }
+  .method-mono {
+    font-family: SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .method-vars { width: auto; margin: 8px 0; }
+  .method-vars td { padding: 4px 16px 4px 0; border: none; font-size: 13px; }
+  .method-vars td:first-child { min-width: 50px; }
+  .method-example {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #E8F0FE;
+    border: 1px solid #C9D2E0;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+
   .toast {
     position: fixed;
     bottom: 24px;
@@ -758,6 +821,7 @@
       { id: "statistics", label: "Statistics" },
       { id: "bytype", label: "By User Type" },
       { id: "responses", label: "All Responses" },
+      { id: "methodology", label: "Methodology" },
       { id: "demographics", label: "Demographics" }
     ];
     var html = '<div class="shell">';
@@ -784,6 +848,7 @@
     else if (STATE.activeTab === "statistics") html += '<div role="tabpanel" id="panel-statistics">' + renderStatistics(r) + '</div>';
     else if (STATE.activeTab === "bytype") html += '<div role="tabpanel" id="panel-bytype">' + renderByType(r) + '</div>';
     else if (STATE.activeTab === "responses") html += '<div role="tabpanel" id="panel-responses">' + renderResponses(r) + '</div>';
+    else if (STATE.activeTab === "methodology") html += '<div role="tabpanel" id="panel-methodology">' + renderMethodology(r) + '</div>';
     else if (STATE.activeTab === "demographics") html += '<div role="tabpanel" id="panel-demographics">' + renderDemographics(r) + '</div>';
 
     html += '</div>';
@@ -1379,6 +1444,147 @@
       html += '</tr>';
     });
     html += '</tbody></table></div>';
+    html += '</div>';
+    return html;
+  }
+
+  function renderMethodology(r) {
+    var html = '<div class="panel active">';
+    var n = r.length;
+    var allVals = [];
+    r.forEach(function(res) {
+      for (var k = 1; k <= TOTAL_ITEMS; k++) {
+        var v = (res.answers || {})[String(k)];
+        if (v) allVals.push(v);
+      }
+    });
+    var overallMean = mean(allVals);
+    var overallSD = stdDev(allVals);
+    var alpha = cronbachAlpha(r);
+
+    html += '<div class="section-heading">1. Likert Scale</div>';
+    html += '<div class="method-box">';
+    html += '<p>Each statement is rated on a <b>4-point Likert scale</b>:</p>';
+    html += '<table class="method-table"><thead><tr><th>Value</th><th>Label</th><th>Meaning</th></tr></thead><tbody>';
+    html += '<tr><td class="method-mono">4</td><td>Strongly Agree (SA)</td><td>Respondent strongly agrees with the statement</td></tr>';
+    html += '<tr><td class="method-mono">3</td><td>Agree (A)</td><td>Respondent agrees with the statement</td></tr>';
+    html += '<tr><td class="method-mono">2</td><td>Disagree (D)</td><td>Respondent disagrees with the statement</td></tr>';
+    html += '<tr><td class="method-mono">1</td><td>Strongly Disagree (SD)</td><td>Respondent strongly disagrees with the statement</td></tr>';
+    html += '</tbody></table>';
+    html += '</div>';
+
+    html += '<div class="section-heading">2. Mean (Average Score)</div>';
+    html += '<div class="method-box">';
+    html += '<p>The mean is the arithmetic average of all ratings for an item or section.</p>';
+    html += '<div class="method-formula">x̄ = (Σ xᵢ) / n</div>';
+    html += '<table class="method-vars"><tbody>';
+    html += '<tr><td class="method-mono">x̄</td><td>= sample mean</td></tr>';
+    html += '<tr><td class="method-mono">Σ xᵢ</td><td>= sum of all ratings</td></tr>';
+    html += '<tr><td class="method-mono">n</td><td>= number of responses</td></tr>';
+    html += '<tr><td class="method-mono">xᵢ</td><td>= individual rating (1, 2, 3, or 4)</td></tr>';
+    html += '</tbody></table>';
+    html += '<div class="method-example">Example: Current overall mean = <b>' + overallMean.toFixed(2) + '</b> across ' + allVals.length + ' ratings from ' + n + ' responses.</div>';
+    html += '</div>';
+
+    html += '<div class="section-heading">3. Standard Deviation</div>';
+    html += '<div class="method-box">';
+    html += '<p>Standard deviation measures the spread or dispersion of ratings around the mean. A low SD means ratings are clustered close to the mean; a high SD indicates wide variation.</p>';
+    html += '<div class="method-formula">s = √( Σ(xᵢ − x̄)² / (n − 1) )</div>';
+    html += '<table class="method-vars"><tbody>';
+    html += '<tr><td class="method-mono">s</td><td>= sample standard deviation</td></tr>';
+    html += '<tr><td class="method-mono">xᵢ − x̄</td><td>= deviation of each rating from the mean</td></tr>';
+    html += '<tr><td class="method-mono">(n − 1)</td><td>= degrees of freedom (Bessel\'s correction)</td></tr>';
+    html += '</tbody></table>';
+    html += '<div class="method-example">Example: Current overall SD = <b>' + overallSD.toFixed(2) + '</b>.</div>';
+    html += '</div>';
+
+    html += '<div class="section-heading">4. Frequency Distribution</div>';
+    html += '<div class="method-box">';
+    html += '<p>For each item, responses are tallied by Likert value and shown both as raw counts and percentages.</p>';
+    html += '<div class="method-formula">% = (count of value / total responses for item) × 100</div>';
+    html += '</div>';
+
+    html += '<div class="section-heading">5. Interpretation Scale</div>';
+    html += '<div class="method-box">';
+    html += '<p>The computed mean is mapped to a qualitative interpretation:</p>';
+    html += '<table class="method-table"><thead><tr><th>Mean Range</th><th>Interpretation</th><th>Description</th></tr></thead><tbody>';
+    html += '<tr><td class="method-mono">3.50 – 4.00</td><td><span class="interp excellent">Excellent</span></td><td>Strongly Agree — respondents overwhelmingly agree</td></tr>';
+    html += '<tr><td class="method-mono">2.50 – 3.49</td><td><span class="interp good">Good</span></td><td>Agree — respondents generally agree</td></tr>';
+    html += '<tr><td class="method-mono">1.50 – 2.49</td><td><span class="interp fair">Fair</span></td><td>Disagree — respondents tend to disagree</td></tr>';
+    html += '<tr><td class="method-mono">1.00 – 1.49</td><td><span class="interp poor">Poor</span></td><td>Strongly Disagree — respondents strongly disagree</td></tr>';
+    html += '</tbody></table>';
+    html += '<div class="method-example">Result: The current overall mean of <b>' + overallMean.toFixed(2) + '</b> is interpreted as <b>' + interpret(overallMean).label + '</b>.</div>';
+    html += '</div>';
+
+    html += '<div class="section-heading">6. Cronbach\'s Alpha (Reliability)</div>';
+    html += '<div class="method-box">';
+    html += '<p>Cronbach\'s alpha measures internal consistency — how closely related the items are as a group. It is computed from the pairwise correlations between items.</p>';
+    html += '<div class="method-formula">α = (k / (k − 1)) × (1 − (Σ s²ᵢ / s²ₜ))</div>';
+    html += '<table class="method-vars"><tbody>';
+    html += '<tr><td class="method-mono">k</td><td>= number of items</td></tr>';
+    html += '<tr><td class="method-mono">s²ᵢ</td><td>= variance of item i</td></tr>';
+    html += '<tr><td class="method-mono">s²ₜ</td><td>= variance of total scores (sum of all items per respondent)</td></tr>';
+    html += '</tbody></table>';
+    html += '<table class="method-table" style="margin-top:12px;"><thead><tr><th>Alpha Range</th><th>Interpretation</th></tr></thead><tbody>';
+    html += '<tr><td class="method-mono">α ≥ 0.9</td><td>Excellent internal consistency</td></tr>';
+    html += '<tr><td class="method-mono">0.8 ≤ α < 0.9</td><td>Good internal consistency</td></tr>';
+    html += '<tr><td class="method-mono">0.7 ≤ α < 0.8</td><td>Acceptable internal consistency</td></tr>';
+    html += '<tr><td class="method-mono">0.6 ≤ α < 0.7</td><td>Questionable internal consistency</td></tr>';
+    html += '<tr><td class="method-mono">α < 0.6</td><td>Poor internal consistency</td></tr>';
+    html += '</tbody></table>';
+    html += '<div class="method-example">Result: Current overall α = <b>' + (alpha !== null ? alpha.toFixed(3) : "N/A") + '</b> — <b>' + alphaLabel(alpha) + '</b>.</div>';
+    html += '</div>';
+
+    html += '<div class="section-heading">7. Pearson Correlation (Inter-Section)</div>';
+    html += '<div class="method-box">';
+    html += '<p>Pearson\'s r measures the strength and direction of the linear relationship between two sections\' scores.</p>';
+    html += '<div class="method-formula">r = Σ((xᵢ − x̄)(yᵢ − ȳ)) / √(Σ(xᵢ − x̄)² × Σ(yᵢ − ȳ)²)</div>';
+    html += '<table class="method-vars"><tbody>';
+    html += '<tr><td class="method-mono">r</td><td>= Pearson correlation coefficient (−1 to +1)</td></tr>';
+    html += '<tr><td class="method-mono">xᵢ, yᵢ</td><td>= paired scores from the two sections</td></tr>';
+    html += '<tr><td class="method-mono">x̄, ȳ</td><td>= means of the respective sections</td></tr>';
+    html += '</tbody></table>';
+    html += '<table class="method-table" style="margin-top:12px;"><thead><tr><th>|r| Range</th><th>Interpretation</th></tr></thead><tbody>';
+    html += '<tr><td class="method-mono">|r| ≥ 0.70</td><td>Strong correlation</td></tr>';
+    html += '<tr><td class="method-mono">0.40 ≤ |r| < 0.70</td><td>Moderate correlation</td></tr>';
+    html += '<tr><td class="method-mono">|r| < 0.40</td><td>Weak correlation</td></tr>';
+    html += '</tbody></table>';
+    html += '</div>';
+
+    html += '<div class="section-heading">8. Independent Samples T-Test</div>';
+    html += '<div class="method-box">';
+    html += '<p>Welch\'s t-test determines whether the mean scores of two independent groups (e.g., Students vs. Faculty) are statistically significantly different.</p>';
+    html += '<div class="method-formula">t = (x̄₁ − x̄₂) / √(s²₁/n₁ + s²₂/n₂)</div>';
+    html += '<table class="method-vars"><tbody>';
+    html += '<tr><td class="method-mono">t</td><td>= test statistic</td></tr>';
+    html += '<tr><td class="method-mono">x̄₁, x̄₂</td><td>= means of group 1 and group 2</td></tr>';
+    html += '<tr><td class="method-mono">s²₁, s²₂</td><td>= variances of group 1 and group 2</td></tr>';
+    html += '<tr><td class="method-mono">n₁, n₂</td><td>= sample sizes</td></tr>';
+    html += '</tbody></table>';
+    html += '<p style="margin-top:10px;">Degrees of freedom are approximated using the Welch–Satterthwaite equation. The p-value is computed from the t-distribution CDF. A p-value less than 0.05 indicates a statistically significant difference at the 95% confidence level.</p>';
+    html += '<table class="method-table" style="margin-top:12px;"><thead><tr><th>p-value</th><th>Significance</th></tr></thead><tbody>';
+    html += '<tr><td class="method-mono">p < 0.001</td><td>Highly significant (***)</td></tr>';
+    html += '<tr><td class="method-mono">p < 0.01</td><td>Very significant (**)</td></tr>';
+    html += '<tr><td class="method-mono">p < 0.05</td><td>Significant (*)</td></tr>';
+    html += '<tr><td class="method-mono">p ≥ 0.05</td><td>Not significant (ns)</td></tr>';
+    html += '</tbody></table>';
+    html += '</div>';
+
+    html += '<div class="section-heading">JavaScript Implementation Reference</div>';
+    html += '<div class="method-box">';
+    html += '<p>All calculations run client-side in your browser. The relevant functions are in <code>admin.html</code>:</p>';
+    html += '<table class="method-table"><thead><tr><th>Function</th><th>Location</th><th>Purpose</th></tr></thead><tbody>';
+    html += '<tr><td class="method-mono">mean(arr)</td><td>Line 531</td><td>Computes arithmetic mean</td></tr>';
+    html += '<tr><td class="method-mono">stdDev(arr)</td><td>Line 557</td><td>Computes sample standard deviation</td></tr>';
+    html += '<tr><td class="method-mono">freqCount(arr)</td><td>Line 564</td><td>Tally Likert frequencies</td></tr>';
+    html += '<tr><td class="method-mono">cronbachAlpha(resp)</td><td>Line 590</td><td>Overall reliability coefficient</td></tr>';
+    html += '<tr><td class="method-mono">cronbachAlphaSection(r, s, n)</td><td>Line 612</td><td>Per-section reliability coefficient</td></tr>';
+    html += '<tr><td class="method-mono">pearsonCorr(x, y)</td><td>Line 647</td><td>Inter-section Pearson correlation</td></tr>';
+    html += '<tr><td class="method-mono">tTestIndependent(g1, g2)</td><td>Line 663</td><td>Welch\'s independent t-test</td></tr>';
+    html += '<tr><td class="method-mono">interpret(mean)</td><td>Line 517</td><td>Maps mean to qualitative label</td></tr>';
+    html += '</tbody></table>';
+    html += '</div>';
+
     html += '</div>';
     return html;
   }
