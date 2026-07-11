@@ -1362,18 +1362,8 @@
         : state.respondent.userType,
       consent_given: state.consentGiven,
       consent_date: state.consentDate,
-      consent_version: state.consentVersion,
       answers: state.answers,
-      comments: state.comments ? state.comments.replace(/<[^>]*>/g, "").trim() : null,
-      session_id: state.sessionId,
-      csrf_token: getCsrfToken(),
-      device_info: getDeviceInfo(),
-      user_agent: getUserAgent(),
-      time_taken_sec: timeTaken,
-      locale: state.lang,
-      survey_version: "1.0",
-      response_started_at: state.surveyStartTime ? new Date(state.surveyStartTime).toISOString() : null,
-      timings: { started_at: state.surveyStartTime, submitted_at: Date.now() }
+      comments: state.comments ? state.comments.replace(/<[^>]*>/g, "").trim() : null
     };
 
     /* Offline queue */
