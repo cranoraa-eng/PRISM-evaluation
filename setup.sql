@@ -32,14 +32,13 @@ alter table responses add column if not exists response_started_at timestamptz;
 alter table responses add column if not exists deleted_at       timestamptz;
 alter table responses add column if not exists deleted_by       uuid;
 alter table responses add column if not exists anonymized_at    timestamptz;
--- retain_until is a generated column; drop & recreate if missing
+-- retain_until: plain text column (generated columns require immutable expressions)
 do $$ begin
   if not exists (
     select 1 from information_schema.columns
     where table_name='responses' and column_name='retain_until'
   ) then
-    alter table responses add column retain_until timestamptz
-      generated always as (submitted_at + interval '3 years') stored;
+    alter table responses add column retain_until timestamptz;
   end if;
 end $$;
 
