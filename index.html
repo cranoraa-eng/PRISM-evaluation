@@ -1327,7 +1327,11 @@
 
   function genId() {
     if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
-    return "resp-" + Date.now() + "-" + Math.floor(Math.random() * 100000);
+    /* Fallback UUID v4 for browsers without crypto.randomUUID */
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0;
+      return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
+    });
   }
 
   var RATE_LIMIT_MS = 30000;
@@ -1349,7 +1353,6 @@
     render();
 
     var id = genId();
-    var timeTaken = state.surveyStartTime ? Math.round((Date.now() - state.surveyStartTime) / 1000) : null;
 
     var payload = {
       id: id,
