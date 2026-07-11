@@ -523,6 +523,115 @@
     return mean(vals);
   }
 
+  /* ---- Statistics helpers ---- */
+  function stdDev(arr) {
+    if (arr.length < 2) return 0;
+    var m = mean(arr);
+    var sumSq = arr.reduce(function(s, v) { return s + Math.pow(v - m, 2); }, 0);
+    return Math.sqrt(sumSq / (arr.length - 1));
+  }
+
+  function weightedMean(arr) {
+    if (!arr.length) return 0;
+    var sum = arr.reduce(function(s, v) { return s + v * v; }, 0);
+    return sum / arr.reduce(function(s, v) { return s + v; }, 0);
+  }
+
+  function freqCount(arr) {
+    var counts = { 4: 0, 3: 0, 2: 0, 1: 0 };
+    arr.forEach(function(v) { if (counts[v] !== undefined) counts[v]++; });
+    return counts;
+  }
+
+  function itemValues(responses, itemNum) {
+    var vals = [];
+    responses.forEach(function(r) {
+      var v = (r.answers || {})[String(itemNum)];
+      if (v) vals.push(v);
+    });
+    return vals;
+  }
+
+  function sectionValues(responses, section, itemStartNum) {
+    var vals = [];
+    responses.forEach(function(r) {
+      section.items.forEach(function(_, i) {
+        var v = (r.answers || {})[String(itemStartNum + i)];
+        if (v) vals.push(v);
+      });
+    });
+    return vals;
+  }
+
+  function cronbachAlpha(responses) {
+    var n = TOTAL_ITEMS;
+    if (n < 2 || responses.length < 2) return null;
+    var itemVariances = [];
+    var allScores = [];
+    for (var i = 0; i < responses.length; i++) {
+      allScores.push(0);
+      for (var k = 1; k <= n; k++) {
+        var v = (responses[i].answers || {})[String(k)];
+        if (v) allScores[i] += v;
+      }
+    }
+    var totalVar = Math.pow(stdDev(allScores), 2);
+    for (var k2 = 1; k2 <= n; k2++) {
+      var iv = itemValues(responses, k2);
+      itemVariances.push(Math.pow(stdDev(iv), 2));
+    }
+    var sumItemVar = itemVariances.reduce(function(a, b) { return a + b; }, 0);
+    if (totalVar === 0) return null;
+    return (n / (n - 1)) * (1 - sumItemVar / totalVar);
+  }
+
+  function pearsonCorr(x, y) {
+    if (x.length < 2 || y.length < 2 || x.length !== y.length) return null;
+    var n = x.length;
+    var mx = mean(x), my = mean(y);
+    var num = 0, dx2 = 0, dy2 = 0;
+    for (var i = 0; i < n; i++) {
+      var dx = x[i] - mx;
+      var dy = y[i] - my;
+      num += dx * dy;
+      dx2 += dx * dx;
+      dy2 += dy * dy;
+    }
+    var denom = Math.sqrt(dx2 * dy2);
+    return denom === 0 ? 0 : num / denom;
+  }
+
+  function tTestIndependent(g1, g2) {
+    if (g1.length < 2 || g2.length < 2) return null;
+    var m1 = mean(g1), m2 = mean(g2);
+    var v1 = Math.pow(stdDev(g1), 2), v2 = Math.pow(stdDev(g2), 2);
+    var n1 = g1.length, n2 = g2.length;
+    var se = Math.sqrt(v1/n1 + v2/n2);
+    if (se === 0) return null;
+    var t = (m1 - m2) / se;
+    var df = n1 + n2 - 2;
+    var p = 2 * (1 - tCDF(Math.abs(t), df));
+    return { t: t, df: df, p: p, mean1: m1, mean2: m2 };
+  }
+
+  function tCDF(t, df) {
+    var x = df / (df + t * t);
+    var a = df / 2, b = 0.5;
+    var bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+    var ib = bt / a;
+    var result = 1 - 0.5 * ib;
+    return Math.max(0, Math.min(1, result));
+  }
+
+  function lgamma(x) {
+    var c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+    var y = x, tmp = x + 5.5;
+    tmp -= (x + 0.5) * Math.log(tmp);
+    var ser = 1.000000000190015;
+    for (var j = 0; j < 6; j++) ser += c[j] / ++y;
+    return -tmp + Math.log(2.5066282746310005 * ser / x);
+  }
+
   /* filters */
   function applyFilters() {
     var r = STATE.responses;
@@ -586,6 +695,7 @@
       { id: "overview", label: "Overview" },
       { id: "charts", label: "Charts" },
       { id: "means", label: "Mean Scores" },
+      { id: "statistics", label: "Statistics" },
       { id: "bytype", label: "By User Type" },
       { id: "responses", label: "All Responses" },
       { id: "demographics", label: "Demographics" }
@@ -611,6 +721,7 @@
     if (STATE.activeTab === "overview") html += renderOverview(r);
     else if (STATE.activeTab === "charts") html += renderCharts(r);
     else if (STATE.activeTab === "means") html += renderMeans(r);
+    else if (STATE.activeTab === "statistics") html += renderStatistics(r);
     else if (STATE.activeTab === "bytype") html += renderByType(r);
     else if (STATE.activeTab === "responses") html += renderResponses(r);
     else if (STATE.activeTab === "demographics") html += renderDemographics(r);
@@ -929,6 +1040,152 @@
     html += '<tr><td><span class="interp fair">1.50 – 2.49</span></td><td><b>Fair</b></td><td>Disagree — respondents tend to disagree</td></tr>';
     html += '<tr><td><span class="interp poor">1.00 – 1.49</span></td><td><b>Poor</b></td><td>Strongly Disagree — respondents strongly disagree</td></tr>';
     html += '</tbody></table></div>';
+    html += '</div>';
+    return html;
+  }
+
+  /* ---- STATISTICS ---- */
+  function renderStatistics(r) {
+    var html = '<div class="panel active">';
+    var n = r.length;
+    if (!n) { html += '<div class="loading">No data to analyze.</div></div>'; return html; }
+
+    /* Overall stats */
+    var allVals = [];
+    r.forEach(function(res) {
+      for (var k = 1; k <= TOTAL_ITEMS; k++) {
+        var v = (res.answers || {})[String(k)];
+        if (v) allVals.push(v);
+      }
+    });
+    var overallMean = mean(allVals);
+    var overallSD = stdDev(allVals);
+    var alpha = cronbachAlpha(r);
+
+    html += '<div class="section-heading">Overall Instrument Summary</div>';
+    html += '<div class="stat-grid">';
+    html += '<div class="stat-card"><div class="label">Sample Size (n)</div><div class="value">' + n + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Overall Mean</div><div class="value">' + overallMean.toFixed(2) + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Std. Deviation</div><div class="value">' + overallSD.toFixed(2) + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Cronbach\u2019s α</div><div class="value">' + (alpha !== null ? alpha.toFixed(3) : "N/A") + '</div><div class="note">' + (alpha !== null ? (alpha >= 0.9 ? "Excellent" : alpha >= 0.8 ? "Good" : alpha >= 0.7 ? "Acceptable" : alpha >= 0.6 ? "Questionable" : "Poor") : "") + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Items</div><div class="value">' + TOTAL_ITEMS + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Min Possible</div><div class="value">1.00</div></div>';
+    html += '<div class="stat-card"><div class="label">Max Possible</div><div class="value">4.00</div></div>';
+    html += '</div>';
+
+    /* Section-level statistics */
+    html += '<div class="section-heading">Section Statistics</div>';
+    html += '<div class="table-wrap"><table><thead><tr><th>Section</th><th>n</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th><th>Interpretation</th></tr></thead><tbody>';
+    var itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      var sv = sectionValues(r, sec, itemNum);
+      var secMean = mean(sv);
+      var secSD = stdDev(sv);
+      var secMin = sv.length ? Math.min.apply(null, sv) : "-";
+      var secMax = sv.length ? Math.max.apply(null, sv) : "-";
+      var interp = interpret(secMean);
+      html += '<tr>';
+      html += '<td>' + esc(sec.title) + '</td>';
+      html += '<td>' + sv.length + '</td>';
+      html += '<td><b>' + secMean.toFixed(2) + '</b></td>';
+      html += '<td>' + secSD.toFixed(2) + '</td>';
+      html += '<td>' + secMin + '</td>';
+      html += '<td>' + secMax + '</td>';
+      html += '<td><span class="interp ' + interp.cls + '">' + interp.label + '</span></td>';
+      html += '</tr>';
+      itemNum += sec.items.length;
+    });
+    html += '</tbody></table></div>';
+
+    /* Item-level statistics with frequency */
+    html += '<div class="section-heading">Item Analysis with Frequency Distribution</div>';
+    itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      html += '<h3 style="font-size:14px;margin:20px 0 8px;">' + esc(sec.title) + '</h3>';
+      html += '<div class="table-wrap"><table><thead><tr><th>#</th><th>Statement</th><th>n</th><th>Mean</th><th>SD</th><th>WM</th><th style="color:#2E7D32">SA</th><th style="color:#1565C0">A</th><th style="color:#F57F17">D</th><th style="color:#B3432E">SD</th></tr></thead><tbody>';
+      sec.items.forEach(function(text) {
+        var iv = itemValues(r, itemNum);
+        var im = mean(iv);
+        var isd = stdDev(iv);
+        var wm = weightedMean(iv);
+        var fc = freqCount(iv);
+        var nn = iv.length;
+        html += '<tr>';
+        html += '<td style="font-weight:700;color:var(--gold)">' + itemNum + '</td>';
+        html += '<td>' + esc(text) + '</td>';
+        html += '<td>' + nn + '</td>';
+        html += '<td><b>' + im.toFixed(2) + '</b></td>';
+        html += '<td>' + isd.toFixed(2) + '</td>';
+        html += '<td>' + wm.toFixed(2) + '</td>';
+        html += '<td>' + fc[4] + ' <span style="color:var(--muted)">(' + (nn ? (fc[4]/nn*100).toFixed(1) : 0) + '%)</span></td>';
+        html += '<td>' + fc[3] + ' <span style="color:var(--muted)">(' + (nn ? (fc[3]/nn*100).toFixed(1) : 0) + '%)</span></td>';
+        html += '<td>' + fc[2] + ' <span style="color:var(--muted)">(' + (nn ? (fc[2]/nn*100).toFixed(1) : 0) + '%)</span></td>';
+        html += '<td>' + fc[1] + ' <span style="color:var(--muted)">(' + (nn ? (fc[1]/nn*100).toFixed(1) : 0) + '%)</span></td>';
+        html += '</tr>';
+        itemNum++;
+      });
+      html += '</tbody></table></div>';
+    });
+
+    /* Correlation matrix */
+    html += '<div class="section-heading">Inter-Section Correlation Matrix (Pearson r)</div>';
+    html += '<div class="table-wrap"><table><thead><tr><th></th>';
+    SECTIONS.forEach(function(sec) {
+      html += '<th>' + esc(sec.title.replace(/^[A-Z]\.\s*/, "")) + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    var secVals = [];
+    var sNum = 1;
+    SECTIONS.forEach(function(sec) {
+      secVals.push(sectionValues(r, sec, sNum));
+      sNum += sec.items.length;
+    });
+    SECTIONS.forEach(function(sec, i) {
+      html += '<tr><td style="font-weight:700">' + esc(sec.title.replace(/^[A-Z]\.\s*/, "")) + '</td>';
+      SECTIONS.forEach(function(_, j) {
+        var corr = pearsonCorr(secVals[i], secVals[j]);
+        var clr = "";
+        if (i !== j && corr !== null) {
+          var abs = Math.abs(corr);
+          if (abs >= 0.7) clr = "color:var(--success);font-weight:700";
+          else if (abs >= 0.4) clr = "color:var(--ink-2);font-weight:600";
+        }
+        html += '<td style="text-align:center;' + clr + '">' + (corr !== null ? corr.toFixed(3) : "-") + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    html += '<p style="font-size:11px;color:var(--muted);margin:0 0 20px;">* Values ≥ 0.70 = strong correlation, 0.40–0.69 = moderate, &lt;0.40 = weak</p>';
+
+    /* T-test: Student vs Faculty */
+    var students = r.filter(function(res) { return res.respondent_user_type === "Student"; });
+    var faculty = r.filter(function(res) { return res.respondent_user_type === "Faculty / Teacher"; });
+    if (students.length >= 2 && faculty.length >= 2) {
+      html += '<div class="section-heading">Independent Samples T-Test: Student vs Faculty</div>';
+      html += '<div class="table-wrap"><table><thead><tr><th>Section</th><th>Student Mean</th><th>Faculty Mean</th><th>t</th><th>df</th><th>p-value</th><th>Sig.</th></tr></thead><tbody>';
+      sNum = 1;
+      SECTIONS.forEach(function(sec) {
+        var sVals = sectionValues(students, sec, sNum);
+        var fVals = sectionValues(faculty, sec, sNum);
+        var tt = tTestIndependent(sVals, fVals);
+        if (tt) {
+          var sig = tt.p < 0.001 ? "***" : tt.p < 0.01 ? "**" : tt.p < 0.05 ? "*" : "ns";
+          html += '<tr>';
+          html += '<td>' + esc(sec.title) + '</td>';
+          html += '<td>' + tt.mean1.toFixed(2) + ' (n=' + students.length + ')</td>';
+          html += '<td>' + tt.mean2.toFixed(2) + ' (n=' + faculty.length + ')</td>';
+          html += '<td>' + tt.t.toFixed(3) + '</td>';
+          html += '<td>' + tt.df + '</td>';
+          html += '<td>' + tt.p.toFixed(4) + '</td>';
+          html += '<td style="font-weight:700">' + sig + '</td>';
+          html += '</tr>';
+        }
+        sNum += sec.items.length;
+      });
+      html += '</tbody></table></div>';
+      html += '<p style="font-size:11px;color:var(--muted);margin:0 0 20px;">* p &lt; 0.05, ** p &lt; 0.01, *** p &lt; 0.001, ns = not significant</p>';
+    }
+
     html += '</div>';
     return html;
   }
