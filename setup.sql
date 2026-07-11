@@ -65,6 +65,8 @@ create or replace function submit_response(
   p_respondent_age  int,
   p_respondent_sex  text,
   p_respondent_user_type text,
+  p_consent_given   boolean,
+  p_consent_date    timestamptz,
   p_answers         jsonb,
   p_comments        text
 ) returns void
@@ -73,10 +75,10 @@ as $$
 begin
   insert into responses (
     id, submitted_at, respondent_name, respondent_age, respondent_sex,
-    respondent_user_type, answers, comments
+    respondent_user_type, consent_given, consent_date, answers, comments
   ) values (
     p_id, p_submitted_at, p_respondent_name, p_respondent_age, p_respondent_sex,
-    p_respondent_user_type, p_answers, p_comments
+    p_respondent_user_type, p_consent_given, p_consent_date, p_answers, p_comments
   );
 end;
 $$;

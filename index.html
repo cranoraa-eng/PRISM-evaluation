@@ -773,6 +773,8 @@
           p_respondent_age: queue[i].respondent_age,
           p_respondent_sex: queue[i].respondent_sex,
           p_respondent_user_type: queue[i].respondent_user_type,
+          p_consent_given: queue[i].consent_given,
+          p_consent_date: queue[i].consent_date,
           p_answers: queue[i].answers,
           p_comments: queue[i].comments
         });
@@ -1362,6 +1364,8 @@
       respondent_age: state.respondent.age ? Number(state.respondent.age) : null,
       respondent_sex: state.respondent.sex,
       respondent_user_type: state.respondent.userType,
+      consent_given: state.consentGiven,
+      consent_date: state.consentDate,
       answers: state.answers,
       comments: state.comments ? state.comments.replace(/<[^>]*>/g, "").trim() : null
     };
@@ -1387,6 +1391,8 @@
         p_respondent_age: payload.respondent_age,
         p_respondent_sex: payload.respondent_sex,
         p_respondent_user_type: payload.respondent_user_type,
+        p_consent_given: payload.consent_given,
+        p_consent_date: payload.consent_date,
         p_answers: payload.answers,
         p_comments: payload.comments
       });
