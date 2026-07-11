@@ -481,8 +481,8 @@
     .masthead .sub { font-size: 12px; }
     .masthead .actions { width: 100%; justify-content: flex-start; }
     .hamburger { display: block; }
-    .tabs { display: none; padding: 0; overflow: visible; flex-direction: column; border-bottom: none; }
-    .tabs.tabs-open { display: flex; }
+    .tabs { display: none; padding: 0; overflow: visible; flex-direction: column; border-bottom: none; position: relative; }
+    .tabs.tabs-open { display: flex; position: absolute; left: 0; right: 0; z-index: 50; background: var(--surface); border-bottom: 2px solid var(--gold); box-shadow: 0 8px 24px -8px rgba(22,35,61,0.2); }
     .tab { padding: 12px 14px; font-size: 12px; border-bottom: 1px solid var(--line); }
     .tab.active { border-bottom-color: var(--gold); border-bottom-style: solid; border-bottom-width: 2px; }
     .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1699,7 +1699,8 @@
 
   function attachDashboardHandlers() {
     var hamburger = document.getElementById("hamburger-btn");
-    if (hamburger) hamburger.addEventListener("click", function() {
+    if (hamburger) hamburger.addEventListener("click", function(e) {
+      e.preventDefault();
       document.querySelector(".tabs").classList.toggle("tabs-open");
     });
 
