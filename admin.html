@@ -2104,26 +2104,6 @@
     }
   }
 
-  async function loadResponses() {
-    STATE.loading = true;
-    render();
-    try {
-      var { data, error } = await supabaseClient
-        .from("responses")
-        .select("*")
-        .order("submitted_at", { ascending: false });
-      if (error) throw error;
-      STATE.responses = data || [];
-      STATE.loadError = null;
-    } catch (err) {
-      console.error("Load error:", err);
-      STATE.responses = [];
-      STATE.loadError = err.message || "Failed to load data from Supabase.";
-    }
-    STATE.loading = false;
-    render();
-  }
-
   function exportCSV() {
     var r = STATE.filteredResponses;
     if (!r.length) return;
