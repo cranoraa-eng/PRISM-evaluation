@@ -318,45 +318,51 @@
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(22,35,61,0.04);
-    transition: box-shadow 0.2s ease;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(22,35,61,0.06);
+    position: relative;
+    overflow: hidden;
   }
-  .chart-card:hover { box-shadow: 0 4px 16px rgba(22,35,61,0.08); }
+  .chart-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--ink), var(--gold));
+    border-radius: 12px 12px 0 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .chart-card:hover::before { opacity: 1; }
+  .chart-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
   .chart-card h3 {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
-    margin: 0 0 4px;
+    margin: 0;
     color: var(--ink);
   }
-  .chart-card .chart-subtitle {
-    font-size: 11px;
+  .chart-card .chart-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: var(--paper);
     color: var(--muted);
-    margin: 0 0 16px;
+    border: 1px solid var(--line);
   }
-  .chart-card canvas { width: 100% !important; max-height: 320px; }
-  .chart-card-wide { grid-column: 1 / -1; }
-  .chart-summary {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--line);
-  }
-  .chart-summary-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  .chart-card .chart-subtitle {
     font-size: 12px;
     color: var(--muted);
+    margin: 4px 0 0;
   }
-  .chart-summary-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .chart-card canvas { width: 100% !important; }
+  .chart-card-wide { grid-column: 1 / -1; }
+  .chart-card-half canvas { max-height: 280px; }
 
   @media (max-width: 640px) {
     .panel { padding: 16px 14px; }
@@ -709,10 +715,10 @@
     html += '</div>';
 
     html += '<div class="chart-grid">';
-    html += '<div class="chart-card chart-card-wide"><h3>Section Mean Scores</h3><p class="chart-subtitle">Horizontal bar chart comparing all sections</p><canvas id="chart-bar"></canvas></div>';
-    html += '<div class="chart-card chart-card-wide"><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown of respondents</p><canvas id="chart-sex"></canvas></div>';
-    html += '<div class="chart-card"><h3>Section Radar</h3><p class="chart-subtitle">Radar view of section performance</p><canvas id="chart-radar"></canvas></div>';
-    html += '<div class="chart-card"><h3>User Type Distribution</h3><p class="chart-subtitle">Breakdown of respondents by role</p><canvas id="chart-type"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Mean Scores</h3><p class="chart-subtitle">Average rating per section across all respondents</p></div><span class="chart-badge">BAR</span></div><canvas id="chart-bar" height="100"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown of survey respondents</p></div><span class="chart-badge">BAR</span></div><canvas id="chart-sex" height="70"></canvas></div>';
+    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>Section Radar</h3><p class="chart-subtitle">Performance overview by section</p></div><span class="chart-badge">RADAR</span></div><canvas id="chart-radar"></canvas></div>';
+    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>User Type Distribution</h3><p class="chart-subtitle">Respondents by role</p></div><span class="chart-badge">DOUGHNUT</span></div><canvas id="chart-type"></canvas></div>';
     html += '</div>';
     html += '</div>';
     return html;
