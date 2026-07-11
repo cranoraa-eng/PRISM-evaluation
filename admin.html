@@ -609,6 +609,41 @@
     return (n / (n - 1)) * (1 - sumItemVar / totalVar);
   }
 
+  function cronbachAlphaSection(responses, section, itemStartNum) {
+    var n = section.items.length;
+    if (n < 2 || responses.length < 2) return null;
+    var itemVariances = [];
+    var allScores = [];
+    for (var i = 0; i < responses.length; i++) {
+      allScores.push(0);
+      section.items.forEach(function(_, j) {
+        var v = (responses[i].answers || {})[String(itemStartNum + j)];
+        if (v) allScores[i] += v;
+      });
+    }
+    var totalVar = Math.pow(stdDev(allScores), 2);
+    section.items.forEach(function(_, j) {
+      var vals = [];
+      responses.forEach(function(r) {
+        var v = (r.answers || {})[String(itemStartNum + j)];
+        if (v) vals.push(v);
+      });
+      itemVariances.push(Math.pow(stdDev(vals), 2));
+    });
+    var sumItemVar = itemVariances.reduce(function(a, b) { return a + b; }, 0);
+    if (totalVar === 0) return null;
+    return (n / (n - 1)) * (1 - sumItemVar / totalVar);
+  }
+
+  function alphaLabel(a) {
+    if (a === null || a === undefined) return "";
+    if (a >= 0.9) return "Excellent";
+    if (a >= 0.8) return "Good";
+    if (a >= 0.7) return "Acceptable";
+    if (a >= 0.6) return "Questionable";
+    return "Poor";
+  }
+
   function pearsonCorr(x, y) {
     if (x.length < 2 || y.length < 2 || x.length !== y.length) return null;
     var n = x.length;
@@ -1092,7 +1127,7 @@
     html += '<div class="stat-card"><div class="label">Sample Size (n)</div><div class="value">' + n + '</div></div>';
     html += '<div class="stat-card"><div class="label">Items</div><div class="value">' + TOTAL_ITEMS + '</div></div>';
     html += '<div class="stat-card"><div class="label">Scale Range</div><div class="value">1 – 4</div><div class="note">4-point Likert</div></div>';
-    html += '<div class="stat-card"><div class="label">Cronbach\u2019s α</div><div class="value">' + (alpha !== null ? alpha.toFixed(3) : "N/A") + '</div><div class="note">' + (alpha !== null ? (alpha >= 0.9 ? "Excellent" : alpha >= 0.8 ? "Good" : alpha >= 0.7 ? "Acceptable" : alpha >= 0.6 ? "Questionable" : "Poor") : "") + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Cronbach\u2019s α</div><div class="value">' + (alpha !== null ? alpha.toFixed(3) : "N/A") + '</div><div class="note">' + alphaLabel(alpha) + '</div></div>';
     html += '</div>';
     html += '<div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">';
     html += '<div class="stat-card"><div class="label">Overall Mean</div><div class="value">' + overallMean.toFixed(2) + '</div></div>';
@@ -1102,12 +1137,13 @@
 
     /* Section-level statistics */
     html += '<div class="section-heading">Section Statistics</div>';
-    html += '<div class="table-wrap"><table><thead><tr><th>Section</th><th>n</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th><th>Interpretation</th></tr></thead><tbody>';
+    html += '<div class="table-wrap"><table><thead><tr><th>Section</th><th>n</th><th>Mean</th><th>SD</th><th>α</th><th>Min</th><th>Max</th><th>Interpretation</th></tr></thead><tbody>';
     var itemNum = 1;
     SECTIONS.forEach(function(sec) {
       var sv = sectionValues(r, sec, itemNum);
       var secMean = mean(sv);
       var secSD = stdDev(sv);
+      var secAlpha = cronbachAlphaSection(r, sec, itemNum);
       var secMin = sv.length ? Math.min.apply(null, sv) : "-";
       var secMax = sv.length ? Math.max.apply(null, sv) : "-";
       var interp = interpret(secMean);
@@ -1116,6 +1152,7 @@
       html += '<td>' + sv.length + '</td>';
       html += '<td><b>' + secMean.toFixed(2) + '</b></td>';
       html += '<td>' + secSD.toFixed(2) + '</td>';
+      html += '<td style="font-weight:700">' + (secAlpha !== null ? secAlpha.toFixed(3) : "\u2014") + '<br><span style="font-weight:400;font-size:11px;color:var(--muted)">' + alphaLabel(secAlpha) + '</span></td>';
       html += '<td>' + secMin + '</td>';
       html += '<td>' + secMax + '</td>';
       html += '<td><span class="interp ' + interp.cls + '">' + interp.label + '</span></td>';
