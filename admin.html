@@ -1203,31 +1203,23 @@
     var r = STATE.filteredResponses;
     if (!r.length) return;
 
-    function calcWidths(rows) {
-      var w = [];
-      rows.forEach(function(row) {
-        row.forEach(function(cell, ci) {
-          var len = String(cell == null ? "" : cell).length;
-          if (len > (w[ci] || 0)) w[ci] = len;
-        });
-      });
-      return w.map(function(v) { return { wch: Math.min(Math.max(v + 3, 8), 55) }; });
-    }
+    var now = new Date();
+    var exportedOn = now.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    });
+    var BORDER = {
+      top: { style: "thin", color: { rgb: "D8E0EC" } },
+      bottom: { style: "thin", color: { rgb: "D8E0EC" } },
+      left: { style: "thin", color: { rgb: "D8E0EC" } },
+      right: { style: "thin", color: { rgb: "D8E0EC" } }
+    };
 
-    function mkSheet(rows, colW) {
-      var ws = XLSX.utils.aoa_to_sheet(rows);
-      ws["!cols"] = colW || calcWidths(rows);
-      ws["!freeze"] = { xSplit: 0, ySplit: 1 };
-      return ws;
-    }
-
-    function hdrStyle(n) {
-      var h = {};
-      for (var c = 0; c < n; c++) {
-        var addr = XLSX.utils.encode_cell({ r: 0, c: c });
-        h[addr] = { s: { font: { bold: true, color: { rgb: "FFFFFF" }, sz: 11 }, fill: { fgColor: { rgb: "16233D" } }, alignment: { horizontal: "center", wrapText: true } } };
-      }
-      return h;
+    function clone(obj) {
+      return JSON.parse(JSON.stringify(obj));
     }
 
     function meanColor(v) {
@@ -1237,114 +1229,235 @@
       return "B3432E";
     }
 
+    function meanFill(v) {
+      if (v >= 3.5) return "E8F5E9";
+      if (v >= 2.5) return "E3F2FD";
+      if (v >= 1.5) return "FFF8E1";
+      return "FBEAE5";
+    }
+
+    function baseCellStyle(opts) {
+      var style = {
+        font: { name: "Calibri", sz: 10, color: { rgb: "16233D" } },
+        border: clone(BORDER),
+        alignment: { vertical: "top" }
+      };
+      if (opts && opts.center) style.alignment.horizontal = "center";
+      if (opts && opts.right) style.alignment.horizontal = "right";
+      if (opts && opts.wrap) style.alignment.wrapText = true;
+      if (opts && opts.bold) style.font.bold = true;
+      if (opts && opts.fill) style.fill = { fgColor: { rgb: opts.fill } };
+      if (opts && opts.fontColor) style.font.color = { rgb: opts.fontColor };
+      if (opts && opts.numFmt) style.numFmt = opts.numFmt;
+      return style;
+    }
+
+    function setStyle(ws, rowIdx, colIdx, style) {
+      var addr = XLSX.utils.encode_cell({ r: rowIdx, c: colIdx });
+      if (!ws[addr]) ws[addr] = { t: "s", v: "" };
+      ws[addr].s = style;
+    }
+
+    function buildRowHeights(rows, wrapHints) {
+      var out = [];
+      out[0] = { hpx: 30 };
+      out[1] = { hpx: 22 };
+      out[2] = { hpx: 8 };
+      out[3] = { hpx: 24 };
+      for (var ri = 4; ri < rows.length; ri++) {
+        var maxLines = 1;
+        Object.keys(wrapHints || {}).forEach(function(key) {
+          var ci = Number(key);
+          var limit = wrapHints[key];
+          var val = rows[ri][ci];
+          if (val == null || val === "") return;
+          String(val).split(/\r?\n/).forEach(function(line) {
+            maxLines = Math.max(maxLines, Math.ceil(line.length / limit) || 1);
+          });
+        });
+        out[ri] = { hpx: Math.min(18 * maxLines + 6, 108) };
+      }
+      return out;
+    }
+
+    function createSheet(title, headers, bodyRows, config) {
+      var subtitle = "Generated " + exportedOn + " | Responses: " + r.length;
+      var rows = [
+        ["PRISM Research Dashboard"],
+        [title + " | " + subtitle],
+        [""],
+        headers
+      ].concat(bodyRows);
+      var lastCol = headers.length - 1;
+      var ws = XLSX.utils.aoa_to_sheet(rows);
+      ws["!cols"] = config.widths;
+      ws["!rows"] = buildRowHeights(rows, config.wrapHints);
+      ws["!merges"] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: lastCol } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: lastCol } }
+      ];
+      ws["!freeze"] = { xSplit: 0, ySplit: 4 };
+      ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 3, c: 0 }, e: { r: 3, c: lastCol } }) };
+
+      setStyle(ws, 0, 0, {
+        font: { name: "Calibri", sz: 16, bold: true, color: { rgb: "16233D" } },
+        alignment: { vertical: "center", horizontal: "left" }
+      });
+      setStyle(ws, 1, 0, {
+        font: { name: "Calibri", sz: 10, italic: true, color: { rgb: "5B6B85" } },
+        alignment: { vertical: "center", horizontal: "left", wrapText: true }
+      });
+
+      for (var hc = 0; hc <= lastCol; hc++) {
+        setStyle(ws, 3, hc, {
+          font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "16233D" } },
+          border: clone(BORDER),
+          alignment: { vertical: "center", horizontal: "center", wrapText: true }
+        });
+      }
+
+      for (var br = 4; br < rows.length; br++) {
+        for (var bc = 0; bc <= lastCol; bc++) {
+          var val = rows[br][bc];
+          var isBlank = val == null || val === "";
+          if (isBlank && !(config.forceStyleCols || {})[bc]) continue;
+          var style = baseCellStyle({ fill: (br % 2 === 0 ? "FAFBFD" : null) });
+          if ((config.centerCols || {})[bc]) style = baseCellStyle({ center: true, fill: (br % 2 === 0 ? "FAFBFD" : null) });
+          if ((config.wrapCols || {})[bc]) style = baseCellStyle({ wrap: true, fill: (br % 2 === 0 ? "FAFBFD" : null) });
+          if ((config.numericCols || {})[bc]) style = baseCellStyle({ center: true, numFmt: config.numericCols[bc], fill: (br % 2 === 0 ? "FAFBFD" : null) });
+          if (config.percentCols && config.percentCols[bc]) style = baseCellStyle({ center: true, numFmt: "0.0%", fill: (br % 2 === 0 ? "FAFBFD" : null) });
+          if (config.meanCol === bc && typeof val === "number") {
+            style = baseCellStyle({
+              center: true,
+              bold: true,
+              numFmt: "0.00",
+              fill: meanFill(val),
+              fontColor: meanColor(val)
+            });
+          }
+          setStyle(ws, br, bc, style);
+        }
+      }
+
+      return ws;
+    }
+
     /* ---- Sheet 1: All Responses ---- */
     var hdrs = ["Reference","Submitted","Name","Age","Sex","User Type"];
     for (var q = 1; q <= TOTAL_ITEMS; q++) hdrs.push("Q" + q);
-    hdrs.push("Mean","Comments");
-    var rows1 = [hdrs];
+    hdrs.push("Mean","Interpretation","Comments");
+    var rows1 = [];
     r.forEach(function(res) {
       var vals = [];
-      for (var q2 = 1; q2 <= TOTAL_ITEMS; q2++) { vals.push((res.answers || {})[String(q2)] || ""); }
+      for (var q2 = 1; q2 <= TOTAL_ITEMS; q2++) vals.push((res.answers || {})[String(q2)] || "");
       var m = mean(vals);
-      var ref = res.id ? res.id.slice(0, 8).toUpperCase() : "";
-      var dt = res.submitted_at ? new Date(res.submitted_at).toLocaleDateString("en-US", { year:"numeric", month:"short", day:"numeric" }) : "";
-      rows1.push([ref, dt, res.respondent_name || "", res.respondent_age || "", res.respondent_sex || "", res.respondent_user_type || ""].concat(vals).concat([+m.toFixed(2), res.comments || ""]));
+      var interp = interpret(m);
+      rows1.push([
+        res.id ? res.id.slice(0, 8).toUpperCase() : "",
+        res.submitted_at ? new Date(res.submitted_at).toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit"
+        }) : "",
+        res.respondent_name || "",
+        res.respondent_age || "",
+        res.respondent_sex || "",
+        res.respondent_user_type || ""
+      ].concat(vals).concat([+m.toFixed(2), interp.label, res.comments || ""]));
     });
-    var ws1 = mkSheet(rows1);
-    var s1 = hdrStyle(hdrs.length);
-    for (var ri = 1; ri < rows1.length; ri++) {
-      var meanIdx = 6 + TOTAL_ITEMS;
-      var meanAddr = XLSX.utils.encode_cell({ r: ri, c: meanIdx });
-      if (ws1[meanAddr] && typeof ws1[meanAddr].v === "number") {
-        s1[meanAddr] = { s: { font: { bold: true, color: { rgb: meanColor(ws1[meanAddr].v) } } } };
-      }
-    }
-    Object.keys(s1).forEach(function(k) { ws1[k].s = s1[k].s; });
-
-    /* ---- Sheet 1: All Responses ---- */
-    var headers = ["Reference","Submitted","Name","Age","Sex","User Type"];
-    for (var k = 1; k <= TOTAL_ITEMS; k++) headers.push("Q" + k);
-    headers.push("Mean","Comments");
-    var rows = [headers];
-    r.forEach(function(res) {
-      var vals = [];
-      for (var k = 1; k <= TOTAL_ITEMS; k++) {
-        var v = (res.answers || {})[String(k)];
-        vals.push(v || "");
-      }
-      var m = mean(vals);
-      var ref = res.id ? res.id.slice(0, 8).toUpperCase() : "";
-      var dt = res.submitted_at || "";
-      var line = [ref, dt, res.respondent_name || "", res.respondent_age || "", res.respondent_sex || "", res.respondent_user_type || ""]
-        .concat(vals).concat([+m.toFixed(2), res.comments || ""]);
-      rows.push(line);
+    var widths1 = [
+      { wch: 12 }, { wch: 21 }, { wch: 20 }, { wch: 8 }, { wch: 12 }, { wch: 14 }
+    ];
+    for (var qc = 1; qc <= TOTAL_ITEMS; qc++) widths1.push({ wch: 6 });
+    widths1.push({ wch: 10 }, { wch: 18 }, { wch: 42 });
+    var centerCols1 = { 0: true, 1: true, 3: true, 4: true };
+    for (var ci = 6; ci < 6 + TOTAL_ITEMS; ci++) centerCols1[ci] = true;
+    centerCols1[6 + TOTAL_ITEMS] = true;
+    var wrapCols1 = { 2: true, 5: true };
+    wrapCols1[8 + TOTAL_ITEMS] = true;
+    var wrapHints1 = { 2: 18, 5: 14 };
+    wrapHints1[8 + TOTAL_ITEMS] = 36;
+    var ws1 = createSheet("All Responses", hdrs, rows1, {
+      widths: widths1,
+      centerCols: centerCols1,
+      wrapCols: wrapCols1,
+      wrapHints: wrapHints1,
+      meanCol: 6 + TOTAL_ITEMS
     });
-    var ws1 = XLSX.utils.aoa_to_sheet(rows);
-    ws1["!cols"] = headers.map(function(h, i) { return { wch: i < 6 ? 16 : (i === headers.length - 1 ? 30 : 6) }; });
 
     /* ---- Sheet 2: Section Means ---- */
-    var secHdrs = ["Section", "Items", "Mean", "Interpretation"];
-    var rows2 = [secHdrs];
+    var rows2 = [];
     var itemNum = 1;
     SECTIONS.forEach(function(sec) {
       var m = calcSectionMean(r, sec, itemNum);
-      var interp = interpret(m);
-      rows2.push([sec.title, sec.items.length, +m.toFixed(2), interp.label]);
+      rows2.push([sec.title, sec.items.length, +m.toFixed(2), interpret(m).label]);
       itemNum += sec.items.length;
     });
-    var ws2 = mkSheet(rows2);
-    var s2 = hdrStyle(4);
-    for (var ri2 = 1; ri2 < rows2.length; ri2++) {
-      var mAddr = XLSX.utils.encode_cell({ r: ri2, c: 2 });
-      if (ws2[mAddr] && typeof ws2[mAddr].v === "number") s2[mAddr] = { s: { font: { bold: true, color: { rgb: meanColor(ws2[mAddr].v) } } } };
-      var iAddr = XLSX.utils.encode_cell({ r: ri2, c: 3 });
-      if (ws2[iAddr]) s2[iAddr] = { s: { alignment: { horizontal: "center" } } };
-    }
-    Object.keys(s2).forEach(function(k) { ws2[k].s = s2[k].s; });
+    var ws2 = createSheet("Section Means", ["Section", "Items", "Mean", "Interpretation"], rows2, {
+      widths: [{ wch: 34 }, { wch: 10 }, { wch: 10 }, { wch: 18 }],
+      centerCols: { 1: true, 3: true },
+      wrapCols: { 0: true },
+      wrapHints: { 0: 30 },
+      meanCol: 2
+    });
 
     /* ---- Sheet 3: Item Means ---- */
-    var itemHdrs = ["#", "Statement", "Mean", "Interpretation"];
-    var rows3 = [itemHdrs];
+    var rows3 = [];
     itemNum = 1;
     SECTIONS.forEach(function(sec) {
       sec.items.forEach(function(text) {
         var m = calcItemMean(r, itemNum);
-        var interp = interpret(m);
-        rows3.push([itemNum, text, +m.toFixed(2), interp.label]);
+        rows3.push([itemNum, sec.title, text, +m.toFixed(2), interpret(m).label]);
         itemNum++;
       });
     });
-    var ws3 = mkSheet(rows3);
-    var s3 = hdrStyle(4);
-    for (var ri3 = 1; ri3 < rows3.length; ri3++) {
-      var mAddr3 = XLSX.utils.encode_cell({ r: ri3, c: 2 });
-      if (ws3[mAddr3] && typeof ws3[mAddr3].v === "number") s3[mAddr3] = { s: { font: { bold: true, color: { rgb: meanColor(ws3[mAddr3].v) } } } };
-      var iAddr3 = XLSX.utils.encode_cell({ r: ri3, c: 3 });
-      if (ws3[iAddr3]) s3[iAddr3] = { s: { alignment: { horizontal: "center" } } };
-    }
-    Object.keys(s3).forEach(function(k) { ws3[k].s = s3[k].s; });
+    var ws3 = createSheet("Item Means", ["#", "Section", "Statement", "Mean", "Interpretation"], rows3, {
+      widths: [{ wch: 6 }, { wch: 24 }, { wch: 64 }, { wch: 10 }, { wch: 18 }],
+      centerCols: { 0: true, 4: true },
+      wrapCols: { 1: true, 2: true },
+      wrapHints: { 1: 20, 2: 46 },
+      meanCol: 3
+    });
 
     /* ---- Sheet 4: Demographics ---- */
-    var rows4 = [["Demographic Breakdown","",""], [], ["Sex","Count","Percentage"]];
+    var rows4 = [];
     var sexC = {};
-    r.forEach(function(res) { var s = res.respondent_sex || "Unknown"; sexC[s] = (sexC[s] || 0) + 1; });
-    var n = r.length;
-    Object.keys(sexC).forEach(function(k) { rows4.push([k, sexC[k], ((sexC[k]/n)*100).toFixed(1)+"%"]); });
-    rows4.push([], ["User Type","Count","Percentage"]);
+    r.forEach(function(res) {
+      var s = res.respondent_sex || "Unknown";
+      sexC[s] = (sexC[s] || 0) + 1;
+    });
     var typC = {};
-    r.forEach(function(res) { var t = res.respondent_user_type || "Unknown"; typC[t] = (typC[t] || 0) + 1; });
-    Object.keys(typC).forEach(function(k) { rows4.push([k, typC[k], ((typC[k]/n)*100).toFixed(1)+"%"]); });
-    var ws4 = mkSheet(rows4);
-    var s4 = {};
-    s4[XLSX.utils.encode_cell({r:0,c:0})] = { s: { font: { bold: true, sz: 13, color: { rgb: "16233D" } } } };
-    s4[XLSX.utils.encode_cell({r:2,c:0})] = { s: { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "16233D" } } } };
-    s4[XLSX.utils.encode_cell({r:2,c:1})] = { s: { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "16233D" } } } };
-    s4[XLSX.utils.encode_cell({r:2,c:2})] = { s: { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "16233D" } } } };
-    var sexEnd = 3 + Object.keys(sexC).length;
-    s4[XLSX.utils.encode_cell({r:sexEnd+1,c:0})] = { s: { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "16233D" } } } };
-    s4[XLSX.utils.encode_cell({r:sexEnd+1,c:1})] = { s: { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "16233D" } } } };
-    s4[XLSX.utils.encode_cell({r:sexEnd+1,c:2})] = { s: { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "16233D" } } } };
-    Object.keys(s4).forEach(function(k) { ws4[k].s = s4[k].s; });
+    r.forEach(function(res) {
+      var t = res.respondent_user_type || "Unknown";
+      typC[t] = (typC[t] || 0) + 1;
+    });
+    var n = r.length;
+    Object.keys(sexC).sort().forEach(function(k) {
+      rows4.push(["Sex", k, sexC[k], n ? sexC[k] / n : 0]);
+    });
+    Object.keys(typC).sort().forEach(function(k) {
+      rows4.push(["User Type", k, typC[k], n ? typC[k] / n : 0]);
+    });
+    var ages = [];
+    r.forEach(function(res) {
+      if (res.respondent_age !== "" && res.respondent_age != null && !isNaN(Number(res.respondent_age))) ages.push(Number(res.respondent_age));
+    });
+    if (ages.length) {
+      rows4.push(["Age Statistics", "Lowest Age", Math.min.apply(null, ages), ""]);
+      rows4.push(["Age Statistics", "Highest Age", Math.max.apply(null, ages), ""]);
+      rows4.push(["Age Statistics", "Average Age", +mean(ages).toFixed(1), ""]);
+    }
+    var ws4 = createSheet("Demographics", ["Group", "Label", "Value", "Percentage"], rows4, {
+      widths: [{ wch: 18 }, { wch: 24 }, { wch: 12 }, { wch: 12 }],
+      wrapCols: { 0: true, 1: true },
+      wrapHints: { 0: 16, 1: 20 },
+      centerCols: { 2: true, 3: true },
+      percentCols: { 3: true },
+      numericCols: { 2: "0.0" }
+    });
 
     /* ---- Build workbook ---- */
     var wb = XLSX.utils.book_new();
@@ -1352,7 +1465,7 @@
     XLSX.utils.book_append_sheet(wb, ws2, "Section Means");
     XLSX.utils.book_append_sheet(wb, ws3, "Item Means");
     XLSX.utils.book_append_sheet(wb, ws4, "Demographics");
-    XLSX.writeFile(wb, "prism_responses_" + new Date().toISOString().slice(0,10) + ".xlsx");
+    XLSX.writeFile(wb, "prism_responses_" + now.toISOString().slice(0,10) + ".xlsx");
   }
 
   if (STATE.loggedIn) loadResponses(); else render();
