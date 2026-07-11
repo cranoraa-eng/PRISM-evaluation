@@ -2233,8 +2233,112 @@
       meanCol: 3
     });
 
-    /* ---- Sheet 4: Demographics ---- */
-    var rows4 = [];
+    /* ---- Sheet 4: Overview ---- */
+    var allVals = [];
+    r.forEach(function(res) {
+      for (var k = 1; k <= TOTAL_ITEMS; k++) {
+        var v = (res.answers || {})[String(k)];
+        if (v) allVals.push(v);
+      }
+    });
+    var overallMean = mean(allVals);
+    var overallSD = stdDev(allVals);
+    var alpha = cronbachAlpha(r);
+    var consentCount = r.filter(function(res) { return res.consent_given; }).length;
+    var rows4 = [
+      ["Metric", "Value"],
+      ["Total Responses", r.length],
+      ["Overall Mean", +overallMean.toFixed(2)],
+      ["Overall SD", +overallSD.toFixed(2)],
+      ["Cronbach's Alpha", alpha !== null ? +alpha.toFixed(3) : "N/A"],
+      ["Consent Rate", r.length ? +(consentCount / r.length * 100).toFixed(1) + "% (" + consentCount + "/" + r.length + ")" : "N/A"],
+      ["", ""],
+      ["Section", "Mean", "Interpretation"]
+    ];
+    var itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      var m = calcSectionMean(r, sec, itemNum);
+      rows4.push([sec.title, +m.toFixed(2), interpret(m).label]);
+      itemNum += sec.items.length;
+    });
+    var wsOverview = createSheet("Overview", ["Metric", "Value"], rows4.slice(0, 6), {
+      widths: [{ wch: 22 }, { wch: 28 }],
+      forceStyleCols: { 0: true, 1: true },
+      numericCols: { 1: "0.00" }
+    });
+    /* Manually add the section summary rows below the stat rows in the same sheet */
+    var secStart = 5 + 6 + 1 + 1; /* header row + 6 data rows + blank + section header */
+    rows4.slice(7).forEach(function(row, i) {
+      var ri = secStart + i;
+      XLSX.utils.sheet_add_aoa(wsOverview, [[row[0], row[1], row[2]]], { origin: { r: ri, c: 0 } });
+      setStyle(wsOverview, ri, 0, baseCellStyle({ bold: true, wrap: true }));
+      setStyle(wsOverview, ri, 1, baseCellStyle({ center: true, numFmt: "0.00", fill: meanFill(row[1]), fontColor: meanColor(row[1]) }));
+      setStyle(wsOverview, ri, 2, baseCellStyle({ center: true, fill: meanFill(row[1]), fontColor: meanColor(row[1]) }));
+    });
+
+    /* ---- Sheet 5: Statistics (Item Analysis) ---- */
+    var statHdrs = ["#", "Section", "Statement", "n", "Mean", "SD", "SA (4)", "A (3)", "D (2)", "SD (1)", "Interpretation"];
+    var rows5 = [];
+    itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      sec.items.forEach(function(text) {
+        var iv = itemValues(r, itemNum);
+        var im = mean(iv);
+        var isd = stdDev(iv);
+        var fc = freqCount(iv);
+        var nn = iv.length;
+        var p = function(n, v) { return nn ? (v / nn * 100).toFixed(1) : "0.0"; };
+        rows5.push([
+          itemNum, sec.title, text, nn, +im.toFixed(2), +isd.toFixed(2),
+          fc[4] + " (" + p(nn, fc[4]) + "%)",
+          fc[3] + " (" + p(nn, fc[3]) + "%)",
+          fc[2] + " (" + p(nn, fc[2]) + "%)",
+          fc[1] + " (" + p(nn, fc[1]) + "%)",
+          interpret(im).label
+        ]);
+        itemNum++;
+      });
+    });
+    var ws5 = createSheet("Statistics", statHdrs, rows5, {
+      widths: [{ wch: 5 }, { wch: 24 }, { wch: 58 }, { wch: 6 }, { wch: 8 }, { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 16 }],
+      centerCols: { 0: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true, 10: true },
+      wrapCols: { 1: true, 2: true },
+      wrapHints: { 1: 20, 2: 42 },
+      meanCol: 4
+    });
+
+    /* ---- Sheet 6: By User Type ---- */
+    var typeMap = {};
+    r.forEach(function(res) {
+      var t = res.respondent_user_type || "Unknown";
+      if (!typeMap[t]) typeMap[t] = [];
+      typeMap[t].push(res);
+    });
+    var typeKeys = Object.keys(typeMap).sort();
+    var btHdrs = ["Section"].concat(typeKeys.map(function(t) { return t + " (n=" + typeMap[t].length + ")"; })).concat(["All"]);
+    var rows6 = [];
+    itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      var row = [sec.title];
+      typeKeys.forEach(function(t) { row.push(+calcSectionMean(typeMap[t], sec, itemNum).toFixed(2)); });
+      row.push(+calcSectionMean(r, sec, itemNum).toFixed(2));
+      rows6.push(row);
+      itemNum += sec.items.length;
+    });
+    var btColCount = btHdrs.length;
+    var btWidths = [{ wch: 28 }];
+    var btCenter = {};
+    for (var bt = 1; bt < btColCount; bt++) { btWidths.push({ wch: 16 }); btCenter[bt] = true; }
+    var ws6 = createSheet("By User Type", btHdrs, rows6, {
+      widths: btWidths,
+      centerCols: btCenter,
+      wrapCols: { 0: true },
+      wrapHints: { 0: 22 },
+      meanCol: btColCount - 1
+    });
+
+    /* ---- Sheet 7: Demographics ---- */
+    var rowsDemo = [];
     var sexC = {};
     r.forEach(function(res) {
       var s = res.respondent_sex || "Unknown";
@@ -2247,21 +2351,21 @@
     });
     var n = r.length;
     Object.keys(sexC).sort().forEach(function(k) {
-      rows4.push(["Sex", k, sexC[k], n ? sexC[k] / n : 0]);
+      rowsDemo.push(["Sex", k, sexC[k], n ? sexC[k] / n : 0]);
     });
     Object.keys(typC).sort().forEach(function(k) {
-      rows4.push(["User Type", k, typC[k], n ? typC[k] / n : 0]);
+      rowsDemo.push(["User Type", k, typC[k], n ? typC[k] / n : 0]);
     });
     var ages = [];
     r.forEach(function(res) {
       if (res.respondent_age !== "" && res.respondent_age != null && !isNaN(Number(res.respondent_age))) ages.push(Number(res.respondent_age));
     });
     if (ages.length) {
-      rows4.push(["Age Statistics", "Lowest Age", Math.min.apply(null, ages), ""]);
-      rows4.push(["Age Statistics", "Highest Age", Math.max.apply(null, ages), ""]);
-      rows4.push(["Age Statistics", "Average Age", +mean(ages).toFixed(1), ""]);
+      rowsDemo.push(["Age Statistics", "Lowest Age", Math.min.apply(null, ages), ""]);
+      rowsDemo.push(["Age Statistics", "Highest Age", Math.max.apply(null, ages), ""]);
+      rowsDemo.push(["Age Statistics", "Average Age", +mean(ages).toFixed(1), ""]);
     }
-    var ws4 = createSheet("Demographics", ["Group", "Label", "Value", "Percentage"], rows4, {
+    var wsDemo = createSheet("Demographics", ["Group", "Label", "Value", "Percentage"], rowsDemo, {
       widths: [{ wch: 18 }, { wch: 24 }, { wch: 12 }, { wch: 12 }],
       wrapCols: { 0: true, 1: true },
       wrapHints: { 0: 16, 1: 20 },
@@ -2273,11 +2377,14 @@
     /* ---- Build workbook ---- */
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws1, "All Responses");
-    XLSX.utils.book_append_sheet(wb, ws2, "Section Means");
+    XLSX.utils.book_append_sheet(wb, ws2, "Mean Scores");
     XLSX.utils.book_append_sheet(wb, ws3, "Item Means");
-    XLSX.utils.book_append_sheet(wb, ws4, "Demographics");
+    XLSX.utils.book_append_sheet(wb, wsOverview, "Overview");
+    XLSX.utils.book_append_sheet(wb, ws5, "Statistics");
+    XLSX.utils.book_append_sheet(wb, ws6, "By User Type");
+    XLSX.utils.book_append_sheet(wb, wsDemo, "Demographics");
     XLSX.writeFile(wb, "prism_responses_" + now.toISOString().slice(0,10) + ".xlsx");
-    showToast("Excel exported (" + r.length + " responses, 4 sheets)");
+    showToast("Excel exported (" + r.length + " responses, 7 sheets)");
   }
 
   supabaseClient.auth.getSession().then(function(res) {
