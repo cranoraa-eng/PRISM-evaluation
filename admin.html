@@ -121,6 +121,8 @@
   .btn-danger:hover { opacity: 0.85; }
   .btn-sm { font-size: 12px; padding: 5px 10px; }
 
+  .hamburger { display: none; }
+
   .tabs {
     display: flex;
     border-bottom: 1px solid var(--line);
@@ -439,6 +441,17 @@
     color: var(--ink-2);
   }
 
+  .hamburger {
+    all: unset;
+    cursor: pointer;
+    display: none;
+    font-size: 22px;
+    padding: 10px 14px;
+    color: var(--ink-2);
+    user-select: none;
+  }
+  .hamburger:hover { color: var(--ink); }
+
   .toast {
     position: fixed;
     bottom: 24px;
@@ -467,8 +480,11 @@
     .masthead h1 { font-size: 18px; }
     .masthead .sub { font-size: 12px; }
     .masthead .actions { width: 100%; justify-content: flex-start; }
-    .tabs { padding: 0 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .tab { padding: 12px 14px; font-size: 12px; }
+    .hamburger { display: block; }
+    .tabs { display: none; padding: 0; overflow: visible; flex-direction: column; border-bottom: none; }
+    .tabs.tabs-open { display: flex; }
+    .tab { padding: 12px 14px; font-size: 12px; border-bottom: 1px solid var(--line); }
+    .tab.active { border-bottom-color: var(--gold); border-bottom-style: solid; border-bottom-width: 2px; }
     .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
     .stat-card { padding: 12px 14px; }
     .stat-card .value { font-size: 22px; }
@@ -844,6 +860,7 @@
     html += '<button class="btn btn-danger" id="logout-btn" aria-label="Logout">Logout</button>';
     html += '</div></div>';
 
+    html += '<button class="hamburger" id="hamburger-btn" aria-label="Toggle navigation tabs">&#9776;</button>';
     html += '<div class="tabs" role="tablist" aria-label="Dashboard tabs">';
     tabs.forEach(function(t) {
       html += '<button class="tab' + (STATE.activeTab === t.id ? " active" : "") + '" role="tab" aria-selected="' + (STATE.activeTab === t.id ? "true" : "false") + '" data-tab="' + t.id + '">' + t.label + '</button>';
@@ -1681,6 +1698,11 @@
   }
 
   function attachDashboardHandlers() {
+    var hamburger = document.getElementById("hamburger-btn");
+    if (hamburger) hamburger.addEventListener("click", function() {
+      document.querySelector(".tabs").classList.toggle("tabs-open");
+    });
+
     document.querySelectorAll(".tab").forEach(function(t) {
       t.addEventListener("click", function() {
         STATE.activeTab = t.getAttribute("data-tab");
