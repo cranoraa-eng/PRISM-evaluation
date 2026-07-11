@@ -921,6 +921,7 @@
     var overallMean = mean(allVals);
     var consentCount = r.filter(function(res) { return res.consent_given; }).length;
     var userTypes = {};
+    r.forEach(function(res) {
       var t = res.respondent_user_type || "Unknown";
       userTypes[t] = (userTypes[t] || 0) + 1;
     });
