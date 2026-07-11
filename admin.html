@@ -2281,7 +2281,7 @@
     });
     /* Add total row with formulas */
     var sr2 = rows2.length + 5;
-    XLSX.utils.sheet_add_aoa(ws2, [["OVERALL TOTAL", { f: "SUM(B5:B" + (sr2 - 1) + ")", t: "n", v: rows2.length ? +sum(rows2.map(function(r){return r[1];})).toFixed(0) : 0 }, "", ""]], { origin: { r: sr2, c: 0 } });
+    XLSX.utils.sheet_add_aoa(ws2, [["OVERALL TOTAL", { f: "SUM(B5:B" + (sr2 - 1) + ")", t: "n", v: rows2.reduce(function(a,r){return a+r[1];}, 0) }, "", ""]], { origin: { r: sr2, c: 0 } });
     setStyle(ws2, sr2, 0, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, sz: 10 }));
     setStyle(ws2, sr2, 1, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 10 }));
     setStyle(ws2, sr2, 2, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 10, numFmt: "0.00" }));
