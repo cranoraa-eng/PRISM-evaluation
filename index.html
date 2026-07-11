@@ -651,7 +651,52 @@
       surveyRequired: "Pakisagutan ang lahat ng pahayag bago magpatuloy.",
       queued: "Ang sagot ay naka-save offline. Isusumite ito kapag bumalik ang iyong koneksyon.",
       lastSaved: "Huling na-save noong",
-      queuedTitle: "Nakapila para isumite"
+      queuedTitle: "Nakapila para isumite",
+      /* Section titles & notes */
+      usabilityTitle: "A. Usability",
+      usabilityNote: "Kaginhawaan sa paggamit, nabigasyon, accessibility, at karanasan ng user.",
+      funcTitle: "B. Functional Suitability",
+      funcNote: "Mga feature ng system, pamamahala ng records, komunikasyon, at operasyon ng paaralan.",
+      satisfactionTitle: "C. User Satisfaction",
+      satisfactionNote: "Kalidad ng nilalaman, accuracy, format, pagiging napapanahon, at pangkalahatang kasiyahan.",
+      /* Scale labels */
+      scaleSA: "Lubos na Sumasang-ayon",
+      scaleA: "Sumasang-ayon",
+      scaleD: "Hindi Sumasang-ayon",
+      scaleSD: "Lubos na Hindi Sumasang-ayon",
+      /* Survey item translations */
+      items: [
+        "Ang PRISM ay madaling gamitin para sa mga gawain ko sa paaralan.",
+        "Ang navigation system ng PRISM ay simple at madaling maintindihan.",
+        "Ang layout at interface design ng PRISM ay maayos at madaling sundan.",
+        "Ang mga menu, button, at icon sa PRISM ay malinaw at madaling gamitin.",
+        "Madali kong mahanap ang impormasyon at features na kailangan ko sa PRISM.",
+        "Ang impormasyon sa PRISM ay malinaw at nauunawaan.",
+        "Natutunan kong gamitin ang PRISM nang hindi nangangailangan ng maraming tulong.",
+        "Ang PRISM ay accessible at nagagamit sa device na madalas kong ginagamit.",
+        "Epektibo kong natatapos ang mga gawain ko sa PRISM.",
+        "Sa kabuuan, ang PRISM ay nagbibigay ng maginhawa at madaling gamitin na karanasan.",
+        "Ang mga features at functions ng PRISM ay gumagana nang maayos.",
+        "Ang PRISM ay nagbibigay ng mga kinakailangang function para sa mga gawain sa pamamahala ng paaralan.",
+        "Pinapayagan ng PRISM ang mga awtorisadong user na ma-access ang records ng paaralan nang mahusay.",
+        "Ang PRISM ay nagbibigay ng tumpak at maaasahang records at impormasyon tungkol sa paaralan.",
+        "Ang PRISM ay tumutulong sa pag-ayos at pamamahala ng impormasyon ng mga estudyante nang epektibo.",
+        "Sinusuportahan ng PRISM ang mga guro sa pamamahala ng mga gawaing akademiko tulad ng attendance at grades.",
+        "Pinapabuti ng PRISM ang pagpapalaganap ng mga anunsyo sa paaralan at mahahalagang impormasyon.",
+        "Ang messaging at notification features ng PRISM ay sumusuporta sa epektibong komunikasyon sa mga user.",
+        "Nagbibigay ang PRISM ng maginhawang access sa mga learning materials at academic resources.",
+        "Epektibong ginagawa ng PRISM ang mga inaasahang function nito bilang school management portal.",
+        "Nasisiya ako sa impormasyong ibinibigay ng PRISM para sa aking mga pangangailangan sa paaralan.",
+        "Nasisiya ako sa relevance at usefulness ng impormasyon sa PRISM.",
+        "Nasisiya ako sa accuracy ng records at impormasyong ibinibigay ng PRISM.",
+        "Nasisiya ako sa kung paano inaayos at ipinapakita ng PRISM ang impormasyon.",
+        "Nasisiya ako sa kalinawan at itsura ng impormasyon na ipinapakita sa PRISM.",
+        "Nasisiya ako sa bilis ng pag-update ng PRISM ng impormasyon.",
+        "Nasisiya ako sa pagiging napapanahon ng mga anunsyo, notifications, at updates ng PRISM.",
+        "Nasisiya ako sa kakayahan ng PRISM na suportahan ang aking mga gawain sa paaralan.",
+        "Nasisiya ako sa pangkalahatang performance ng PRISM.",
+        "Nasisiya ako sa PRISM bilang portal para sa records, impormasyon, at pamamahala ng paaralan."
+      ]
     }
   };
 
@@ -659,6 +704,16 @@
     var lang = document.documentElement.lang || "en";
     var langMap = i18n[lang] || i18n.en;
     return langMap[key] || i18n.en[key] || key;
+  }
+
+  function itemText(item) {
+    var lang = document.documentElement.lang || "en";
+    if (lang === "fil") {
+      var filItems = i18n.fil.items;
+      var idx = item.num - 1;
+      if (filItems && filItems[idx]) return filItems[idx];
+    }
+    return item.text;
   }
 
   function getDeviceInfo() {
@@ -774,18 +829,24 @@
       id: "usability", kind: "survey", label: "Usability",
       title: "A. Usability",
       note: "Ease of use, navigation, accessibility, and user experience.",
+      titleKey: "usabilityTitle",
+      noteKey: "usabilityNote",
       groups: [grp(null, usabilityItems)]
     },
     {
       id: "func", kind: "survey", label: "Functionality",
       title: "B. Functional Suitability",
       note: "System features, records management, communication, and school operations.",
+      titleKey: "funcTitle",
+      noteKey: "funcNote",
       groups: [grp(null, funcItems)]
     },
     {
       id: "satisfaction", kind: "survey", label: "Satisfaction",
       title: "C. User Satisfaction",
       note: "Content quality, accuracy, format, timeliness, and overall satisfaction.",
+      titleKey: "satisfactionTitle",
+      noteKey: "satisfactionNote",
       groups: [grp(null, satisfactionItems)]
     },
     { id: "comments", kind: "comments", label: "Comments" },
@@ -955,7 +1016,7 @@
       '<div class="item' + (invalid ? " invalid" : "") + '" data-item="' + item.num + '"' + (invalid ? ' aria-invalid="true"' : '') + '>' +
         '<div class="item-row">' +
           '<div class="item-num" aria-hidden="true">' + item.num + '</div>' +
-          '<div class="item-text" id="item-label-' + item.num + '">' + esc(item.text) + '</div>' +
+          '<div class="item-text" id="item-label-' + item.num + '">' + esc(itemText(item)) + '</div>' +
           '<div class="likert" role="radiogroup" aria-labelledby="item-label-' + item.num + '">' + btns + '</div>' +
         '</div>' +
       '</div>'
@@ -964,9 +1025,11 @@
 
   function renderSurveyStep(step, missing) {
     var html = '<div class="content" id="prism-content">';
-    html += '<h2 class="section-title serif">' + esc(step.title) + '</h2>';
-    if (step.note) html += '<p class="section-note">' + esc(step.note) + '</p>';
-    html += '<div class="scale-key" role="group" aria-label="Response scale"><span><b>4</b> Strongly Agree</span><span><b>3</b> Agree</span><span><b>2</b> Disagree</span><span><b>1</b> Strongly Disagree</span></div>';
+    var stepTitle = step.titleKey ? t(step.titleKey) : step.title;
+    var stepNote = step.noteKey ? t(step.noteKey) : step.note;
+    html += '<h2 class="section-title serif">' + esc(stepTitle) + '</h2>';
+    if (stepNote) html += '<p class="section-note">' + esc(stepNote) + '</p>';
+    html += '<div class="scale-key" role="group" aria-label="Response scale"><span><b>4</b> ' + t("scaleSA") + '</span><span><b>3</b> ' + t("scaleA") + '</span><span><b>2</b> ' + t("scaleD") + '</span><span><b>1</b> ' + t("scaleSD") + '</span></div>';
     html += '<div class="banner error' + (missing.length ? " show" : "") + '" role="alert">' + t("surveyRequired") + '</div>';
     step.groups.forEach(function(g) {
       if (g.heading) html += '<div class="group-heading">' + esc(g.heading) + '</div>';
