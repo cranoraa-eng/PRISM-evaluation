@@ -2025,24 +2025,24 @@
     }
 
     function meanColor(v) {
-      if (v >= 3.5) return "1B5E20";
-      if (v >= 2.5) return "0D47A1";
-      if (v >= 1.5) return "E65100";
-      return "B71C1C";
+      if (v >= 3.5) return "2E7D32"; /* Dark green for excellent */
+      if (v >= 2.5) return "1565C0"; /* Dark blue for good */
+      if (v >= 1.5) return "F57F17"; /* Dark amber for fair */
+      return "C62828"; /* Dark red for poor */
     }
 
     function meanFill(v) {
-      if (v >= 3.5) return "C8E6C9";
-      if (v >= 2.5) return "BBDEFB";
-      if (v >= 1.5) return "FFE0B2";
-      return "FFCDD2";
+      if (v >= 3.5) return "E8F5E9"; /* Light green for excellent */
+      if (v >= 2.5) return "E3F2FD"; /* Light blue for good */
+      if (v >= 1.5) return "FFF8E1"; /* Light amber for fair */
+      return "FFEBEE"; /* Light red for poor */
     }
 
     function baseCellStyle(opts) {
       var style = {
-        font: { name: "Calibri", sz: 10, color: { rgb: "16233D" } },
+        font: { name: "Segoe UI", sz: 10, color: { rgb: "16233D" } },
         border: clone(BORDER),
-        alignment: { vertical: "top" }
+        alignment: { vertical: "center" }
       };
       if (opts && opts.center) style.alignment.horizontal = "center";
       if (opts && opts.right) style.alignment.horizontal = "right";
@@ -2058,8 +2058,14 @@
     var SECTION_FILL = "2E4066";
     var SECTION_FONT = "FFFFFF";
     var GOLD_FILL = "A9813E";
-    var ROW_EVEN = "F5F7FA";
+    var ACCENT_FILL = "5B7C99";
+    var LIGHT_GOLD = "F5ECD7";
+    var ROW_EVEN = "F8FAFB";
     var ROW_ODD = "FFFFFF";
+    var EXCELLENT_FILL = "E8F5E9";
+    var GOOD_FILL = "E3F2FD";
+    var FAIR_FILL = "FFF8E1";
+    var POOR_FILL = "FBEAE5";
 
     function setStyle(ws, rowIdx, colIdx, style) {
       var addr = XLSX.utils.encode_cell({ r: rowIdx, c: colIdx });
@@ -2069,11 +2075,11 @@
 
     function buildRowHeights(rows, wrapHints) {
       var out = [];
-      out[0] = { hpx: 30 };
-      out[1] = { hpx: 22 };
-      out[2] = { hpx: 8 };
-      out[3] = { hpx: 8 };
-      out[4] = { hpx: 24 };
+      out[0] = { hpx: 36 }; /* Title row - increased height */
+      out[1] = { hpx: 26 }; /* Subtitle row - increased height */
+      out[2] = { hpx: 8 };  /* Spacer */
+      out[3] = { hpx: 8 };  /* Spacer */
+      out[4] = { hpx: 28 }; /* Header row - increased height */
       for (var ri = 5; ri < rows.length; ri++) {
         var maxLines = 1;
         Object.keys(wrapHints || {}).forEach(function(key) {
@@ -2085,7 +2091,7 @@
             maxLines = Math.max(maxLines, Math.ceil(line.length / limit) || 1);
           });
         });
-        out[ri] = { hpx: Math.min(18 * maxLines + 6, 108) };
+        out[ri] = { hpx: Math.min(20 * maxLines + 8, 120) }; /* Increased base height */
       }
       return out;
     }
@@ -2110,20 +2116,32 @@
       ws["!freeze"] = { xSplit: 0, ySplit: 5 };
       ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 4, c: 0 }, e: { r: 4, c: lastCol } }) };
 
+      /* Enhanced title styling with gradient-like feel */
       setStyle(ws, 0, 0, {
-        font: { name: "Calibri", sz: 16, bold: true, color: { rgb: "16233D" } },
-        alignment: { vertical: "center", horizontal: "left" }
+        font: { name: "Segoe UI", sz: 18, bold: true, color: { rgb: "16233D" } },
+        alignment: { vertical: "center", horizontal: "left" },
+        fill: { fgColor: { rgb: "F5ECD7" } },
+        border: {
+          bottom: { style: "thick", color: { rgb: "A9813E" } }
+        }
       });
       setStyle(ws, 1, 0, {
-        font: { name: "Calibri", sz: 10, italic: true, color: { rgb: "5B6B85" } },
-        alignment: { vertical: "center", horizontal: "left", wrapText: true }
+        font: { name: "Segoe UI", sz: 10, italic: true, color: { rgb: "5B6B85" } },
+        alignment: { vertical: "center", horizontal: "left", wrapText: true },
+        fill: { fgColor: { rgb: "F8FAFB" } }
       });
 
+      /* Enhanced header styling with rounded corners effect */
       for (var hc = 0; hc <= lastCol; hc++) {
         setStyle(ws, 4, hc, {
-          font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "FFFFFF" } },
-          fill: { fgColor: { rgb: "16233D" } },
-          border: clone(BORDER),
+          font: { name: "Segoe UI", sz: 11, bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "2E4066" } },
+          border: {
+            top: { style: "medium", color: { rgb: "16233D" } },
+            bottom: { style: "medium", color: { rgb: "16233D" } },
+            left: { style: "thin", color: { rgb: "5B7C99" } },
+            right: { style: "thin", color: { rgb: "5B7C99" } }
+          },
           alignment: { vertical: "center", horizontal: "center", wrapText: true }
         });
       }
@@ -2150,7 +2168,7 @@
           if (isSection) {
             setStyle(ws, br, bc, baseCellStyle({
               bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT,
-              sz: 11, wrap: true
+              sz: 12, wrap: true
             }));
             continue;
           }
@@ -2158,7 +2176,7 @@
           if (isSubSection) {
             setStyle(ws, br, bc, baseCellStyle({
               bold: true, fill: GOLD_FILL, fontColor: "FFFFFF",
-              sz: 10, wrap: true
+              sz: 11, wrap: true
             }));
             continue;
           }
@@ -2173,6 +2191,14 @@
           } else {
             style = baseCellStyle({ fill: rowFill });
           }
+
+          /* Add subtle borders to all data cells */
+          style.border = {
+            top: { style: "thin", color: { rgb: "E0E0E0" } },
+            bottom: { style: "thin", color: { rgb: "E0E0E0" } },
+            left: { style: "thin", color: { rgb: "E0E0E0" } },
+            right: { style: "thin", color: { rgb: "E0E0E0" } }
+          };
 
           if ((config.boldCols || {})[bc]) {
             style.font.bold = true;
@@ -2191,11 +2217,18 @@
 
           if (config.meanCol === bc && typeof val === "number") {
             style = baseCellStyle({
-              center: true, bold: true, sz: 10,
+              center: true, bold: true, sz: 11,
               numFmt: "0.00",
               fill: meanFill(val),
               fontColor: meanColor(val)
             });
+            /* Enhanced border for mean columns */
+            style.border = {
+              top: { style: "medium", color: { rgb: "A9813E" } },
+              bottom: { style: "medium", color: { rgb: "A9813E" } },
+              left: { style: "medium", color: { rgb: "A9813E" } },
+              right: { style: "medium", color: { rgb: "A9813E" } }
+            };
           }
 
           setStyle(ws, br, bc, style);
@@ -2232,10 +2265,10 @@
       ].concat(vals).concat([+m.toFixed(2), interp.label, res.comments || ""]));
     });
     var widths1 = [
-      { wch: 12 }, { wch: 21 }, { wch: 20 }, { wch: 8 }, { wch: 12 }, { wch: 14 }, { wch: 8 }
+      { wch: 13 }, { wch: 22 }, { wch: 22 }, { wch: 8 }, { wch: 12 }, { wch: 15 }, { wch: 9 }
     ];
     for (var qc = 1; qc <= TOTAL_ITEMS; qc++) widths1.push({ wch: 6 });
-    widths1.push({ wch: 10 }, { wch: 18 }, { wch: 42 });
+    widths1.push({ wch: 11 }, { wch: 20 }, { wch: 45 });
     var centerCols1 = { 0: true, 1: true, 3: true, 4: true, 6: true };
     for (var ci = 7; ci < 7 + TOTAL_ITEMS; ci++) centerCols1[ci] = true;
     centerCols1[7 + TOTAL_ITEMS] = true;
@@ -2262,6 +2295,23 @@
         ws1[meanCellAddr].t = "n";
         ws1[meanCellAddr].z = "0.00";
       }
+      /* Style the interpretation cell with color coding */
+      var interpCellAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 8 + TOTAL_ITEMS });
+      var meanVal = rows1[rowIdx1][7 + TOTAL_ITEMS];
+      if (ws1[interpCellAddr]) {
+        var interpStyle = baseCellStyle({
+          center: true, bold: true, sz: 10,
+          fill: meanFill(meanVal),
+          fontColor: meanColor(meanVal)
+        });
+        interpStyle.border = {
+          top: { style: "thin", color: { rgb: "E0E0E0" } },
+          bottom: { style: "thin", color: { rgb: "E0E0E0" } },
+          left: { style: "medium", color: { rgb: "A9813E" } },
+          right: { style: "thin", color: { rgb: "E0E0E0" } }
+        };
+        ws1[interpCellAddr].s = interpStyle;
+      }
     }
 
     /* ---- Sheet 2: Section Means ---- */
@@ -2273,24 +2323,38 @@
       itemNum += sec.items.length;
     });
     var ws2 = createSheet("Section Means", ["Section", "Items", "Mean", "Interpretation"], rows2, {
-      widths: [{ wch: 34 }, { wch: 10 }, { wch: 10 }, { wch: 18 }],
+      widths: [{ wch: 38 }, { wch: 11 }, { wch: 12 }, { wch: 20 }],
       centerCols: { 1: true, 3: true },
       wrapCols: { 0: true },
-      wrapHints: { 0: 30 },
+      wrapHints: { 0: 34 },
       meanCol: 2
     });
-    /* Add total row with formulas */
+    /* Add total row with formulas and enhanced styling */
     var sr2 = rows2.length + 5;
     XLSX.utils.sheet_add_aoa(ws2, [["OVERALL TOTAL", { f: "SUM(B5:B" + (sr2 - 1) + ")", t: "n", v: rows2.reduce(function(a,r){return a+r[1];}, 0) }, "", ""]], { origin: { r: sr2, c: 0 } });
-    setStyle(ws2, sr2, 0, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, sz: 10 }));
-    setStyle(ws2, sr2, 1, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 10 }));
-    setStyle(ws2, sr2, 2, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 10, numFmt: "0.00" }));
-    setStyle(ws2, sr2, 3, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 10 }));
-    /* STDEV formula in total row */
-    setStyle(ws2, sr2 + 1, 0, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", sz: 10 }));
-    setStyle(ws2, sr2 + 1, 1, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", sz: 10 }));
-    setStyle(ws2, sr2 + 1, 2, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10, numFmt: "0.000" }));
-    setStyle(ws2, sr2 + 1, 3, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10 }));
+    var totalStyle = baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, sz: 11 });
+    totalStyle.border = {
+      top: { style: "double", color: { rgb: "FFFFFF" } },
+      bottom: { style: "medium", color: { rgb: "16233D" } },
+      left: { style: "medium", color: { rgb: "16233D" } },
+      right: { style: "medium", color: { rgb: "16233D" } }
+    };
+    setStyle(ws2, sr2, 0, totalStyle);
+    setStyle(ws2, sr2, 1, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 11 }));
+    setStyle(ws2, sr2, 2, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 11, numFmt: "0.00" }));
+    setStyle(ws2, sr2, 3, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 11 }));
+    /* STDEV formula in total row with enhanced styling */
+    var stdStyle = baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", sz: 11 });
+    stdStyle.border = {
+      top: { style: "thin", color: { rgb: "FFFFFF" } },
+      bottom: { style: "double", color: { rgb: "A9813E" } },
+      left: { style: "medium", color: { rgb: "A9813E" } },
+      right: { style: "medium", color: { rgb: "A9813E" } }
+    };
+    setStyle(ws2, sr2 + 1, 0, stdStyle);
+    setStyle(ws2, sr2 + 1, 1, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", sz: 11 }));
+    setStyle(ws2, sr2 + 1, 2, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 11, numFmt: "0.000" }));
+    setStyle(ws2, sr2 + 1, 3, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 11 }));
     XLSX.utils.sheet_add_aoa(ws2, [["STD DEVIATION", "", { f: "STDEV(C5:C" + (sr2 - 1) + ")", t: "n", v: 0 }, "(Across sections)"]], { origin: { r: sr2 + 1, c: 0 } });
 
     /* ---- Sheet 3: Item Means ---- */
@@ -2309,10 +2373,10 @@
       secRanges3.push({ sec: sec, start: secStart, end: secEnd });
     });
     var ws3 = createSheet("Item Means", ["#", "Section", "Statement", "Mean", "Interpretation"], rows3, {
-      widths: [{ wch: 6 }, { wch: 24 }, { wch: 64 }, { wch: 10 }, { wch: 18 }],
+      widths: [{ wch: 7 }, { wch: 26 }, { wch: 68 }, { wch: 12 }, { wch: 20 }],
       centerCols: { 0: true, 4: true },
       wrapCols: { 1: true, 2: true },
-      wrapHints: { 1: 20, 2: 46 },
+      wrapHints: { 1: 22, 2: 50 },
       meanCol: 3,
       sectionRows: secRanges3.map(function(r) { return 5 + r.start; })
     });
@@ -2328,10 +2392,17 @@
       var formula = meanColLetter + dr + ":" + meanColLetter + er;
       XLSX.utils.sheet_add_aoa(ws3, [["", "Section Mean", { f: "AVERAGE(" + formula + ")", t: "n", v: 0 }, "", ""]], { origin: { r: str, c: 0 } });
       for (var sc = 0; sc <= 4; sc++) {
-        setStyle(ws3, str, sc, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10 }));
+        var subStyle = baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 11 });
+        subStyle.border = {
+          top: { style: "double", color: { rgb: "FFFFFF" } },
+          bottom: { style: "double", color: { rgb: "FFFFFF" } },
+          left: { style: "thin", color: { rgb: "FFFFFF" } },
+          right: { style: "thin", color: { rgb: "FFFFFF" } }
+        };
+        setStyle(ws3, str, sc, subStyle);
       }
-      setStyle(ws3, str, 1, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
-      setStyle(ws3, str, 2, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
+      setStyle(ws3, str, 1, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 11 }));
+      setStyle(ws3, str, 2, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 11 }));
     });
 
     /* ---- Sheet 4: Overview ---- */
@@ -2363,7 +2434,7 @@
       itemNum += sec.items.length;
     });
     var wsOverview = createSheet("Overview", ["Metric", "Value"], rows4.slice(0, 6), {
-      widths: [{ wch: 22 }, { wch: 28 }],
+      widths: [{ wch: 24 }, { wch: 32 }],
       forceStyleCols: { 0: true, 1: true },
       numericCols: { 1: "0.00" }
     });
@@ -2381,12 +2452,27 @@
       var ri = secStart + i;
       XLSX.utils.sheet_add_aoa(wsOverview, [[row[0], row[1], row[2]]], { origin: { r: ri, c: 0 } });
       if (i === 0) {
-        setStyle(wsOverview, ri, 0, baseCellStyle({ bold: true, wrap: true, sz: 10 }));
+        setStyle(wsOverview, ri, 0, baseCellStyle({ bold: true, wrap: true, sz: 11 }));
       } else {
         setStyle(wsOverview, ri, 0, baseCellStyle({ wrap: true, fill: (i % 2 === 0 ? ROW_EVEN : ROW_ODD) }));
       }
-      setStyle(wsOverview, ri, 1, baseCellStyle({ center: true, numFmt: "0.00", fill: meanFill(row[1]), fontColor: meanColor(row[1]) }));
-      setStyle(wsOverview, ri, 2, baseCellStyle({ center: true, fill: meanFill(row[1]), fontColor: meanColor(row[1]) }));
+      /* Enhanced mean and interpretation cell styling with borders */
+      var meanStyle = baseCellStyle({ center: true, bold: true, sz: 11, numFmt: "0.00", fill: meanFill(row[1]), fontColor: meanColor(row[1]) });
+      meanStyle.border = {
+        top: { style: "medium", color: { rgb: "A9813E" } },
+        bottom: { style: "medium", color: { rgb: "A9813E" } },
+        left: { style: "medium", color: { rgb: "A9813E" } },
+        right: { style: "thin", color: { rgb: "A9813E" } }
+      };
+      var interpStyle = baseCellStyle({ center: true, bold: true, sz: 11, fill: meanFill(row[1]), fontColor: meanColor(row[1]) });
+      interpStyle.border = {
+        top: { style: "medium", color: { rgb: "A9813E" } },
+        bottom: { style: "medium", color: { rgb: "A9813E" } },
+        left: { style: "thin", color: { rgb: "A9813E" } },
+        right: { style: "medium", color: { rgb: "A9813E" } }
+      };
+      setStyle(wsOverview, ri, 1, meanStyle);
+      setStyle(wsOverview, ri, 2, interpStyle);
     });
 
     /* ---- Sheet 5: Statistics ---- */
@@ -2418,10 +2504,10 @@
       secRanges5.push({ sec: sec, start: secStart, end: secEnd });
     });
     var ws5 = createSheet("Statistics", statHdrs, rows5, {
-      widths: [{ wch: 5 }, { wch: 24 }, { wch: 58 }, { wch: 6 }, { wch: 8 }, { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 16 }],
+      widths: [{ wch: 6 }, { wch: 26 }, { wch: 62 }, { wch: 7 }, { wch: 9 }, { wch: 9 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 18 }],
       centerCols: { 0: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true, 10: true },
       wrapCols: { 1: true, 2: true },
-      wrapHints: { 1: 20, 2: 42 },
+      wrapHints: { 1: 22, 2: 46 },
       meanCol: 4,
       sectionRows: secRanges5.map(function(r) { return 5 + r.start; })
     });
@@ -2436,10 +2522,17 @@
       var sf = "F" + dr + ":F" + er;
       XLSX.utils.sheet_add_aoa(ws5, [["", "Section Mean", { f: "AVERAGE(" + mf + ")", t: "n", v: 0 }, "", "", { f: "STDEV(" + mf + ")", t: "n", v: 0 }, "", "", "", "", ""]], { origin: { r: str, c: 0 } });
       for (var sc5 = 0; sc5 <= 10; sc5++) {
-        setStyle(ws5, str, sc5, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10 }));
+        var subStyle = baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 11 });
+        subStyle.border = {
+          top: { style: "double", color: { rgb: "FFFFFF" } },
+          bottom: { style: "double", color: { rgb: "FFFFFF" } },
+          left: { style: "thin", color: { rgb: "FFFFFF" } },
+          right: { style: "thin", color: { rgb: "FFFFFF" } }
+        };
+        setStyle(ws5, str, sc5, subStyle);
       }
-      setStyle(ws5, str, 1, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
-      setStyle(ws5, str, 2, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
+      setStyle(ws5, str, 1, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 11 }));
+      setStyle(ws5, str, 2, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 11 }));
     });
 
     /* ---- Sheet 6: By User Type ---- */
@@ -2489,11 +2582,18 @@
       var formula = "AVERAGE(" + firstDataCol + dataRowNum + ":" + lastColLetter + dataRowNum + ")";
       var subtotalRow = [""].concat(typeKeys.map(function() { return ""; })).concat([null]);
       XLSX.utils.sheet_add_aoa(ws6, [["Section Avg", "", "", "", ""]], { origin: { r: str, c: 0 } });
-      /* Fill each cell of subtotal row */
+      /* Fill each cell of subtotal row with enhanced styling */
       for (var sc6 = 0; sc6 < btColCount; sc6++) {
-        setStyle(ws6, str, sc6, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10 }));
+        var subStyle = baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 11 });
+        subStyle.border = {
+          top: { style: "double", color: { rgb: "FFFFFF" } },
+          bottom: { style: "double", color: { rgb: "FFFFFF" } },
+          left: { style: "thin", color: { rgb: "FFFFFF" } },
+          right: { style: "thin", color: { rgb: "FFFFFF" } }
+        };
+        setStyle(ws6, str, sc6, subStyle);
       }
-      setStyle(ws6, str, 0, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
+      setStyle(ws6, str, 0, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 11 }));
     });
 
     /* ---- Sheet 7: Demographics ---- */
@@ -2528,9 +2628,9 @@
       rowsDemo.push(["Age Statistics", "Average Age", +mean(ages).toFixed(1), ""]);
     }
     var wsDemo = createSheet("Demographics", ["Group", "Label", "Value", "Percentage"], rowsDemo, {
-      widths: [{ wch: 18 }, { wch: 24 }, { wch: 12 }, { wch: 12 }],
+      widths: [{ wch: 20 }, { wch: 26 }, { wch: 13 }, { wch: 14 }],
       wrapCols: { 0: true, 1: true },
-      wrapHints: { 0: 16, 1: 20 },
+      wrapHints: { 0: 18, 1: 22 },
       centerCols: { 2: true, 3: true },
       percentCols: { 3: true },
       numericCols: { 2: "0.0" },
