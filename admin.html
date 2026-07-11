@@ -2013,22 +2013,29 @@
       right: { style: "thin", color: { rgb: "D8E0EC" } }
     };
 
+    var BORDER_WHITE = {
+      top: { style: "thin", color: { rgb: "FFFFFF" } },
+      bottom: { style: "thin", color: { rgb: "FFFFFF" } },
+      left: { style: "thin", color: { rgb: "FFFFFF" } },
+      right: { style: "thin", color: { rgb: "FFFFFF" } }
+    };
+
     function clone(obj) {
       return JSON.parse(JSON.stringify(obj));
     }
 
     function meanColor(v) {
-      if (v >= 3.5) return "2E7D32";
-      if (v >= 2.5) return "1565C0";
-      if (v >= 1.5) return "F57F17";
-      return "B3432E";
+      if (v >= 3.5) return "1B5E20";
+      if (v >= 2.5) return "0D47A1";
+      if (v >= 1.5) return "E65100";
+      return "B71C1C";
     }
 
     function meanFill(v) {
-      if (v >= 3.5) return "E8F5E9";
-      if (v >= 2.5) return "E3F2FD";
-      if (v >= 1.5) return "FFF8E1";
-      return "FBEAE5";
+      if (v >= 3.5) return "C8E6C9";
+      if (v >= 2.5) return "BBDEFB";
+      if (v >= 1.5) return "FFE0B2";
+      return "FFCDD2";
     }
 
     function baseCellStyle(opts) {
@@ -2044,8 +2051,15 @@
       if (opts && opts.fill) style.fill = { fgColor: { rgb: opts.fill } };
       if (opts && opts.fontColor) style.font.color = { rgb: opts.fontColor };
       if (opts && opts.numFmt) style.numFmt = opts.numFmt;
+      if (opts && opts.sz) style.font.sz = opts.sz;
       return style;
     }
+
+    var SECTION_FILL = "2E4066";
+    var SECTION_FONT = "FFFFFF";
+    var GOLD_FILL = "A9813E";
+    var ROW_EVEN = "F5F7FA";
+    var ROW_ODD = "FFFFFF";
 
     function setStyle(ws, rowIdx, colIdx, style) {
       var addr = XLSX.utils.encode_cell({ r: rowIdx, c: colIdx });
@@ -2114,25 +2128,76 @@
         });
       }
 
+      var sectionRowsMap = {};
+      if (config.sectionRows) {
+        config.sectionRows.forEach(function(sr) { sectionRowsMap[sr] = true; });
+      }
+      var subSectionRowsMap = {};
+      if (config.subSectionRows) {
+        config.subSectionRows.forEach(function(sr) { subSectionRowsMap[sr] = true; });
+      }
+
       for (var br = 5; br < rows.length; br++) {
+        var isSection = sectionRowsMap[br];
+        var isSubSection = subSectionRowsMap[br];
+        var isEven = br % 2 === 0;
+
         for (var bc = 0; bc <= lastCol; bc++) {
           var val = rows[br][bc];
           var isBlank = val == null || val === "";
           if (isBlank && !(config.forceStyleCols || {})[bc]) continue;
-          var style = baseCellStyle({ fill: (br % 2 === 0 ? "FAFBFD" : null) });
-          if ((config.centerCols || {})[bc]) style = baseCellStyle({ center: true, fill: (br % 2 === 0 ? "FAFBFD" : null) });
-          if ((config.wrapCols || {})[bc]) style = baseCellStyle({ wrap: true, fill: (br % 2 === 0 ? "FAFBFD" : null) });
-          if ((config.numericCols || {})[bc]) style = baseCellStyle({ center: true, numFmt: config.numericCols[bc], fill: (br % 2 === 0 ? "FAFBFD" : null) });
-          if (config.percentCols && config.percentCols[bc]) style = baseCellStyle({ center: true, numFmt: "0.0%", fill: (br % 2 === 0 ? "FAFBFD" : null) });
+
+          if (isSection) {
+            setStyle(ws, br, bc, baseCellStyle({
+              bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT,
+              sz: 11, wrap: true
+            }));
+            continue;
+          }
+
+          if (isSubSection) {
+            setStyle(ws, br, bc, baseCellStyle({
+              bold: true, fill: GOLD_FILL, fontColor: "FFFFFF",
+              sz: 10, wrap: true
+            }));
+            continue;
+          }
+
+          var rowFill = isEven ? ROW_EVEN : ROW_ODD;
+          var style;
+
+          if ((config.wrapCols || {})[bc]) {
+            style = baseCellStyle({ wrap: true, fill: rowFill });
+          } else if ((config.centerCols || {})[bc]) {
+            style = baseCellStyle({ center: true, fill: rowFill });
+          } else {
+            style = baseCellStyle({ fill: rowFill });
+          }
+
+          if ((config.boldCols || {})[bc]) {
+            style.font.bold = true;
+            style.font.color = { rgb: "16233D" };
+          }
+
+          if (config.percentCols && config.percentCols[bc]) {
+            style.alignment.horizontal = "center";
+            style.numFmt = "0.0%";
+          }
+
+          if ((config.numericCols || {})[bc]) {
+            style.alignment.horizontal = "center";
+            style.numFmt = config.numericCols[bc];
+          }
+
           if (config.meanCol === bc && typeof val === "number") {
             style = baseCellStyle({
-              center: true,
-              bold: true,
+              center: true, bold: true, sz: 10,
               numFmt: "0.00",
               fill: meanFill(val),
               fontColor: meanColor(val)
             });
           }
+
           setStyle(ws, br, bc, style);
         }
       }
@@ -2214,23 +2279,59 @@
       wrapHints: { 0: 30 },
       meanCol: 2
     });
+    /* Add total row with formulas */
+    var sr2 = rows2.length + 5;
+    XLSX.utils.sheet_add_aoa(ws2, [["OVERALL TOTAL", { f: "SUM(B5:B" + (sr2 - 1) + ")", t: "n", v: rows2.length ? +sum(rows2.map(function(r){return r[1];})).toFixed(0) : 0 }, "", ""]], { origin: { r: sr2, c: 0 } });
+    setStyle(ws2, sr2, 0, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, sz: 10 }));
+    setStyle(ws2, sr2, 1, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 10 }));
+    setStyle(ws2, sr2, 2, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 10, numFmt: "0.00" }));
+    setStyle(ws2, sr2, 3, baseCellStyle({ bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, center: true, sz: 10 }));
+    /* STDEV formula in total row */
+    setStyle(ws2, sr2 + 1, 0, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", sz: 10 }));
+    setStyle(ws2, sr2 + 1, 1, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", sz: 10 }));
+    setStyle(ws2, sr2 + 1, 2, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10, numFmt: "0.000" }));
+    setStyle(ws2, sr2 + 1, 3, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10 }));
+    XLSX.utils.sheet_add_aoa(ws2, [["STD DEVIATION", "", { f: "STDEV(C5:C" + (sr2 - 1) + ")", t: "n", v: 0 }, "(Across sections)"]], { origin: { r: sr2 + 1, c: 0 } });
 
     /* ---- Sheet 3: Item Means ---- */
     var rows3 = [];
+    var secRanges3 = []; /* track section row ranges for AVERAGE formulas */
     itemNum = 1;
     SECTIONS.forEach(function(sec) {
+      var secStart = rows3.length;
+      rows3.push([null, null, null, null, null]); /* placeholder for section header */
       sec.items.forEach(function(text) {
         var m = calcItemMean(r, itemNum);
         rows3.push([itemNum, sec.title, text, +m.toFixed(2), interpret(m).label]);
         itemNum++;
       });
+      var secEnd = rows3.length - 1;
+      secRanges3.push({ sec: sec, start: secStart, end: secEnd });
     });
     var ws3 = createSheet("Item Means", ["#", "Section", "Statement", "Mean", "Interpretation"], rows3, {
       widths: [{ wch: 6 }, { wch: 24 }, { wch: 64 }, { wch: 10 }, { wch: 18 }],
       centerCols: { 0: true, 4: true },
       wrapCols: { 1: true, 2: true },
       wrapHints: { 1: 20, 2: 46 },
-      meanCol: 3
+      meanCol: 3,
+      sectionRows: secRanges3.map(function(r) { return 5 + r.start; })
+    });
+    /* Fill in section header text and add sub-total formulas */
+    secRanges3.forEach(function(range) {
+      var hr = 5 + range.start; /* header row index in sheet */
+      var dr = hr + 1; /* first data row */
+      var er = 5 + range.end; /* last data row */
+      XLSX.utils.sheet_add_aoa(ws3, [[range.sec.title.toUpperCase(), "(" + range.sec.items.length + " items)", "", "", ""]], { origin: { r: hr, c: 0 } });
+      /* Sub-total row after section data */
+      var str = er + 1;
+      var meanColLetter = "D";
+      var formula = meanColLetter + dr + ":" + meanColLetter + er;
+      XLSX.utils.sheet_add_aoa(ws3, [["", "Section Mean", { f: "AVERAGE(" + formula + ")", t: "n", v: 0 }, "", ""]], { origin: { r: str, c: 0 } });
+      for (var sc = 0; sc <= 4; sc++) {
+        setStyle(ws3, str, sc, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10 }));
+      }
+      setStyle(ws3, str, 1, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
+      setStyle(ws3, str, 2, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
     });
 
     /* ---- Sheet 4: Overview ---- */
@@ -2267,20 +2368,35 @@
       numericCols: { 1: "0.00" }
     });
     /* Manually add the section summary rows below the stat rows in the same sheet */
-    var secStart = 5 + 6 + 1 + 1; /* header row + 6 data rows + blank + section header */
+    var secHdrRow = 5 + 6 + 1; /* blank row after stats */
+    var secStart = secHdrRow + 1;
+    /* Section header row */
+    XLSX.utils.sheet_add_aoa(wsOverview, [["Section", "Mean", "Interpretation"]], { origin: { r: secHdrRow, c: 0 } });
+    for (var shc = 0; shc <= 2; shc++) {
+      setStyle(wsOverview, secHdrRow, shc, baseCellStyle({
+        bold: true, fill: SECTION_FILL, fontColor: SECTION_FONT, sz: 10, center: true
+      }));
+    }
     rows4.slice(7).forEach(function(row, i) {
       var ri = secStart + i;
       XLSX.utils.sheet_add_aoa(wsOverview, [[row[0], row[1], row[2]]], { origin: { r: ri, c: 0 } });
-      setStyle(wsOverview, ri, 0, baseCellStyle({ bold: true, wrap: true }));
+      if (i === 0) {
+        setStyle(wsOverview, ri, 0, baseCellStyle({ bold: true, wrap: true, sz: 10 }));
+      } else {
+        setStyle(wsOverview, ri, 0, baseCellStyle({ wrap: true, fill: (i % 2 === 0 ? ROW_EVEN : ROW_ODD) }));
+      }
       setStyle(wsOverview, ri, 1, baseCellStyle({ center: true, numFmt: "0.00", fill: meanFill(row[1]), fontColor: meanColor(row[1]) }));
       setStyle(wsOverview, ri, 2, baseCellStyle({ center: true, fill: meanFill(row[1]), fontColor: meanColor(row[1]) }));
     });
 
-    /* ---- Sheet 5: Statistics (Item Analysis) ---- */
+    /* ---- Sheet 5: Statistics ---- */
     var statHdrs = ["#", "Section", "Statement", "n", "Mean", "SD", "SA (4)", "A (3)", "D (2)", "SD (1)", "Interpretation"];
     var rows5 = [];
+    var secRanges5 = [];
     itemNum = 1;
     SECTIONS.forEach(function(sec) {
+      var secStart = rows5.length;
+      rows5.push([null, null, null, null, null, null, null, null, null, null, null]);
       sec.items.forEach(function(text) {
         var iv = itemValues(r, itemNum);
         var im = mean(iv);
@@ -2298,13 +2414,32 @@
         ]);
         itemNum++;
       });
+      var secEnd = rows5.length - 1;
+      secRanges5.push({ sec: sec, start: secStart, end: secEnd });
     });
     var ws5 = createSheet("Statistics", statHdrs, rows5, {
       widths: [{ wch: 5 }, { wch: 24 }, { wch: 58 }, { wch: 6 }, { wch: 8 }, { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 16 }],
       centerCols: { 0: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true, 10: true },
       wrapCols: { 1: true, 2: true },
       wrapHints: { 1: 20, 2: 42 },
-      meanCol: 4
+      meanCol: 4,
+      sectionRows: secRanges5.map(function(r) { return 5 + r.start; })
+    });
+    secRanges5.forEach(function(range) {
+      var hr = 5 + range.start;
+      var dr = hr + 1;
+      var er = 5 + range.end;
+      XLSX.utils.sheet_add_aoa(ws5, [[range.sec.title.toUpperCase(), "(" + range.sec.items.length + " items)", "", "", "", "", "", "", "", "", ""]], { origin: { r: hr, c: 0 } });
+      var str = er + 1;
+      var meanCol = 4, sdCol = 5;
+      var mf = "E" + dr + ":E" + er;
+      var sf = "F" + dr + ":F" + er;
+      XLSX.utils.sheet_add_aoa(ws5, [["", "Section Mean", { f: "AVERAGE(" + mf + ")", t: "n", v: 0 }, "", "", { f: "STDEV(" + mf + ")", t: "n", v: 0 }, "", "", "", "", ""]], { origin: { r: str, c: 0 } });
+      for (var sc5 = 0; sc5 <= 10; sc5++) {
+        setStyle(ws5, str, sc5, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10 }));
+      }
+      setStyle(ws5, str, 1, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
+      setStyle(ws5, str, 2, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
     });
 
     /* ---- Sheet 6: By User Type ---- */
@@ -2317,13 +2452,18 @@
     var typeKeys = Object.keys(typeMap).sort();
     var btHdrs = ["Section"].concat(typeKeys.map(function(t) { return t + " (n=" + typeMap[t].length + ")"; })).concat(["All"]);
     var rows6 = [];
+    var secRanges6 = [];
     itemNum = 1;
     SECTIONS.forEach(function(sec) {
+      var secStart = rows6.length;
+      rows6.push([null].concat(typeKeys.map(function() { return null; })).concat([null]));
       var row = [sec.title];
       typeKeys.forEach(function(t) { row.push(+calcSectionMean(typeMap[t], sec, itemNum).toFixed(2)); });
       row.push(+calcSectionMean(r, sec, itemNum).toFixed(2));
       rows6.push(row);
       itemNum += sec.items.length;
+      var secEnd = rows6.length - 1;
+      secRanges6.push({ sec: sec, start: secStart, end: secEnd });
     });
     var btColCount = btHdrs.length;
     var btWidths = [{ wch: 28 }];
@@ -2334,28 +2474,50 @@
       centerCols: btCenter,
       wrapCols: { 0: true },
       wrapHints: { 0: 22 },
-      meanCol: btColCount - 1
+      meanCol: btColCount - 1,
+      sectionRows: secRanges6.map(function(r) { return 5 + r.start; })
+    });
+    secRanges6.forEach(function(range) {
+      var hr = 5 + range.start;
+      var dr = hr + 1;
+      var er = 5 + range.end;
+      XLSX.utils.sheet_add_aoa(ws6, [[range.sec.title.toUpperCase()].concat(typeKeys.map(function() { return ""; })).concat([""])], { origin: { r: hr, c: 0 } });
+      var str = er + 1;
+      var lastColLetter = XLSX.utils.encode_cell({ r: dr, c: btColCount - 1 }).replace(/\d+$/, "");
+      var firstDataCol = XLSX.utils.encode_cell({ r: dr, c: 1 }).replace(/\d+$/, "");
+      var dataRowNum = dr + 1;
+      var formula = "AVERAGE(" + firstDataCol + dataRowNum + ":" + lastColLetter + dataRowNum + ")";
+      var subtotalRow = [""].concat(typeKeys.map(function() { return ""; })).concat([null]);
+      XLSX.utils.sheet_add_aoa(ws6, [["Section Avg", "", "", "", ""]], { origin: { r: str, c: 0 } });
+      /* Fill each cell of subtotal row */
+      for (var sc6 = 0; sc6 < btColCount; sc6++) {
+        setStyle(ws6, str, sc6, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", center: true, sz: 10 }));
+      }
+      setStyle(ws6, str, 0, baseCellStyle({ bold: true, fill: GOLD_FILL, fontColor: "FFFFFF", wrap: true, sz: 10 }));
     });
 
     /* ---- Sheet 7: Demographics ---- */
     var rowsDemo = [];
+    rowsDemo.push(["SEX", "", "", ""]);
     var sexC = {};
     r.forEach(function(res) {
       var s = res.respondent_sex || "Unknown";
       sexC[s] = (sexC[s] || 0) + 1;
     });
+    var n = r.length;
+    Object.keys(sexC).sort().forEach(function(k) {
+      rowsDemo.push(["Sex", k, sexC[k], n ? sexC[k] / n : 0]);
+    });
+    rowsDemo.push(["USER TYPE", "", "", ""]);
     var typC = {};
     r.forEach(function(res) {
       var t = res.respondent_user_type || "Unknown";
       typC[t] = (typC[t] || 0) + 1;
     });
-    var n = r.length;
-    Object.keys(sexC).sort().forEach(function(k) {
-      rowsDemo.push(["Sex", k, sexC[k], n ? sexC[k] / n : 0]);
-    });
     Object.keys(typC).sort().forEach(function(k) {
       rowsDemo.push(["User Type", k, typC[k], n ? typC[k] / n : 0]);
     });
+    rowsDemo.push(["AGE STATISTICS", "", "", ""]);
     var ages = [];
     r.forEach(function(res) {
       if (res.respondent_age !== "" && res.respondent_age != null && !isNaN(Number(res.respondent_age))) ages.push(Number(res.respondent_age));
@@ -2371,7 +2533,8 @@
       wrapHints: { 0: 16, 1: 20 },
       centerCols: { 2: true, 3: true },
       percentCols: { 3: true },
-      numericCols: { 2: "0.0" }
+      numericCols: { 2: "0.0" },
+      sectionRows: [5, 6 + Object.keys(sexC).length, 7 + Object.keys(sexC).length + Object.keys(typC).length]
     });
 
     /* ---- Build workbook ---- */
