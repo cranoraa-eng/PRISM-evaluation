@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PRISM — Research Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL  = "https://qwkkpmxpmugkrlspbiri.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3a2twbXhwbXVna3Jsc3BiaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NjQwMDEsImV4cCI6MjA5OTM0MDAwMX0.HT3V9wXTEm0ehxoqgChUEDrqetPKwnB1fanGwHWtDdI";
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // Simple password gate — change this to your own password
+  const ADMIN_PASSWORD = "prism2025";
+</script>
+</head>
+<body>
+<div id="admin-root"></div>
+<style>
+  :root {
+    --ink: #16233D;
+    --ink-2: #2E4066;
+    --gold: #A9813E;
+    --gold-soft: #D9C08F;
+    --line: #C9D2E0;
+    --paper: #EEF1F6;
+    --surface: #FFFFFF;
+    --muted: #5B6B85;
+    --success: #3F7A5C;
+    --error: #B3432E;
+    --radius: 10px;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif { font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; }
+
+  /* login */
+  .login-wrap {
+    max-width: 380px;
+    margin: 80px auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px -16px rgba(22,35,61,0.18);
+    padding: 40px 32px;
+    text-align: center;
+  }
+  .login-wrap h1 { font-size: 22px; margin: 0 0 6px; }
+  .login-wrap p { font-size: 13.5px; color: var(--muted); margin: 0 0 24px; }
+  .login-wrap input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    outline: none;
+  }
+  .login-wrap input:focus { border-color: var(--ink-2); }
+  .login-wrap .err { color: var(--error); font-size: 13px; margin-bottom: 12px; display: none; }
+  .login-wrap button {
+    all: unset;
+    cursor: pointer;
+    width: 100%;
+    padding: 12px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .login-wrap button:hover { background: var(--ink-2); }
+
+  /* shell */
+  .shell {
+    max-width: 1100px;
+    margin: 24px auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(22,35,61,0.04), 0 12px 32px -16px rgba(22,35,61,0.18);
+    overflow: hidden;
+    position: relative;
+  }
+  .shell::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--ink) 0%, var(--ink-2) 55%, var(--gold) 100%);
+  }
+  .masthead {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .masthead h1 { font-size: 22px; margin: 0; }
+  .masthead .sub { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+  .masthead .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn {
+    all: unset;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+  }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { background: var(--ink-2); }
+  .btn-ghost { color: var(--ink-2); border: 1.5px solid var(--line); background: var(--surface); }
+  .btn-ghost:hover { border-color: var(--ink-2); }
+  .btn-danger { background: var(--error); color: #fff; }
+  .btn-danger:hover { opacity: 0.85; }
+
+  /* tabs */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    padding: 0 32px;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .tab {
+    all: unset;
+    cursor: pointer;
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--ink-2); }
+  .tab.active { color: var(--ink); border-bottom-color: var(--gold); }
+
+  /* panels */
+  .panel { display: none; padding: 28px 32px; }
+  .panel.active { display: block; }
+
+  /* stat cards */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .stat-card .label { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .stat-card .value { font-size: 28px; font-weight: 700; color: var(--ink); margin-top: 4px; }
+  .stat-card .note { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* tables */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 24px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  th {
+    background: var(--paper);
+    font-weight: 700;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+    position: sticky;
+    top: 0;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(22,35,61,0.02); }
+
+  /* mean bar */
+  .mean-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 200px;
+  }
+  .mean-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .mean-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  .mean-val {
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 32px;
+    text-align: right;
+  }
+
+  /* interpretation badge */
+  .interp {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .interp.excellent { background: #E8F5E9; color: #2E7D32; }
+  .interp.good { background: #E3F2FD; color: #1565C0; }
+  .interp.fair { background: #FFF8E1; color: #F57F17; }
+  .interp.poor { background: #FBEAE5; color: var(--error); }
+
+  /* section heading */
+  .section-heading {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 28px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--gold);
+  }
+  .section-heading:first-child { margin-top: 0; }
+
+  /* loading */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--line);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* export dropdown */
+  .export-menu {
+    position: relative;
+    display: inline-block;
+  }
+  .export-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px -8px rgba(22,35,61,0.2);
+    z-index: 10;
+    min-width: 160px;
+  }
+  .export-dropdown.show { display: block; }
+  .export-dropdown button {
+    all: unset;
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .export-dropdown button:hover { background: var(--paper); }
+
+  /* responsive */
+  @media (max-width: 640px) {
+    .panel { padding: 20px 16px; }
+    .masthead { padding: 20px 16px; }
+    .tabs { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+<div id="admin-root"></div>
+<script>
+(function() {
+  "use strict";
+
+  var root = document.getElementById("admin-root");
+
+  var STATE = {
+    loggedIn: false,
+    loading: true,
+    responses: [],
+    activeTab: "overview",
+    exportOpen: false
+  };
+
+  var SECTIONS = [
+    {
+      key: "usability",
+      title: "A. Usability",
+      items: [
+        "PRISM is easy to access and use for my school-related tasks.",
+        "I can easily understand how to navigate through PRISM.",
+        "The arrangement of menus, buttons, and features in PRISM is clear and organized.",
+        "The interface design of PRISM is simple and user-friendly.",
+        "The labels, icons, and controls in PRISM are easy to understand.",
+        "I can quickly learn how to use PRISM without requiring extensive assistance.",
+        "I can easily find the information and features I need in PRISM.",
+        "The information displayed in PRISM is presented clearly and is easy to understand.",
+        "PRISM can be accessed and used effectively on different devices such as computers, tablets, and smartphones.",
+        "PRISM allows me to complete my tasks efficiently.",
+        "The different modules of PRISM provide a consistent user experience.",
+        "Overall, PRISM provides a convenient and user-friendly experience."
+      ]
+    },
+    {
+      key: "func_general",
+      title: "B1. General System Functions",
+      items: [
+        "PRISM's features and functions operate properly.",
+        "PRISM performs the functions expected from a school management system.",
+        "PRISM provides the necessary tools to support school operations.",
+        "PRISM responds properly when users interact with its features.",
+        "PRISM minimizes errors and technical problems during use."
+      ]
+    },
+    {
+      key: "func_records",
+      title: "B2. Records Management",
+      items: [
+        "PRISM effectively organizes and manages student records.",
+        "PRISM allows authorized users to access required records efficiently.",
+        "The records stored in PRISM are accurate and reliable.",
+        "PRISM helps reduce difficulties associated with manual record management."
+      ]
+    },
+    {
+      key: "func_enrollment",
+      title: "B3. Enrollment Management",
+      items: [
+        "PRISM provides an effective process for managing student enrollment information.",
+        "PRISM helps organize enrollment applications and related documents."
+      ]
+    },
+    {
+      key: "func_attendance",
+      title: "B4. Attendance and Grade Management",
+      items: [
+        "PRISM effectively supports attendance monitoring and record keeping.",
+        "PRISM helps teachers manage student grades efficiently.",
+        "PRISM supports accurate computation and management of academic records.",
+        "PRISM helps generate academic reports such as report cards efficiently."
+      ]
+    },
+    {
+      key: "func_communication",
+      title: "B5. Communication and Learning Features",
+      items: [
+        "PRISM improves access to school announcements and important updates.",
+        "The messaging and communication features of PRISM help users exchange information effectively.",
+        "PRISM makes learning materials easier to access and manage.",
+        "PRISM provides useful notifications regarding school activities, assignments, attendance, and academic information."
+      ]
+    },
+    {
+      key: "func_security",
+      title: "B6. Security and User Management",
+      items: [
+        "PRISM provides appropriate access based on user roles (administrator, teacher, student, and parent).",
+        "PRISM protects school information from unauthorized access."
+      ]
+    },
+    {
+      key: "sat_content",
+      title: "C1. Content",
+      items: [
+        "PRISM provides the information that I need for my school-related activities.",
+        "The information provided by PRISM is relevant and useful."
+      ]
+    },
+    {
+      key: "sat_accuracy",
+      title: "C2. Accuracy",
+      items: [
+        "The information and records provided by PRISM are accurate.",
+        "PRISM provides reliable information for decision-making and monitoring."
+      ]
+    },
+    {
+      key: "sat_format",
+      title: "C3. Format",
+      items: [
+        "The information displayed in PRISM is organized and easy to interpret.",
+        "The design and presentation of PRISM information are appropriate for users."
+      ]
+    },
+    {
+      key: "sat_timeliness",
+      title: "C4. Timeliness",
+      items: [
+        "PRISM provides updated information when needed.",
+        "PRISM allows users to receive announcements and notifications on time."
+      ]
+    },
+    {
+      key: "sat_overall",
+      title: "C5. Overall Satisfaction",
+      items: [
+        "PRISM meets my expectations as a school management portal.",
+        "I am satisfied with the overall performance of PRISM.",
+        "I would recommend the continued use of PRISM in school operations."
+      ]
+    }
+  ];
+
+  // flatten items to get itemNum -> text mapping (1-indexed in document order)
+  var ITEM_MAP = {};
+  var idx = 1;
+  SECTIONS.forEach(function(sec) {
+    sec.items.forEach(function(text) {
+      ITEM_MAP[idx] = text;
+      idx++;
+    });
+  });
+  var TOTAL_ITEMS = idx - 1; // 44
+
+  /* helpers */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  function interpret(mean) {
+    if (mean >= 3.5) return { label: "Excellent", cls: "excellent" };
+    if (mean >= 2.5) return { label: "Good", cls: "good" };
+    if (mean >= 1.5) return { label: "Fair", cls: "fair" };
+    return { label: "Poor", cls: "poor" };
+  }
+
+  function barColor(mean) {
+    if (mean >= 3.5) return "var(--success)";
+    if (mean >= 2.5) return "var(--ink-2)";
+    if (mean >= 1.5) return "var(--gold)";
+    return "var(--error)";
+  }
+
+  function mean(arr) {
+    if (!arr.length) return 0;
+    return arr.reduce(function(a, b) { return a + b; }, 0) / arr.length;
+  }
+
+  function calcSectionMean(responses, section, itemStartNum) {
+    var vals = [];
+    responses.forEach(function(r) {
+      section.items.forEach(function(_, i) {
+        var v = (r.answers || {})[String(itemStartNum + i)];
+        if (v) vals.push(v);
+      });
+    });
+    return mean(vals);
+  }
+
+  function calcItemMean(responses, itemNum) {
+    var vals = [];
+    responses.forEach(function(r) {
+      var v = (r.answers || {})[String(itemNum)];
+      if (v) vals.push(v);
+    });
+    return mean(vals);
+  }
+
+  /* render login */
+  function renderLogin() {
+    return (
+      '<div class="login-wrap">' +
+        '<h1 class="serif">PRISM Dashboard</h1>' +
+        '<p>Enter the researcher password to access survey results.</p>' +
+        '<div class="err" id="login-err">Incorrect password. Try again.</div>' +
+        '<input type="password" id="login-pass" placeholder="Password" />' +
+        '<button id="login-btn">Access Dashboard</button>' +
+      '</div>'
+    );
+  }
+
+  /* render main dashboard */
+  function renderDashboard() {
+    var r = STATE.responses;
+    var tabs = [
+      { id: "overview", label: "Overview" },
+      { id: "means", label: "Mean Scores" },
+      { id: "responses", label: "All Responses" },
+      { id: "demographics", label: "Demographics" }
+    ];
+    var html = '<div class="shell">';
+    html += '<div class="masthead"><div><h1 class="serif">PRISM Evaluation Dashboard</h1><p class="sub">Portal for Records, Information, and School Management</p></div>';
+    html += '<div class="actions">';
+    html += '<div class="export-menu"><button class="btn btn-ghost" id="export-toggle">&#8681; Export</button>';
+    html += '<div class="export-dropdown" id="export-dropdown"><button id="export-csv">Export CSV</button><button id="export-json">Export JSON</button></div></div>';
+    html += '<button class="btn btn-ghost" id="refresh-btn">&#8635; Refresh</button>';
+    html += '<button class="btn btn-danger" id="logout-btn">Logout</button>';
+    html += '</div></div>';
+
+    // tabs
+    html += '<div class="tabs">';
+    tabs.forEach(function(t) {
+      html += '<button class="tab' + (STATE.activeTab === t.id ? " active" : "") + '" data-tab="' + t.id + '">' + t.label + '</button>';
+    });
+    html += '</div>';
+
+    // panels
+    if (STATE.activeTab === "overview") html += renderOverview(r);
+    else if (STATE.activeTab === "means") html += renderMeans(r);
+    else if (STATE.activeTab === "responses") html += renderResponses(r);
+    else if (STATE.activeTab === "demographics") html += renderDemographics(r);
+
+    html += '</div>';
+    return html;
+  }
+
+  /* ---- OVERVIEW ---- */
+  function renderOverview(r) {
+    var html = '<div class="panel active">';
+    var n = r.length;
+
+    // compute overall mean
+    var allVals = [];
+    r.forEach(function(res) {
+      for (var k = 1; k <= TOTAL_ITEMS; k++) {
+        var v = (res.answers || {})[String(k)];
+        if (v) allVals.push(v);
+      }
+    });
+    var overallMean = mean(allVals);
+
+    // count unique user types
+    var userTypes = {};
+    r.forEach(function(res) {
+      var t = res.respondent_user_type || "Unknown";
+      userTypes[t] = (userTypes[t] || 0) + 1;
+    });
+
+    html += '<div class="stat-grid">';
+    html += '<div class="stat-card"><div class="label">Total Responses</div><div class="value">' + n + '</div><div class="note">submissions collected</div></div>';
+    html += '<div class="stat-card"><div class="label">Overall Mean</div><div class="value">' + overallMean.toFixed(2) + '</div><div class="note">' + interpret(overallMean).label + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Items Rated</div><div class="value">' + TOTAL_ITEMS + '</div><div class="note">statements per respondent</div></div>';
+    html += '<div class="stat-card"><div class="label">User Types</div><div class="value">' + Object.keys(userTypes).length + '</div><div class="note">categories represented</div></div>';
+    html += '</div>';
+
+    // section summary table
+    html += '<div class="section-heading">Section Mean Summary</div>';
+    html += '<div class="table-wrap"><table><thead><tr><th>Section</th><th>Items</th><th>Mean</th><th>Interpretation</th></tr></thead><tbody>';
+    var itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      var m = calcSectionMean(r, sec, itemNum);
+      var interp = interpret(m);
+      html += '<tr>';
+      html += '<td>' + esc(sec.title) + '</td>';
+      html += '<td>' + sec.items.length + '</td>';
+      html += '<td><div class="mean-bar-wrap"><div class="mean-bar"><div class="mean-bar-fill" style="width:' + (m / 4 * 100) + '%;background:' + barColor(m) + '"></div></div><span class="mean-val">' + m.toFixed(2) + '</span></div></td>';
+      html += '<td><span class="interp ' + interp.cls + '">' + interp.label + '</span></td>';
+      html += '</tr>';
+      itemNum += sec.items.length;
+    });
+    html += '</tbody></table></div>';
+
+    html += '</div>';
+    return html;
+  }
+
+  /* ---- MEAN SCORES ---- */
+  function renderMeans(r) {
+    var html = '<div class="panel active">';
+    html += '<p style="font-size:13px;color:var(--muted);margin:0 0 18px;">Mean score for each statement across all ' + r.length + ' responses.</p>';
+
+    var itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      html += '<div class="section-heading">' + esc(sec.title) + '</div>';
+      html += '<div class="table-wrap"><table><thead><tr><th style="width:40px">#</th><th>Statement</th><th style="width:240px">Mean</th><th>Score</th><th>Interpretation</th></tr></thead><tbody>';
+      sec.items.forEach(function(text) {
+        var m = calcItemMean(r, itemNum);
+        var interp = interpret(m);
+        html += '<tr>';
+        html += '<td style="font-weight:700;color:var(--gold)">' + itemNum + '</td>';
+        html += '<td>' + esc(text) + '</td>';
+        html += '<td><div class="mean-bar-wrap"><div class="mean-bar"><div class="mean-bar-fill" style="width:' + (m / 4 * 100) + '%;background:' + barColor(m) + '"></div></div></div></td>';
+        html += '<td style="font-weight:700">' + m.toFixed(2) + '</td>';
+        html += '<td><span class="interp ' + interp.cls + '">' + interp.label + '</span></td>';
+        html += '</tr>';
+        itemNum++;
+      });
+      html += '</tbody></table></div>';
+    });
+
+    // interpretation guide
+    html += '<div class="section-heading">Interpretation Guide</div>';
+    html += '<div class="table-wrap"><table><thead><tr><th>Mean Range</th><th>Interpretation</th><th>Description</th></tr></thead><tbody>';
+    html += '<tr><td><span class="interp excellent">3.50 – 4.00</span></td><td><b>Excellent</b></td><td>Strongly Agree — respondents overwhelmingly agree</td></tr>';
+    html += '<tr><td><span class="interp good">2.50 – 3.49</span></td><td><b>Good</b></td><td>Agree — respondents generally agree</td></tr>';
+    html += '<tr><td><span class="interp fair">1.50 – 2.49</span></td><td><b>Fair</b></td><td>Disagree — respondents tend to disagree</td></tr>';
+    html += '<tr><td><span class="interp poor">1.00 – 1.49</span></td><td><b>Poor</b></td><td>Strongly Disagree — respondents strongly disagree</td></tr>';
+    html += '</tbody></table></div>';
+
+    html += '</div>';
+    return html;
+  }
+
+  /* ---- ALL RESPONSES ---- */
+  function renderResponses(r) {
+    var html = '<div class="panel active">';
+    if (!r.length) {
+      html += '<div class="loading">No responses yet.</div>';
+      html += '</div>';
+      return html;
+    }
+
+    html += '<p style="font-size:13px;color:var(--muted);margin:0 0 14px;">Showing all ' + r.length + ' submissions. Scroll horizontally to see all columns.</p>';
+
+    html += '<div class="table-wrap"><table><thead><tr>';
+    html += '<th>#</th><th>Reference</th><th>Submitted</th><th>Name</th><th>Age</th><th>Sex</th><th>User Type</th><th>Duration</th>';
+    for (var k = 1; k <= TOTAL_ITEMS; k++) {
+      html += '<th>Q' + k + '</th>';
+    }
+    html += '<th>Mean</th><th>Comments</th></tr></thead><tbody>';
+
+    r.forEach(function(res, i) {
+      var vals = [];
+      for (var k = 1; k <= TOTAL_ITEMS; k++) {
+        var v = (res.answers || {})[String(k)];
+        if (v) vals.push(v);
+      }
+      var m = mean(vals);
+      var interp = interpret(m);
+      var dt = res.submitted_at ? new Date(res.submitted_at).toLocaleDateString("en-US", { year:"numeric", month:"short", day:"numeric" }) : "—";
+
+      html += '<tr>';
+      html += '<td>' + (i + 1) + '</td>';
+      html += '<td style="font-family:monospace;font-size:12px">' + (res.id ? res.id.slice(0, 8).toUpperCase() : "—") + '</td>';
+      html += '<td>' + dt + '</td>';
+      html += '<td>' + esc(res.respondent_name || "—") + '</td>';
+      html += '<td>' + (res.respondent_age || "—") + '</td>';
+      html += '<td>' + esc(res.respondent_sex || "—") + '</td>';
+      html += '<td>' + esc(res.respondent_user_type || "—") + '</td>';
+      html += '<td>' + esc(res.duration_of_use || "—") + '</td>';
+      for (var k2 = 1; k2 <= TOTAL_ITEMS; k2++) {
+        var v2 = (res.answers || {})[String(k2)];
+        html += '<td style="text-align:center">' + (v2 || "—") + '</td>';
+      }
+      html += '<td style="font-weight:700"><span class="interp ' + interp.cls + '">' + m.toFixed(2) + '</span></td>';
+      html += '<td style="max-width:180px;white-space:normal;font-size:12px">' + esc(res.comments || "—") + '</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    html += '</div>';
+    return html;
+  }
+
+  /* ---- DEMOGRAPHICS ---- */
+  function renderDemographics(r) {
+    var html = '<div class="panel active">';
+    var n = r.length;
+
+    // sex breakdown
+    var sexCounts = {};
+    r.forEach(function(res) {
+      var s = res.respondent_sex || "Unknown";
+      sexCounts[s] = (sexCounts[s] || 0) + 1;
+    });
+    html += '<div class="section-heading">Sex Distribution</div>';
+    html += '<div class="table-wrap"><table><thead><tr><th>Sex</th><th>Count</th><th>Percentage</th></tr></thead><tbody>';
+    Object.keys(sexCounts).forEach(function(k) {
+      var pct = n ? (sexCounts[k] / n * 100).toFixed(1) : 0;
+      html += '<tr><td>' + esc(k) + '</td><td>' + sexCounts[k] + '</td><td>' + pct + '%</td></tr>';
+    });
+    html += '</tbody></table></div>';
+
+    // user type breakdown
+    var typeCounts = {};
+    r.forEach(function(res) {
+      var t = res.respondent_user_type || "Unknown";
+      typeCounts[t] = (typeCounts[t] || 0) + 1;
+    });
+    html += '<div class="section-heading">User Type Distribution</div>';
+    html += '<div class="table-wrap"><table><thead><tr><th>User Type</th><th>Count</th><th>Percentage</th></tr></thead><tbody>';
+    Object.keys(typeCounts).forEach(function(k) {
+      var pct = n ? (typeCounts[k] / n * 100).toFixed(1) : 0;
+      html += '<tr><td>' + esc(k) + '</td><td>' + typeCounts[k] + '</td><td>' + pct + '%</td></tr>';
+    });
+    html += '</tbody></table></div>';
+
+    // duration breakdown
+    var durCounts = {};
+    r.forEach(function(res) {
+      var d = res.duration_of_use || "Unknown";
+      durCounts[d] = (durCounts[d] || 0) + 1;
+    });
+    html += '<div class="section-heading">Duration of Use</div>';
+    html += '<div class="table-wrap"><table><thead><tr><th>Duration</th><th>Count</th><th>Percentage</th></tr></thead><tbody>';
+    Object.keys(durCounts).forEach(function(k) {
+      var pct = n ? (durCounts[k] / n * 100).toFixed(1) : 0;
+      html += '<tr><td>' + esc(k) + '</td><td>' + durCounts[k] + '</td><td>' + pct + '%</td></tr>';
+    });
+    html += '</tbody></table></div>';
+
+    // age stats
+    var ages = [];
+    r.forEach(function(res) {
+      if (res.respondent_age) ages.push(Number(res.respondent_age));
+    });
+    if (ages.length) {
+      var minAge = Math.min.apply(null, ages);
+      var maxAge = Math.max.apply(null, ages);
+      var avgAge = mean(ages);
+      html += '<div class="section-heading">Age Statistics</div>';
+      html += '<div class="stat-grid">';
+      html += '<div class="stat-card"><div class="label">Lowest Age</div><div class="value">' + minAge + '</div></div>';
+      html += '<div class="stat-card"><div class="label">Highest Age</div><div class="value">' + maxAge + '</div></div>';
+      html += '<div class="stat-card"><div class="label">Average Age</div><div class="value">' + avgAge.toFixed(1) + '</div></div>';
+      html += '<div class="stat-card"><div class="label">Respondents with Age</div><div class="value">' + ages.length + ' / ' + n + '</div></div>';
+      html += '</div>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  /* main render */
+  function render() {
+    if (!STATE.loggedIn) {
+      root.innerHTML = renderLogin();
+      attachLoginHandlers();
+      return;
+    }
+    if (STATE.loading) {
+      root.innerHTML = '<div class="loading"><div class="spinner"></div>Loading responses from Supabase...</div>';
+      return;
+    }
+    root.innerHTML = renderDashboard();
+    attachDashboardHandlers();
+  }
+
+  /* login handlers */
+  function attachLoginHandlers() {
+    var btn = document.getElementById("login-btn");
+    var pass = document.getElementById("login-pass");
+    var err = document.getElementById("login-err");
+    if (btn) btn.addEventListener("click", function() {
+      if (pass.value === ADMIN_PASSWORD) {
+        STATE.loggedIn = true;
+        loadResponses();
+      } else {
+        err.style.display = "block";
+      }
+    });
+    if (pass) pass.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") btn.click();
+    });
+  }
+
+  /* dashboard handlers */
+  function attachDashboardHandlers() {
+    // tabs
+    document.querySelectorAll(".tab").forEach(function(t) {
+      t.addEventListener("click", function() {
+        STATE.activeTab = t.getAttribute("data-tab");
+        render();
+      });
+    });
+
+    // refresh
+    var refreshBtn = document.getElementById("refresh-btn");
+    if (refreshBtn) refreshBtn.addEventListener("click", function() { loadResponses(); });
+
+    // logout
+    var logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) logoutBtn.addEventListener("click", function() {
+      STATE.loggedIn = false;
+      STATE.responses = [];
+      render();
+    });
+
+    // export toggle
+    var exportToggle = document.getElementById("export-toggle");
+    var exportDropdown = document.getElementById("export-dropdown");
+    if (exportToggle && exportDropdown) {
+      exportToggle.addEventListener("click", function() {
+        exportDropdown.classList.toggle("show");
+      });
+      document.addEventListener("click", function(e) {
+        if (!exportToggle.contains(e.target) && !exportDropdown.contains(e.target)) {
+          exportDropdown.classList.remove("show");
+        }
+      });
+    }
+
+    // export csv
+    var exportCsv = document.getElementById("export-csv");
+    if (exportCsv) exportCsv.addEventListener("click", function() { exportCSV(); });
+
+    // export json
+    var exportJson = document.getElementById("export-json");
+    if (exportJson) exportJson.addEventListener("click", function() { exportJSON(); });
+  }
+
+  /* data loading */
+  async function loadResponses() {
+    STATE.loading = true;
+    render();
+    try {
+      var { data, error } = await supabaseClient
+        .from("responses")
+        .select("*")
+        .order("submitted_at", { ascending: false });
+      if (error) throw error;
+      STATE.responses = data || [];
+    } catch (err) {
+      console.error("Load error:", err);
+      STATE.responses = [];
+    }
+    STATE.loading = false;
+    render();
+  }
+
+  /* export CSV */
+  function exportCSV() {
+    if (!STATE.responses.length) return;
+    var headers = ["Reference","Submitted","Name","Age","Sex","User Type","Duration"];
+    for (var k = 1; k <= TOTAL_ITEMS; k++) headers.push("Q" + k);
+    headers.push("Mean","Comments");
+
+    var rows = [headers.join(",")];
+    STATE.responses.forEach(function(res) {
+      var vals = [];
+      for (var k = 1; k <= TOTAL_ITEMS; k++) {
+        var v = (res.answers || {})[String(k)];
+        vals.push(v || "");
+      }
+      var m = mean(vals);
+      var ref = res.id ? res.id.slice(0, 8).toUpperCase() : "";
+      var dt = res.submitted_at || "";
+      var line = [
+        ref, dt, res.respondent_name || "", res.respondent_age || "",
+        res.respondent_sex || "", res.respondent_user_type || "", res.duration_of_use || ""
+      ].concat(vals).concat([m.toFixed(2), res.comments || ""]);
+      rows.push(line.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","));
+    });
+
+    var blob = new Blob([rows.join("\n")], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "prism_responses_" + new Date().toISOString().slice(0,10) + ".csv";
+    a.click();
+  }
+
+  /* export JSON */
+  function exportJSON() {
+    if (!STATE.responses.length) return;
+    var blob = new Blob([JSON.stringify(STATE.responses, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "prism_responses_" + new Date().toISOString().slice(0,10) + ".json";
+    a.click();
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

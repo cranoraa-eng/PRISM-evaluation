@@ -22,7 +22,14 @@ create policy "Allow anonymous inserts"
   to anon
   with check (true);
 
--- Optional: allow authenticated reads (for a future admin dashboard)
+-- Allow anonymous reads (for the admin dashboard — password-protected client-side)
+create policy "Allow anonymous reads"
+  on responses
+  for select
+  to anon
+  using (true);
+
+-- Allow authenticated reads (if using Supabase Auth)
 create policy "Allow authenticated reads"
   on responses
   for select
