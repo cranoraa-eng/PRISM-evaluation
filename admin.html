@@ -315,13 +315,48 @@
     margin-bottom: 28px;
   }
   .chart-card {
-    background: var(--paper);
+    background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 18px;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(22,35,61,0.04);
+    transition: box-shadow 0.2s ease;
   }
-  .chart-card h3 { font-size: 13px; font-weight: 700; margin: 0 0 12px; color: var(--ink); }
-  .chart-card canvas { width: 100% !important; }
+  .chart-card:hover { box-shadow: 0 4px 16px rgba(22,35,61,0.08); }
+  .chart-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .chart-card .chart-subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+  .chart-card canvas { width: 100% !important; max-height: 320px; }
+  .chart-card-wide { grid-column: 1 / -1; }
+  .chart-summary {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .chart-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .chart-summary-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
 
   @media (max-width: 640px) {
     .panel { padding: 16px 14px; }
@@ -655,11 +690,29 @@
   /* ---- CHARTS ---- */
   function renderCharts(r) {
     var html = '<div class="panel active">';
+    var n = r.length;
+
+    var overallAll = [];
+    r.forEach(function(res) {
+      for (var k = 1; k <= TOTAL_ITEMS; k++) {
+        var v = (res.answers || {})[String(k)];
+        if (v) overallAll.push(v);
+      }
+    });
+    var overallMean = mean(overallAll);
+
+    html += '<div class="stat-grid" style="margin-bottom:20px;">';
+    html += '<div class="stat-card"><div class="label">Responses</div><div class="value">' + n + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Overall Mean</div><div class="value">' + overallMean.toFixed(2) + '</div><div class="note">' + interpret(overallMean).label + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Sections</div><div class="value">' + SECTIONS.length + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Statements</div><div class="value">' + TOTAL_ITEMS + '</div></div>';
+    html += '</div>';
+
     html += '<div class="chart-grid">';
-    html += '<div class="chart-card"><h3>Section Mean Scores (Radar)</h3><canvas id="chart-radar"></canvas></div>';
-    html += '<div class="chart-card"><h3>User Type Distribution</h3><canvas id="chart-type"></canvas></div>';
-    html += '<div class="chart-card"><h3>Sex Distribution</h3><canvas id="chart-sex"></canvas></div>';
-    html += '<div class="chart-card"><h3>Section Means (Bar)</h3><canvas id="chart-bar"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><h3>Section Mean Scores</h3><p class="chart-subtitle">Horizontal bar chart comparing all sections</p><canvas id="chart-bar"></canvas></div>';
+    html += '<div class="chart-card"><h3>Section Radar</h3><p class="chart-subtitle">Radar view of section performance</p><canvas id="chart-radar"></canvas></div>';
+    html += '<div class="chart-card"><h3>User Type Distribution</h3><p class="chart-subtitle">Breakdown of respondents by role</p><canvas id="chart-type"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown of respondents</p><canvas id="chart-sex"></canvas></div>';
     html += '</div>';
     html += '</div>';
     return html;
@@ -678,6 +731,58 @@
       itemNum += sec.items.length;
     });
 
+    var barColors = [
+      "rgba(46,64,102,0.85)", "rgba(169,129,62,0.85)", "rgba(63,122,92,0.85)",
+      "rgba(179,67,46,0.85)", "rgba(91,107,133,0.85)", "rgba(217,192,143,0.85)",
+      "rgba(21,101,192,0.85)", "rgba(245,127,23,0.85)", "rgba(123,31,162,0.85)",
+      "rgba(0,131,143,0.85)", "rgba(56,142,60,0.85)", "rgba(230,74,25,0.85)"
+    ];
+
+    var barCtx = document.getElementById("chart-bar");
+    if (barCtx) {
+      STATE.charts.bar = new Chart(barCtx, {
+        type: "bar",
+        data: {
+          labels: sectionLabels,
+          datasets: [{
+            label: "Mean Score",
+            data: sectionMeans,
+            backgroundColor: barColors.slice(0, sectionLabels.length),
+            borderColor: barColors.slice(0, sectionLabels.length).map(function(c) { return c.replace("0.85", "1"); }),
+            borderWidth: 1,
+            borderRadius: 6,
+            barPercentage: 0.7
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { min: 0, max: 4, grid: { color: "rgba(22,35,61,0.06)" }, ticks: { font: { size: 11 } } },
+            y: { grid: { display: false }, ticks: { font: { size: 11, weight: "600" } } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: "rgba(22,35,61,0.9)",
+              titleFont: { size: 12, weight: "700" },
+              bodyFont: { size: 12 },
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(ctx) {
+                  var interp = interpret(ctx.raw);
+                  return "Mean: " + ctx.raw.toFixed(2) + " (" + interp.label + ")";
+                }
+              }
+            }
+          }
+        }
+      });
+      barCtx.parentElement.style.height = (sectionLabels.length * 48 + 60) + "px";
+    }
+
     var radarCtx = document.getElementById("chart-radar");
     if (radarCtx) {
       STATE.charts.radar = new Chart(radarCtx, {
@@ -687,15 +792,45 @@
           datasets: [{
             label: "Mean Score",
             data: sectionMeans,
-            backgroundColor: "rgba(46,64,102,0.15)",
+            backgroundColor: "rgba(46,64,102,0.12)",
             borderColor: "#2E4066",
+            borderWidth: 2,
             pointBackgroundColor: "#A9813E",
-            pointRadius: 4
+            pointBorderColor: "#fff",
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
           }]
         },
         options: {
-          scales: { r: { min: 0, max: 4, ticks: { stepSize: 1 } } },
-          plugins: { legend: { display: false } }
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            r: {
+              min: 0,
+              max: 4,
+              ticks: { stepSize: 1, font: { size: 10 }, backdropColor: "transparent" },
+              pointLabels: { font: { size: 10, weight: "600" } },
+              grid: { color: "rgba(22,35,61,0.08)" },
+              angleLines: { color: "rgba(22,35,61,0.08)" }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: "rgba(22,35,61,0.9)",
+              titleFont: { size: 12, weight: "700" },
+              bodyFont: { size: 12 },
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(ctx) {
+                  var interp = interpret(ctx.raw);
+                  return "Mean: " + ctx.raw.toFixed(2) + " (" + interp.label + ")";
+                }
+              }
+            }
+          }
         }
       });
     }
@@ -711,9 +846,36 @@
         type: "doughnut",
         data: {
           labels: Object.keys(typeCounts),
-          datasets: [{ data: Object.values(typeCounts), backgroundColor: COLORS }]
+          datasets: [{
+            data: Object.values(typeCounts),
+            backgroundColor: COLORS.slice(0, Object.keys(typeCounts).length),
+            borderColor: "#fff",
+            borderWidth: 3,
+            hoverOffset: 8
+          }]
         },
-        options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } } } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          cutout: "55%",
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 12, padding: 14, font: { size: 11 } } },
+            tooltip: {
+              backgroundColor: "rgba(22,35,61,0.9)",
+              titleFont: { size: 12, weight: "700" },
+              bodyFont: { size: 12 },
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(ctx) {
+                  var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
+                  var pct = ((ctx.raw / total) * 100).toFixed(1);
+                  return ctx.label + ": " + ctx.raw + " (" + pct + "%)";
+                }
+              }
+            }
+          }
+        }
       });
     }
 
@@ -724,32 +886,45 @@
     });
     var sexCtx = document.getElementById("chart-sex");
     if (sexCtx) {
+      var sexColors = ["#2E4066","#A9813E","#3F7A5C","#5B6B85","#D9C08F"];
       STATE.charts.sex = new Chart(sexCtx, {
-        type: "doughnut",
-        data: {
-          labels: Object.keys(sexCounts),
-          datasets: [{ data: Object.values(sexCounts), backgroundColor: ["#2E4066","#A9813E","#3F7A5C","#5B6B85"] }]
-        },
-        options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } } } }
-      });
-    }
-
-    var barCtx = document.getElementById("chart-bar");
-    if (barCtx) {
-      STATE.charts.bar = new Chart(barCtx, {
         type: "bar",
         data: {
-          labels: sectionLabels,
+          labels: Object.keys(sexCounts),
           datasets: [{
-            label: "Mean",
-            data: sectionMeans,
-            backgroundColor: COLORS.slice(0, sectionLabels.length)
+            label: "Count",
+            data: Object.values(sexCounts),
+            backgroundColor: sexColors.slice(0, Object.keys(sexCounts).length).map(function(c){return c+"dd";}),
+            borderColor: sexColors.slice(0, Object.keys(sexCounts).length),
+            borderWidth: 1.5,
+            borderRadius: 8,
+            barPercentage: 0.5
           }]
         },
         options: {
-          indexAxis: "y",
-          scales: { x: { min: 0, max: 4 } },
-          plugins: { legend: { display: false } }
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: { beginAtZero: true, grid: { color: "rgba(22,35,61,0.06)" }, ticks: { stepSize: 1, font: { size: 11 } } },
+            x: { grid: { display: false }, ticks: { font: { size: 12, weight: "600" } } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: "rgba(22,35,61,0.9)",
+              titleFont: { size: 12, weight: "700" },
+              bodyFont: { size: 12 },
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(ctx) {
+                  var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
+                  var pct = ((ctx.raw / total) * 100).toFixed(1);
+                  return ctx.raw + " respondents (" + pct + "%)";
+                }
+              }
+            }
+          }
         }
       });
     }
