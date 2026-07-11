@@ -525,6 +525,10 @@
     #prism-root .response-counter b { font-size: 14px; }
 
     #prism-root .response-id { font-size: 11px; padding: 5px 10px; }
+
+    #prism-root .saved-indicator { font-size: 10.5px; padding: 6px 10px; bottom: 12px; right: 12px; }
+    #prism-root .consent-box { max-height: 220px; padding: 12px 14px; font-size: 12.5px; }
+    #prism-root .consent-label { font-size: 12.5px !important; padding: 10px 12px; }
   }
 
   @media (min-width: 561px) and (max-width: 900px) {
@@ -660,20 +664,6 @@
   var root = document.getElementById("prism-root");
 
   /* ---- localStorage save/load ---- */
-  function saveProgress() {
-    var toSave = {
-      stepIndex: state.stepIndex,
-      answers: state.answers,
-      respondent: state.respondent,
-      comments: state.comments,
-      consentGiven: state.consentGiven
-    };
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-      showSavedIndicator();
-    } catch (e) {}
-  }
-
   function loadProgress() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -693,12 +683,33 @@
   }
 
   var savedTimer = null;
+  var saveDebounceTimer = null;
+  function saveProgress() {
+    if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
+    saveDebounceTimer = setTimeout(function() {
+      var toSave = {
+        stepIndex: state.stepIndex,
+        answers: state.answers,
+        respondent: state.respondent,
+        comments: state.comments,
+        consentGiven: state.consentGiven
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+        showSavedIndicator();
+      } catch (e) {}
+    }, 400);
+  }
+
   function showSavedIndicator() {
     var el = document.getElementById("saved-indicator");
     if (!el) return;
+    var now = new Date();
+    var time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    el.textContent = "Last saved at " + time;
     el.classList.add("show");
     clearTimeout(savedTimer);
-    savedTimer = setTimeout(function() { el.classList.remove("show"); }, 1500);
+    savedTimer = setTimeout(function() { el.classList.remove("show"); }, 2000);
   }
 
   /* ---- response counter ---- */
@@ -1064,6 +1075,7 @@
 
   async function submitResponse() {
     if (state.submitting) return;
+    if (!confirm("You are about to submit your evaluation. This action cannot be undone. Continue?")) return;
     state.submitting = true;
     state.submitError = null;
     render();
@@ -1103,6 +1115,14 @@
       render();
     }
   }
+
+  /* unsaved changes warning */
+  window.addEventListener("beforeunload", function(e) {
+    if (state.stepIndex > 0 && state.stepIndex < STEPS.length - 1) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
 
   /* init */
   loadProgress();

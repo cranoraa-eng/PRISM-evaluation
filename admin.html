@@ -191,6 +191,7 @@
   }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(22,35,61,0.02); }
+  th input[type=checkbox], td input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--ink); }
 
   .mean-bar-wrap {
     display: flex;
@@ -494,8 +495,8 @@
     .chart-grid { grid-template-columns: 1fr; }
     .chart-card { padding: 14px; }
     .chart-card h3 { font-size: 12px; }
-    .filter-bar { flex-direction: row; flex-wrap: wrap; gap: 6px; padding: 10px; }
-    .filter-group { flex: 1 1 auto; min-width: 0; }
+    .filter-bar { flex-direction: column; gap: 6px; padding: 10px; }
+    .filter-group { width: 100%; }
     .filter-group label { font-size: 9.5px; }
     .filter-group select, .filter-group input { width: 100%; padding: 5px 7px; font-size: 11.5px; }
     .filter-count { font-size: 10.5px; padding: 4px 0; }
@@ -544,7 +545,13 @@
     filteredResponses: [],
     activeTab: "overview",
     exportOpen: false,
-    filters: { userType: "all", dateFrom: "", dateTo: "" },
+    filters: (function() {
+      try { return JSON.parse(sessionStorage.getItem("prism_filters")) || { userType: "all", dateFrom: "", dateTo: "", search: "" }; }
+      catch(e) { return { userType: "all", dateFrom: "", dateTo: "", search: "" }; }
+    })(),
+    page: 1,
+    pageSize: 25,
+    selectedIds: {},
     charts: {}
   };
 
@@ -784,6 +791,10 @@
   }
 
   /* filters */
+  function saveFilters() {
+    try { sessionStorage.setItem("prism_filters", JSON.stringify(STATE.filters)); } catch(e) {}
+  }
+
   function applyFilters() {
     var r = STATE.responses;
     var f = STATE.filters;
@@ -798,7 +809,19 @@
       var to = new Date(f.dateTo + "T23:59:59.999Z");
       r = r.filter(function(res) { return new Date(res.submitted_at) <= to; });
     }
+    if (f.search) {
+      var q = f.search.toLowerCase();
+      r = r.filter(function(res) {
+        return (res.respondent_name || "").toLowerCase().indexOf(q) !== -1 ||
+               (res.respondent_user_type || "").toLowerCase().indexOf(q) !== -1 ||
+               (res.comments || "").toLowerCase().indexOf(q) !== -1 ||
+               (res.id || "").toLowerCase().indexOf(q) !== -1 ||
+               (res.respondent_sex || "").toLowerCase().indexOf(q) !== -1;
+      });
+    }
+    STATE.page = 1;
     STATE.filteredResponses = r;
+    saveFilters();
   }
 
   function getUserTypes() {
@@ -831,6 +854,7 @@
     });
     return (
       '<div class="filter-bar">' +
+        '<div class="filter-group" style="flex:2;min-width:140px;"><label>Search</label><input type="text" id="f-search" value="' + esc(STATE.filters.search || "") + '" placeholder="Name, ID, user type, comments\u2026" /></div>' +
         '<div class="filter-group"><label>User Type</label><select id="f-type">' + typeOptions + '</select></div>' +
         '<div class="filter-group"><label>From</label><input type="date" id="f-from" value="' + STATE.filters.dateFrom + '" /></div>' +
         '<div class="filter-group"><label>To</label><input type="date" id="f-to" value="' + STATE.filters.dateTo + '" /></div>' +
@@ -950,10 +974,10 @@
     html += '</div>';
 
     html += '<div class="chart-grid">';
-    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Mean Scores</h3><p class="chart-subtitle">Average rating per section across all respondents</p></div><span class="chart-badge">BAR</span></div><canvas id="chart-bar" height="100"></canvas></div>';
-    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Radar</h3><p class="chart-subtitle">Performance overview by section</p></div><span class="chart-badge">RADAR</span></div><canvas id="chart-radar"></canvas></div>';
-    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown</p></div><span class="chart-badge">DOUGHNUT</span></div><canvas id="chart-sex"></canvas></div>';
-    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>User Type Distribution</h3><p class="chart-subtitle">Respondents by role</p></div><span class="chart-badge">DOUGHNUT</span></div><canvas id="chart-type"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Mean Scores</h3><p class="chart-subtitle">Average rating per section across all respondents</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">BAR</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-bar" style="font-size:11px;padding:3px 8px;">Save</button></div></div><canvas id="chart-bar" height="100"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Radar</h3><p class="chart-subtitle">Performance overview by section</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">RADAR</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-radar" style="font-size:11px;padding:3px 8px;">Save</button></div></div><canvas id="chart-radar"></canvas></div>';
+    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">DOUGHNUT</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-sex" style="font-size:11px;padding:3px 8px;">Save</button></div></div><canvas id="chart-sex"></canvas></div>';
+    html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>User Type Distribution</h3><p class="chart-subtitle">Respondents by role</p></div><div style="display:flex;gap:6px;align-items:center;"><span class="chart-badge">DOUGHNUT</span><button class="btn btn-ghost btn-sm chart-download-btn" data-canvas="chart-type" style="font-size:11px;padding:3px 8px;">Save</button></div></div><canvas id="chart-type"></canvas></div>';
     html += '</div>';
     html += '</div>';
     return html;
@@ -1420,9 +1444,20 @@
       html += '</div>';
       return html;
     }
-    html += '<p style="font-size:13px;color:var(--muted);margin:0 0 14px;">Showing ' + r.length + ' submissions. Click column headers to sort. Scroll horizontally to see all columns.</p>';
+    var totalPages = Math.ceil(r.length / STATE.pageSize);
+    var pageData = getPageData();
+    var startRow = (STATE.page - 1) * STATE.pageSize + 1;
+    var selectedCount = Object.keys(STATE.selectedIds).length;
+
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">';
+    html += '<p style="font-size:13px;color:var(--muted);margin:0;">Page <b>' + STATE.page + '</b> of <b>' + totalPages + '</b> (' + r.length + ' total responses' + (selectedCount ? ', <b>' + selectedCount + '</b> selected' : '') + ')</p>';
+    html += '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">';
+    html += '<button class="btn btn-ghost btn-sm" id="bulk-delete-btn" style="color:var(--error);' + (selectedCount ? '' : 'opacity:0.4;') + '">Delete Selected</button>';
+    html += '<span style="font-size:11px;color:var(--muted);">' + STATE.pageSize + ' per page</span></div></div>';
+
     html += '<div class="table-wrap"><table><thead><tr>';
-    html += '<th><button class="sort-btn" data-sort="num" style="all:unset;cursor:pointer;font-weight:inherit">#' + sortArrow("num") + '</button></th>';
+    html += '<th style="width:32px"><input type="checkbox" id="select-all" ' + (pageData.every(function(res) { return STATE.selectedIds[res.id]; }) && pageData.length ? 'checked' : '') + ' /></th>';
+    html += '<th style="width:40px"><button class="sort-btn" data-sort="num" style="all:unset;cursor:pointer;font-weight:inherit">#' + sortArrow("num") + '</button></th>';
     html += '<th><button class="sort-btn" data-sort="ref" style="all:unset;cursor:pointer;font-weight:inherit">Reference' + sortArrow("ref") + '</button></th>';
     html += '<th><button class="sort-btn" data-sort="date" style="all:unset;cursor:pointer;font-weight:inherit">Submitted' + sortArrow("date") + '</button></th>';
     html += '<th><button class="sort-btn" data-sort="name" style="all:unset;cursor:pointer;font-weight:inherit">Name' + sortArrow("name") + '</button></th>';
@@ -1448,7 +1483,7 @@
       if (va > vb) return 1 * SORT.dir;
       return 0;
     });
-    sorted.forEach(function(res, i) {
+    pageData.forEach(function(res) {
       var vals = [];
       for (var k = 1; k <= TOTAL_ITEMS; k++) {
         var v = (res.answers || {})[String(k)];
@@ -1458,7 +1493,9 @@
       var interp = interpret(m);
       var dt = res.submitted_at ? new Date(res.submitted_at).toLocaleDateString("en-US", { year:"numeric", month:"short", day:"numeric" }) : "\u2014";
       html += '<tr>';
-      html += '<td>' + (i + 1) + '</td>';
+      html += '<td><input type="checkbox" class="row-select" data-id="' + res.id + '" ' + (STATE.selectedIds[res.id] ? 'checked' : '') + ' /></td>';
+      html += '<td>' + startRow + '</td>';
+      startRow++;
       html += '<td style="font-family:monospace;font-size:12px">' + (res.id ? res.id.slice(0, 8).toUpperCase() : "\u2014") + '</td>';
       html += '<td>' + dt + '</td>';
       html += '<td>' + esc(res.respondent_name || "\u2014") + '</td>';
@@ -1475,6 +1512,14 @@
       html += '</tr>';
     });
     html += '</tbody></table></div>';
+
+    /* pagination controls */
+    html += '<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line);">';
+    html += '<button class="btn btn-ghost btn-sm" id="page-prev"' + (STATE.page <= 1 ? ' disabled style="opacity:0.4"' : '') + '>&larr; Previous</button>';
+    html += '<span style="font-size:13px;color:var(--muted);">Page ' + STATE.page + ' of ' + totalPages + '</span>';
+    html += '<button class="btn btn-ghost btn-sm" id="page-next"' + (STATE.page >= totalPages ? ' disabled style="opacity:0.4"' : '') + '>Next &rarr;</button>';
+    html += '</div>';
+
     html += '</div>';
     return html;
   }
@@ -1759,11 +1804,13 @@
     var fType = document.getElementById("f-type");
     var fFrom = document.getElementById("f-from");
     var fTo = document.getElementById("f-to");
+    var fSearch = document.getElementById("f-search");
     var fReset = document.getElementById("f-reset");
     if (fType) fType.addEventListener("change", function() { STATE.filters.userType = fType.value; render(); });
     if (fFrom) fFrom.addEventListener("change", function() { STATE.filters.dateFrom = fFrom.value; render(); });
     if (fTo) fTo.addEventListener("change", function() { STATE.filters.dateTo = fTo.value; render(); });
-    if (fReset) fReset.addEventListener("click", function() { STATE.filters = { userType: "all", dateFrom: "", dateTo: "" }; render(); });
+    if (fSearch) fSearch.addEventListener("input", function() { STATE.filters.search = fSearch.value; render(); });
+    if (fReset) fReset.addEventListener("click", function() { STATE.filters = { userType: "all", dateFrom: "", dateTo: "", search: "" }; render(); });
 
     document.querySelectorAll(".sort-btn").forEach(function(btn) {
       btn.addEventListener("click", function() {
@@ -1773,6 +1820,72 @@
         render();
       });
     });
+
+    /* pagination */
+    var pagePrev = document.getElementById("page-prev");
+    var pageNext = document.getElementById("page-next");
+    if (pagePrev) pagePrev.addEventListener("click", function() { if (STATE.page > 1) { STATE.page--; render(); } });
+    if (pageNext) pageNext.addEventListener("click", function() {
+      var totalPages = Math.ceil(STATE.filteredResponses.length / STATE.pageSize);
+      if (STATE.page < totalPages) { STATE.page++; render(); }
+    });
+
+    /* bulk select */
+    var selectAll = document.getElementById("select-all");
+    if (selectAll) selectAll.addEventListener("change", function() {
+      var pageData = getPageData();
+      STATE.selectedIds = {};
+      if (selectAll.checked) pageData.forEach(function(r) { STATE.selectedIds[r.id] = true; });
+      render();
+    });
+
+    var bulkDeleteBtn = document.getElementById("bulk-delete-btn");
+    if (bulkDeleteBtn) bulkDeleteBtn.addEventListener("click", function() { bulkDelete(); });
+
+    /* row select handler */
+    document.querySelectorAll(".row-select").forEach(function(cb) {
+      cb.addEventListener("change", function() {
+        var id = cb.getAttribute("data-id");
+        if (cb.checked) STATE.selectedIds[id] = true;
+        else delete STATE.selectedIds[id];
+      });
+    });
+
+    /* chart download */
+    document.querySelectorAll(".chart-download-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var canvasId = btn.getAttribute("data-canvas");
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        var link = document.createElement("a");
+        link.download = canvasId + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        showToast("Chart saved as " + link.download);
+      });
+    });
+  }
+
+  function getPageData() {
+    var r = STATE.filteredResponses;
+    var start = (STATE.page - 1) * STATE.pageSize;
+    return r.slice(start, start + STATE.pageSize);
+  }
+
+  async function bulkDelete() {
+    var ids = Object.keys(STATE.selectedIds);
+    if (!ids.length) { showToast("No responses selected."); return; }
+    if (!confirm("Delete " + ids.length + " selected response(s)? This action cannot be undone.")) return;
+    try {
+      var { error } = await supabaseClient.from("responses").delete().in("id", ids);
+      if (error) throw error;
+      STATE.selectedIds = {};
+      showToast("Deleted " + ids.length + " response(s).");
+      loadResponses();
+    } catch (err) {
+      console.error("Bulk delete error:", err);
+      showToast("Delete failed: " + (err.message || "Unknown error"));
+    }
   }
 
   async function loadResponses() {
