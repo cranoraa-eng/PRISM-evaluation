@@ -1063,14 +1063,16 @@
     var alpha = cronbachAlpha(r);
 
     html += '<div class="section-heading">Overall Instrument Summary</div>';
-    html += '<div class="stat-grid">';
+    html += '<div class="stat-grid" style="grid-template-columns: repeat(4, 1fr);">';
     html += '<div class="stat-card"><div class="label">Sample Size (n)</div><div class="value">' + n + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Items</div><div class="value">' + TOTAL_ITEMS + '</div></div>';
+    html += '<div class="stat-card"><div class="label">Scale Range</div><div class="value">1 – 4</div><div class="note">4-point Likert</div></div>';
+    html += '<div class="stat-card"><div class="label">Cronbach\u2019s α</div><div class="value">' + (alpha !== null ? alpha.toFixed(3) : "N/A") + '</div><div class="note">' + (alpha !== null ? (alpha >= 0.9 ? "Excellent" : alpha >= 0.8 ? "Good" : alpha >= 0.7 ? "Acceptable" : alpha >= 0.6 ? "Questionable" : "Poor") : "") + '</div></div>';
+    html += '</div>';
+    html += '<div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">';
     html += '<div class="stat-card"><div class="label">Overall Mean</div><div class="value">' + overallMean.toFixed(2) + '</div></div>';
     html += '<div class="stat-card"><div class="label">Std. Deviation</div><div class="value">' + overallSD.toFixed(2) + '</div></div>';
-    html += '<div class="stat-card"><div class="label">Cronbach\u2019s α</div><div class="value">' + (alpha !== null ? alpha.toFixed(3) : "N/A") + '</div><div class="note">' + (alpha !== null ? (alpha >= 0.9 ? "Excellent" : alpha >= 0.8 ? "Good" : alpha >= 0.7 ? "Acceptable" : alpha >= 0.6 ? "Questionable" : "Poor") : "") + '</div></div>';
-    html += '<div class="stat-card"><div class="label">Items</div><div class="value">' + TOTAL_ITEMS + '</div></div>';
-    html += '<div class="stat-card"><div class="label">Min Possible</div><div class="value">1.00</div></div>';
-    html += '<div class="stat-card"><div class="label">Max Possible</div><div class="value">4.00</div></div>';
+    html += '<div class="stat-card"><div class="label">Interpretation</div><div class="value" style="color:var(--' + (overallMean >= 3.5 ? "success" : overallMean >= 2.5 ? "ink-2" : overallMean >= 1.5 ? "gold" : "error") + ')">' + interpret(overallMean).label + '</div></div>';
     html += '</div>';
 
     /* Section-level statistics */
