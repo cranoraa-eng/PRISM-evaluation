@@ -870,8 +870,7 @@
     responseCount: null,
     sessionId: null,
     surveyStartTime: null,
-    lang: "en",
-    turnstileToken: null
+    lang: "en"
   };
 
   var SEX_OPTIONS = ["Male", "Female"];
@@ -1143,7 +1142,6 @@
     if (state.submitError) {
       html += '<div class="banner error show" role="alert">' + esc(state.submitError) + '</div>';
     }
-    html += '<div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey="0x4AAAAAAAW4t_lYhFwTmSZE" data-callback="onTurnstileSuccess"></div></div>';
     html += '</div>';
     return html;
   }
@@ -1203,11 +1201,6 @@
     attachHandlers(step);
   }
 
-  /* Turnstile callback */
-  window.onTurnstileSuccess = function(token) {
-    state.turnstileToken = token;
-  };
-
   function attachHandlers(step) {
     var startBtn = root.querySelector("#start-btn");
     if (startBtn) startBtn.addEventListener("click", function() {
@@ -1225,8 +1218,7 @@
         comments: "", consentGiven: false, consentDate: null, consentVersion: "v1.0",
         submitting: false, submitError: null, responseId: null,
         responseCount: state.responseCount,
-        sessionId: genId(), surveyStartTime: null, lang: state.lang,
-        turnstileToken: null
+        sessionId: genId(), surveyStartTime: null, lang: state.lang
       };
       clearProgress();
       render();
@@ -1343,13 +1335,6 @@
   async function submitResponse() {
     if (state.submitting) return;
     if (!confirm(t("submitConfirm"))) return;
-
-    /* Check Turnstile */
-    if (!state.turnstileToken) {
-      state.submitError = "Please complete the verification check.";
-      render();
-      return;
-    }
 
     var lastSub = parseInt(localStorage.getItem("prism_last_submit") || "0");
     if (Date.now() - lastSub < RATE_LIMIT_MS) {
