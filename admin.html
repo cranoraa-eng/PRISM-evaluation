@@ -718,20 +718,37 @@
   function cronbachAlpha(responses) {
     var n = TOTAL_ITEMS;
     if (n < 2 || responses.length < 2) return null;
+    
     var itemVariances = [];
-    var allScores = [];
-    for (var i = 0; i < responses.length; i++) {
-      allScores.push(0);
+    var validScores = []; /* Only include respondents with complete data */
+    
+    /* Calculate total scores only for complete responses */
+    responses.forEach(function(res) {
+      var score = 0;
+      var completeItems = 0;
       for (var k = 1; k <= n; k++) {
-        var v = (responses[i].answers || {})[String(k)];
-        if (v) allScores[i] += v;
+        var v = (res.answers || {})[String(k)];
+        if (v) {
+          score += v;
+          completeItems++;
+        }
       }
-    }
-    var totalVar = Math.pow(stdDev(allScores), 2);
+      /* Only include if they answered all items */
+      if (completeItems === n) {
+        validScores.push(score);
+      }
+    });
+    
+    if (validScores.length < 2) return null;
+    
+    var totalVar = Math.pow(stdDev(validScores), 2);
+    
+    /* Calculate item variances */
     for (var k2 = 1; k2 <= n; k2++) {
       var iv = itemValues(responses, k2);
       itemVariances.push(Math.pow(stdDev(iv), 2));
     }
+    
     var sumItemVar = itemVariances.reduce(function(a, b) { return a + b; }, 0);
     if (totalVar === 0) return null;
     return (n / (n - 1)) * (1 - sumItemVar / totalVar);
@@ -740,16 +757,32 @@
   function cronbachAlphaSection(responses, section, itemStartNum) {
     var n = section.items.length;
     if (n < 2 || responses.length < 2) return null;
+    
     var itemVariances = [];
-    var allScores = [];
-    for (var i = 0; i < responses.length; i++) {
-      allScores.push(0);
+    var validScores = []; /* Only include respondents with complete section data */
+    
+    /* Calculate section total scores only for complete responses */
+    responses.forEach(function(res) {
+      var score = 0;
+      var completeItems = 0;
       section.items.forEach(function(_, j) {
-        var v = (responses[i].answers || {})[String(itemStartNum + j)];
-        if (v) allScores[i] += v;
+        var v = (res.answers || {})[String(itemStartNum + j)];
+        if (v) {
+          score += v;
+          completeItems++;
+        }
       });
-    }
-    var totalVar = Math.pow(stdDev(allScores), 2);
+      /* Only include if they answered all items in this section */
+      if (completeItems === n) {
+        validScores.push(score);
+      }
+    });
+    
+    if (validScores.length < 2) return null;
+    
+    var totalVar = Math.pow(stdDev(validScores), 2);
+    
+    /* Calculate item variances */
     section.items.forEach(function(_, j) {
       var vals = [];
       responses.forEach(function(r) {
@@ -758,6 +791,7 @@
       });
       itemVariances.push(Math.pow(stdDev(vals), 2));
     });
+    
     var sumItemVar = itemVariances.reduce(function(a, b) { return a + b; }, 0);
     if (totalVar === 0) return null;
     return (n / (n - 1)) * (1 - sumItemVar / totalVar);
@@ -803,12 +837,72 @@
   }
 
   function tCDF(t, df) {
+    /* Better approximation of Student's t-distribution CDF using continued fraction */
+    if (df <= 0) return 0.5;
+    if (t === 0) return 0.5;
+    
     var x = df / (df + t * t);
-    var a = df / 2, b = 0.5;
-    var bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x));
-    var ib = bt / a;
-    var result = 1 - 0.5 * ib;
-    return Math.max(0, Math.min(1, result));
+    var a = df / 2;
+    var b = 0.5;
+    
+    /* Incomplete beta function approximation */
+    if (x < 0 || x > 1) return 0.5;
+    if (x === 0) return 0;
+    if (x === 1) return 1;
+    
+    /* Use regularized incomplete beta function */
+    var bt = Math.exp(
+      lgamma(a + b) - lgamma(a) - lgamma(b) + 
+      a * Math.log(x) + b * Math.log(1 - x)
+    );
+    
+    if (x < (a + 1) / (a + b + 2)) {
+      /* Use continued fraction directly */
+      var betacf = betaContinuedFraction(a, b, x);
+      return t < 0 ? 0.5 * bt * betacf / a : 1 - 0.5 * bt * betacf / a;
+    } else {
+      /* Use symmetry relation */
+      var betacf = betaContinuedFraction(b, a, 1 - x);
+      return t < 0 ? 1 - 0.5 * bt * betacf / b : 0.5 * bt * betacf / b;
+    }
+  }
+  
+  function betaContinuedFraction(a, b, x) {
+    var maxIterations = 100;
+    var epsilon = 3e-7;
+    var qab = a + b;
+    var qap = a + 1;
+    var qam = a - 1;
+    var c = 1;
+    var d = 1 - qab * x / qap;
+    
+    if (Math.abs(d) < 1e-30) d = 1e-30;
+    d = 1 / d;
+    var h = d;
+    
+    for (var m = 1; m <= maxIterations; m++) {
+      var m2 = 2 * m;
+      var aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+      d = 1 + aa * d;
+      if (Math.abs(d) < 1e-30) d = 1e-30;
+      c = 1 + aa / c;
+      if (Math.abs(c) < 1e-30) c = 1e-30;
+      d = 1 / d;
+      h *= d * c;
+      
+      aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+      d = 1 + aa * d;
+      if (Math.abs(d) < 1e-30) d = 1e-30;
+      c = 1 + aa / c;
+      if (Math.abs(c) < 1e-30) c = 1e-30;
+      d = 1 / d;
+      var del = d * c;
+      h *= del;
+      
+      if (Math.abs(del - 1) < epsilon) break;
+    }
+    
+    return h;
   }
 
   function lgamma(x) {
