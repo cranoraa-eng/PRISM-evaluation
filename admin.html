@@ -574,7 +574,7 @@
     filteredResponses: [],
     activeTab: "overview",
     exportOpen: false,
-    filters: { userType: "", dateFrom: "", dateTo: "", search: "" },
+    filters: { userType: "all", dateFrom: "", dateTo: "", search: "" },
     page: 1,
     pageSize: 25,
     selectedIds: {},
@@ -880,7 +880,7 @@
 
   function renderFilters() {
     var types = getUserTypes();
-    var typeOptions = '<option value="all">All User Types</option>';
+    var typeOptions = '<option value="all"' + (STATE.filters.userType === "all" ? ' selected' : '') + '>All User Types</option>';
     types.forEach(function(t) {
       typeOptions += '<option value="' + esc(t) + '"' + (STATE.filters.userType === t ? ' selected' : '') + '>' + esc(t) + '</option>';
     });
@@ -1987,11 +1987,11 @@
     var fTo = document.getElementById("f-to");
     var fSearch = document.getElementById("f-search");
     var fReset = document.getElementById("f-reset");
-    if (fType) fType.addEventListener("change", function() { STATE.filters.userType = fType.value; render(); });
-    if (fFrom) fFrom.addEventListener("change", function() { STATE.filters.dateFrom = fFrom.value; render(); });
-    if (fTo) fTo.addEventListener("change", function() { STATE.filters.dateTo = fTo.value; render(); });
-    if (fSearch) fSearch.addEventListener("input", function() { STATE.filters.search = fSearch.value; render(); });
-    if (fReset) fReset.addEventListener("click", function() { STATE.filters = { userType: "all", dateFrom: "", dateTo: "", search: "" }; render(); });
+    if (fType) fType.addEventListener("change", function() { STATE.filters.userType = fType.value; applyFilters(); render(); });
+    if (fFrom) fFrom.addEventListener("change", function() { STATE.filters.dateFrom = fFrom.value; applyFilters(); render(); });
+    if (fTo) fTo.addEventListener("change", function() { STATE.filters.dateTo = fTo.value; applyFilters(); render(); });
+    if (fSearch) fSearch.addEventListener("input", function() { STATE.filters.search = fSearch.value; applyFilters(); render(); });
+    if (fReset) fReset.addEventListener("click", function() { STATE.filters = { userType: "all", dateFrom: "", dateTo: "", search: "" }; applyFilters(); render(); });
 
     document.querySelectorAll(".sort-btn").forEach(function(btn) {
       btn.addEventListener("click", function() {
