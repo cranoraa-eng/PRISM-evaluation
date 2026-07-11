@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PRISM Evaluation Questionnaire</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  // ============================================================
+  //  SUPABASE CONFIG — replace with your own project values
+  // ============================================================
+  const SUPABASE_URL  = "https://qwkkpmxpmugkrlspbiri.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3a2twbXhwbXVna3Jsc3BiaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NjQwMDEsImV4cCI6MjA5OTM0MDAwMX0.HT3V9wXTEm0ehxoqgChUEDrqetPKwnB1fanGwHWtDdI";
+  // ============================================================
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+</script>
+</head>
+<body>
+<div id="prism-root"></div>
+<style>
+  #prism-root {
+    --ink: #16233D;
+    --ink-2: #2E4066;
+    --gold: #A9813E;
+    --gold-soft: #D9C08F;
+    --line: #C9D2E0;
+    --paper: #EEF1F6;
+    --surface: #FFFFFF;
+    --muted: #5B6B85;
+    --success: #3F7A5C;
+    --error: #B3432E;
+    --radius: 10px;
+
+    all: initial;
+    *, *::before, *::after { box-sizing: border-box; }
+    display: block;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 27px, rgba(22,35,61,0.045) 28px
+      );
+    min-height: 100%;
+    padding: 32px 16px 64px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #prism-root .serif { font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; }
+
+  #prism-root .shell {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(22,35,61,0.04), 0 12px 32px -16px rgba(22,35,61,0.18);
+    overflow: hidden;
+    position: relative;
+  }
+
+  #prism-root .shell::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--ink) 0%, var(--ink-2) 55%, var(--gold) 100%);
+  }
+
+  #prism-root .masthead {
+    padding: 34px 36px 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  #prism-root .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 0 0 8px;
+  }
+  #prism-root h1.title {
+    font-size: 26px;
+    margin: 0 0 4px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  #prism-root .subtitle {
+    font-size: 14.5px;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  #prism-root .progress-wrap {
+    padding: 14px 36px 0;
+  }
+  #prism-root .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  #prism-root .progress-track {
+    height: 6px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  #prism-root .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ink-2), var(--gold));
+    transition: width 0.35s ease;
+    border-radius: 4px;
+  }
+
+  #prism-root .stamp {
+    position: absolute;
+    top: 26px;
+    right: 30px;
+    width: 68px;
+    height: 68px;
+    border: 2px dashed var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(-8deg);
+    color: var(--gold);
+    font-family: Georgia, serif;
+    font-weight: 700;
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  #prism-root .content {
+    padding: 26px 36px 8px;
+  }
+
+  #prism-root .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+  #prism-root .section-note {
+    font-size: 13.5px;
+    color: var(--muted);
+    font-style: italic;
+    margin: 0 0 20px;
+  }
+  #prism-root .group-heading {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 26px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  #prism-root .group-heading:first-child { margin-top: 0; }
+
+  #prism-root .scale-key {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 0 0 22px;
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+  #prism-root .scale-key b { color: var(--ink); }
+
+  #prism-root .item {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  #prism-root .item:last-child { border-bottom: none; }
+  #prism-root .item.invalid .item-text { color: var(--error); }
+  #prism-root .item.invalid .likert { outline: 1.5px solid var(--error); border-radius: 10px; }
+
+  #prism-root .item-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  #prism-root .item-num {
+    flex: 0 0 auto;
+    font-family: Georgia, serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--gold);
+    background: var(--paper);
+    border: 1px solid var(--gold-soft);
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  #prism-root .item-text {
+    flex: 1 1 260px;
+    font-size: 14.5px;
+    color: var(--ink);
+    padding-top: 2px;
+  }
+  #prism-root .likert {
+    display: flex;
+    gap: 6px;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+  #prism-root .likert-btn {
+    all: unset;
+    cursor: pointer;
+    width: 46px;
+    height: 40px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--muted);
+    transition: all 0.15s ease;
+    background: var(--surface);
+  }
+  #prism-root .likert-btn b { font-size: 13px; line-height: 1.1; color: inherit; }
+  #prism-root .likert-btn:hover { border-color: var(--ink-2); color: var(--ink-2); }
+  #prism-root .likert-btn:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
+  #prism-root .likert-btn.selected {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+
+  #prism-root .field { margin-bottom: 20px; }
+  #prism-root .field label.field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 7px;
+  }
+  #prism-root .field .req { color: var(--error); font-weight: 700; }
+  #prism-root input[type=text], #prism-root input[type=number], #prism-root textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink);
+  }
+  #prism-root input:focus-visible, #prism-root textarea:focus-visible {
+    outline: 2px solid var(--ink-2);
+    outline-offset: 1px;
+    border-color: var(--ink-2);
+  }
+  #prism-root textarea { resize: vertical; min-height: 100px; }
+
+  #prism-root .choice-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  #prism-root .choice-pill {
+    all: unset;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 8px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 20px;
+    color: var(--ink-2);
+    background: var(--surface);
+    transition: all 0.15s ease;
+  }
+  #prism-root .choice-pill:hover { border-color: var(--ink-2); }
+  #prism-root .choice-pill.selected {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  #prism-root .choice-pill:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
+
+  #prism-root .banner {
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin: 0 0 18px;
+    display: none;
+  }
+  #prism-root .banner.show { display: block; }
+  #prism-root .banner.error { background: #FBEAE5; color: var(--error); border: 1px solid #EAC3B8; }
+
+  #prism-root .footer-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 36px 30px;
+    gap: 12px;
+  }
+  #prism-root .btn {
+    all: unset;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 22px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+  #prism-root .btn-primary {
+    background: var(--ink);
+    color: #fff;
+  }
+  #prism-root .btn-primary:hover { background: var(--ink-2); }
+  #prism-root .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+  #prism-root .btn-ghost {
+    color: var(--ink-2);
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+  }
+  #prism-root .btn-ghost:hover { border-color: var(--ink-2); }
+  #prism-root .btn:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
+  #prism-root .spacer { flex: 1; }
+
+  #prism-root .welcome { padding: 40px 36px 36px; text-align: left; }
+  #prism-root .welcome .rule {
+    height: 1px;
+    background: var(--line);
+    margin: 20px 0 22px;
+  }
+  #prism-root .welcome p { font-size: 14.5px; color: var(--ink-2); margin: 0 0 14px; }
+  #prism-root .welcome .meta {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 18px 0 28px;
+  }
+  #prism-root .welcome .meta div b { display:block; color: var(--ink); font-size: 13px; }
+
+  #prism-root .done-wrap {
+    padding: 54px 36px 46px;
+    text-align: center;
+  }
+  #prism-root .seal {
+    width: 128px; height: 128px;
+    margin: 0 auto 22px;
+    border-radius: 50%;
+    border: 3px double var(--gold);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(-6deg);
+    color: var(--ink);
+    font-family: Georgia, serif;
+  }
+  #prism-root .seal .seal-word { font-weight: 700; font-size: 15px; letter-spacing: 0.08em; }
+  #prism-root .seal .seal-sub { font-size: 9.5px; color: var(--muted); margin-top: 4px; letter-spacing: 0.06em; }
+  #prism-root .done-wrap h2 { font-size: 21px; margin: 0 0 8px; }
+  #prism-root .done-wrap p { color: var(--muted); font-size: 14px; margin: 0 auto 22px; max-width: 420px; }
+  #prism-root .response-id {
+    display: inline-block;
+    font-family: SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: var(--ink-2);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-bottom: 26px;
+  }
+
+  #prism-root .error-state { padding: 40px 36px; text-align: center; }
+  #prism-root .error-state p { color: var(--error); font-size: 14px; margin-bottom: 16px; }
+
+  @media (max-width: 560px) {
+    #prism-root { padding: 16px 0 48px; }
+    #prism-root .masthead, #prism-root .content, #prism-root .footer-nav, #prism-root .progress-wrap { padding-left: 20px; padding-right: 20px; }
+    #prism-root .shell { border-radius: 0; border-left: none; border-right: none; }
+    #prism-root .stamp { width: 54px; height: 54px; font-size: 8.5px; top: 20px; right: 16px; }
+    #prism-root h1.title { font-size: 21px; }
+    #prism-root .item-row { flex-direction: column; }
+    #prism-root .likert { margin-left: 0; }
+    #prism-root .item-num { margin-bottom: 2px; }
+  }
+</style>
+<script>
+(function() {
+  "use strict";
+
+  var usabilityItems = [
+    "PRISM is easy to access and use for my school-related tasks.",
+    "I can easily understand how to navigate through PRISM.",
+    "The arrangement of menus, buttons, and features in PRISM is clear and organized.",
+    "The interface design of PRISM is simple and user-friendly.",
+    "The labels, icons, and controls in PRISM are easy to understand.",
+    "I can quickly learn how to use PRISM without requiring extensive assistance.",
+    "I can easily find the information and features I need in PRISM.",
+    "The information displayed in PRISM is presented clearly and is easy to understand.",
+    "PRISM can be accessed and used effectively on different devices such as computers, tablets, and smartphones.",
+    "PRISM allows me to complete my tasks efficiently.",
+    "The different modules of PRISM provide a consistent user experience.",
+    "Overall, PRISM provides a convenient and user-friendly experience."
+  ];
+  var generalSystemItems = [
+    "PRISM's features and functions operate properly.",
+    "PRISM performs the functions expected from a school management system.",
+    "PRISM provides the necessary tools to support school operations.",
+    "PRISM responds properly when users interact with its features.",
+    "PRISM minimizes errors and technical problems during use."
+  ];
+  var recordsMgmtItems = [
+    "PRISM effectively organizes and manages student records.",
+    "PRISM allows authorized users to access required records efficiently.",
+    "The records stored in PRISM are accurate and reliable.",
+    "PRISM helps reduce difficulties associated with manual record management."
+  ];
+  var enrollmentItems = [
+    "PRISM provides an effective process for managing student enrollment information.",
+    "PRISM helps organize enrollment applications and related documents."
+  ];
+  var attendanceGradeItems = [
+    "PRISM effectively supports attendance monitoring and record keeping.",
+    "PRISM helps teachers manage student grades efficiently.",
+    "PRISM supports accurate computation and management of academic records.",
+    "PRISM helps generate academic reports such as report cards efficiently."
+  ];
+  var communicationItems = [
+    "PRISM improves access to school announcements and important updates.",
+    "The messaging and communication features of PRISM help users exchange information effectively.",
+    "PRISM makes learning materials easier to access and manage.",
+    "PRISM provides useful notifications regarding school activities, assignments, attendance, and academic information."
+  ];
+  var securityItems = [
+    "PRISM provides appropriate access based on user roles (administrator, teacher, student, and parent).",
+    "PRISM protects school information from unauthorized access."
+  ];
+  var contentItems = [
+    "PRISM provides the information that I need for my school-related activities.",
+    "The information provided by PRISM is relevant and useful."
+  ];
+  var accuracyItems = [
+    "The information and records provided by PRISM are accurate.",
+    "PRISM provides reliable information for decision-making and monitoring."
+  ];
+  var formatItems = [
+    "The information displayed in PRISM is organized and easy to interpret.",
+    "The design and presentation of PRISM information are appropriate for users."
+  ];
+  var timelinessItems = [
+    "PRISM provides updated information when needed.",
+    "PRISM allows users to receive announcements and notifications on time."
+  ];
+  var overallSatisfactionItems = [
+    "PRISM meets my expectations as a school management portal.",
+    "I am satisfied with the overall performance of PRISM.",
+    "I would recommend the continued use of PRISM in school operations."
+  ];
+
+  var counter = 0;
+  function grp(heading, arr) {
+    var items = arr.map(function(text) {
+      counter += 1;
+      return { num: counter, text: text };
+    });
+    return { heading: heading, items: items };
+  }
+
+  var STEPS = [
+    { id: "welcome", kind: "welcome" },
+    { id: "info", kind: "info", label: "Your Info" },
+    {
+      id: "usability", kind: "survey", label: "Usability",
+      title: "A. Usability",
+      note: "Measures the ease of use, learnability, accessibility, and user experience of PRISM.",
+      groups: [grp(null, usabilityItems)]
+    },
+    {
+      id: "func1", kind: "survey", label: "Functionality I",
+      title: "B. Functional Suitability",
+      note: "Measures whether PRISM provides complete, correct, and effective functions for school management.",
+      groups: [
+        grp("General System Functions", generalSystemItems),
+        grp("Records Management", recordsMgmtItems),
+        grp("Enrollment Management", enrollmentItems)
+      ]
+    },
+    {
+      id: "func2", kind: "survey", label: "Functionality II",
+      title: "B. Functional Suitability (continued)",
+      note: null,
+      groups: [
+        grp("Attendance and Grade Management", attendanceGradeItems),
+        grp("Communication and Learning Features", communicationItems),
+        grp("Security and User Management", securityItems)
+      ]
+    },
+    {
+      id: "satisfaction", kind: "survey", label: "Satisfaction",
+      title: "C. User Satisfaction",
+      note: "Measures content quality, accuracy, format, and timeliness, based on the End-User Computing Satisfaction (EUCS) model.",
+      groups: [
+        grp("Content", contentItems),
+        grp("Accuracy", accuracyItems),
+        grp("Format", formatItems),
+        grp("Timeliness", timelinessItems),
+        grp("Overall Satisfaction", overallSatisfactionItems)
+      ]
+    },
+    { id: "comments", kind: "comments", label: "Comments" },
+    { id: "done", kind: "done" }
+  ];
+
+  var TOTAL_ITEMS = counter;
+  var NAV_STEPS = STEPS.filter(function(s) { return s.kind !== "welcome" && s.kind !== "done"; });
+
+  var state = {
+    stepIndex: 0,
+    answers: {},
+    respondent: { name: "", age: "", sex: "", userType: "", userTypeOther: "", duration: "" },
+    comments: "",
+    submitting: false,
+    submitError: null,
+    responseId: null
+  };
+
+  var SEX_OPTIONS = ["Male", "Female"];
+  var USER_TYPE_OPTIONS = ["Student", "Faculty / Teacher", "Parent / Guardian", "School Administrator / Staff", "Other"];
+  var DURATION_OPTIONS = ["Less than 1 month", "1–6 months", "7–12 months", "More than 1 year"];
+
+  var root = document.getElementById("prism-root");
+
+  function el(html) {
+    var d = document.createElement("div");
+    d.innerHTML = html.trim();
+    return d.firstChild;
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function currentStep() { return STEPS[state.stepIndex]; }
+
+  function stepMissingItems(step) {
+    var missing = [];
+    if (step.kind === "survey") {
+      step.groups.forEach(function(g) {
+        g.items.forEach(function(it) {
+          if (!state.answers[it.num]) missing.push(it.num);
+        });
+      });
+    }
+    return missing;
+  }
+
+  function infoMissing() {
+    var m = [];
+    if (!state.respondent.sex) m.push("sex");
+    if (!state.respondent.userType) m.push("userType");
+    if (state.respondent.userType === "Other" && !state.respondent.userTypeOther.trim()) m.push("userTypeOther");
+    if (!state.respondent.duration) m.push("duration");
+    if (state.respondent.age && (isNaN(state.respondent.age) || +state.respondent.age < 5 || +state.respondent.age > 100)) m.push("age");
+    return m;
+  }
+
+  function renderProgress() {
+    var step = currentStep();
+    if (step.kind === "welcome" || step.kind === "done") return "";
+    var idx = NAV_STEPS.indexOf(step) + 1;
+    var total = NAV_STEPS.length;
+    var pct = Math.round((idx / total) * 100);
+    return (
+      '<div class="progress-wrap">' +
+        '<div class="progress-label"><span>Step ' + idx + ' of ' + total + ' — ' + esc(step.label) + '</span><span>' + pct + '%</span></div>' +
+        '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+      '</div>'
+    );
+  }
+
+  function renderStamp() {
+    var step = currentStep();
+    if (step.kind === "welcome" || step.kind === "done") return "";
+    var idx = NAV_STEPS.indexOf(step) + 1;
+    return '<div class="stamp">FORM<br>' + idx + ' / ' + NAV_STEPS.length + '</div>';
+  }
+
+  function likertRow(item, invalid) {
+    var val = state.answers[item.num];
+    var opts = [
+      { v: 4, l: "SA" }, { v: 3, l: "A" }, { v: 2, l: "D" }, { v: 1, l: "SD" }
+    ];
+    var btns = opts.map(function(o) {
+      var sel = val === o.v ? " selected" : "";
+      return '<button type="button" class="likert-btn' + sel + '" data-num="' + item.num + '" data-val="' + o.v + '" aria-pressed="' + (val === o.v) + '"><b>' + o.v + '</b>' + o.l + '</button>';
+    }).join("");
+    return (
+      '<div class="item' + (invalid ? " invalid" : "") + '" data-item="' + item.num + '">' +
+        '<div class="item-row">' +
+          '<div class="item-num">' + item.num + '</div>' +
+          '<div class="item-text">' + esc(item.text) + '</div>' +
+          '<div class="likert">' + btns + '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderSurveyStep(step, missing) {
+    var html = '<div class="content">';
+    html += '<h2 class="section-title serif">' + esc(step.title) + '</h2>';
+    if (step.note) html += '<p class="section-note">' + esc(step.note) + '</p>';
+    html += '<div class="scale-key"><span><b>4</b> Strongly Agree</span><span><b>3</b> Agree</span><span><b>2</b> Disagree</span><span><b>1</b> Strongly Disagree</span></div>';
+    html += '<div class="banner error' + (missing.length ? " show" : "") + '">Please answer every statement before continuing.</div>';
+    step.groups.forEach(function(g) {
+      if (g.heading) html += '<div class="group-heading">' + esc(g.heading) + '</div>';
+      g.items.forEach(function(it) {
+        html += likertRow(it, missing.indexOf(it.num) !== -1);
+      });
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function renderWelcome() {
+    return (
+      '<div class="welcome">' +
+        '<p class="eyebrow">Research Instrument</p>' +
+        '<h1 class="title serif">PRISM Evaluation Questionnaire</h1>' +
+        '<p class="subtitle">Portal for Records, Information, and School Management</p>' +
+        '<div class="rule"></div>' +
+        '<p>This questionnaire gathers your honest assessment of PRISM. Your responses help evaluate the system\u2019s usability, functional suitability, and overall user satisfaction as a school management portal. All information you provide is treated confidentially and used solely for research purposes.</p>' +
+        '<div class="meta">' +
+          '<div><b>' + TOTAL_ITEMS + ' statements</b>3 sections</div>' +
+          '<div><b>~6\u20138 min</b>estimated time</div>' +
+          '<div><b>4-point scale</b>Strongly Disagree \u2192 Strongly Agree</div>' +
+        '</div>' +
+        '<button type="button" class="btn btn-primary" id="start-btn">Begin Questionnaire</button>' +
+      '</div>'
+    );
+  }
+
+  function renderInfo() {
+    var r = state.respondent;
+    var missing = infoMissing();
+    var showBanner = state._infoTouched && missing.length;
+    var html = '<div class="content">';
+    html += '<h2 class="section-title serif">Respondent Information</h2>';
+    html += '<p class="section-note">A few quick details before you begin.</p>';
+    html += '<div class="banner error' + (showBanner ? " show" : "") + '">Please complete the required fields marked with *.</div>';
+
+    html += '<div class="field"><label class="field-label">Name <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
+      '<input type="text" id="f-name" value="' + esc(r.name) + '" placeholder="Your name" /></div>';
+
+    html += '<div class="field"><label class="field-label">Age <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
+      '<input type="number" id="f-age" value="' + esc(r.age) + '" placeholder="e.g. 24" min="5" max="100" /></div>';
+
+    html += '<div class="field"><label class="field-label">Sex <span class="req">*</span></label><div class="choice-grid">' +
+      SEX_OPTIONS.map(function(o) {
+        return '<button type="button" class="choice-pill' + (r.sex === o ? " selected" : "") + '" data-field="sex" data-val="' + esc(o) + '">' + esc(o) + '</button>';
+      }).join("") + '</div></div>';
+
+    html += '<div class="field"><label class="field-label">User Type <span class="req">*</span></label><div class="choice-grid">' +
+      USER_TYPE_OPTIONS.map(function(o) {
+        return '<button type="button" class="choice-pill' + (r.userType === o ? " selected" : "") + '" data-field="userType" data-val="' + esc(o) + '">' + esc(o) + '</button>';
+      }).join("") + '</div></div>';
+
+    if (r.userType === "Other") {
+      html += '<div class="field"><label class="field-label">Please specify <span class="req">*</span></label>' +
+        '<input type="text" id="f-usertype-other" value="' + esc(r.userTypeOther) + '" placeholder="Your role" /></div>';
+    }
+
+    html += '<div class="field"><label class="field-label">Length of Time Using PRISM <span class="req">*</span></label><div class="choice-grid">' +
+      DURATION_OPTIONS.map(function(o) {
+        return '<button type="button" class="choice-pill' + (r.duration === o ? " selected" : "") + '" data-field="duration" data-val="' + esc(o) + '">' + esc(o) + '</button>';
+      }).join("") + '</div></div>';
+
+    html += '</div>';
+    return html;
+  }
+
+  function renderComments() {
+    var html = '<div class="content">';
+    html += '<h2 class="section-title serif">Additional Comments</h2>';
+    html += '<p class="section-note">Optional \u2014 share any comments, concerns, or suggestions for improving PRISM.</p>';
+    html += '<div class="field"><textarea id="f-comments" placeholder="Type your feedback here...">' + esc(state.comments) + '</textarea></div>';
+    if (state.submitError) {
+      html += '<div class="banner error show">' + esc(state.submitError) + '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderDone() {
+    return (
+      '<div class="done-wrap">' +
+        '<div class="seal"><span class="seal-word">RECORDED</span><span class="seal-sub">PRISM SURVEY</span></div>' +
+        '<h2 class="serif">Thank you for your response</h2>' +
+        '<p>Your evaluation has been recorded and will help improve the PRISM school management portal.</p>' +
+        '<div class="response-id">Reference: ' + esc(state.responseId || "") + '</div>' +
+        '<div><button type="button" class="btn btn-ghost" id="restart-btn">Submit Another Response</button></div>' +
+      '</div>'
+    );
+  }
+
+  function renderFooterNav(step) {
+    var isFirstNav = NAV_STEPS.indexOf(step) === 0;
+    var isLastNav = NAV_STEPS.indexOf(step) === NAV_STEPS.length - 1;
+    var nextLabel = isLastNav ? (state.submitting ? "Submitting\u2026" : "Submit Questionnaire") : "Next";
+    return (
+      '<div class="footer-nav">' +
+        (isFirstNav
+          ? '<span></span>'
+          : '<button type="button" class="btn btn-ghost" id="back-btn">Back</button>') +
+        '<div class="spacer"></div>' +
+        '<button type="button" class="btn btn-primary" id="next-btn"' + (state.submitting ? " disabled" : "") + '>' + nextLabel + '</button>' +
+      '</div>'
+    );
+  }
+
+  function render() {
+    var step = currentStep();
+    var missing = step.kind === "survey" ? (state._surveyTouched && state._surveyTouched[step.id] ? stepMissingItems(step) : []) : [];
+
+    var inner = '<div class="shell">' + renderStamp() + '<div class="masthead">' +
+      '<p class="eyebrow">PRISM \u00b7 Portal for Records, Information, and School Management</p>' +
+      '<h1 class="title serif">Evaluation Questionnaire</h1>' +
+      '<p class="subtitle">Usability \u00b7 Functional Suitability \u00b7 User Satisfaction</p>' +
+      '</div>';
+
+    inner += renderProgress();
+
+    if (step.kind === "welcome") inner += renderWelcome();
+    else if (step.kind === "info") inner += renderInfo();
+    else if (step.kind === "survey") inner += renderSurveyStep(step, missing);
+    else if (step.kind === "comments") inner += renderComments();
+    else if (step.kind === "done") inner += renderDone();
+
+    if (step.kind !== "welcome" && step.kind !== "done") inner += renderFooterNav(step);
+
+    inner += '</div>';
+    root.innerHTML = inner;
+    attachHandlers(step);
+  }
+
+  function attachHandlers(step) {
+    var startBtn = root.querySelector("#start-btn");
+    if (startBtn) startBtn.addEventListener("click", function() {
+      state.stepIndex += 1;
+      render();
+    });
+
+    var restartBtn = root.querySelector("#restart-btn");
+    if (restartBtn) restartBtn.addEventListener("click", function() {
+      state = {
+        stepIndex: 0, answers: {},
+        respondent: { name: "", age: "", sex: "", userType: "", userTypeOther: "", duration: "" },
+        comments: "", submitting: false, submitError: null, responseId: null
+      };
+      render();
+    });
+
+    root.querySelectorAll(".likert-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var num = btn.getAttribute("data-num");
+        var val = +btn.getAttribute("data-val");
+        state.answers[num] = val;
+        render();
+      });
+    });
+
+    root.querySelectorAll(".choice-pill").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var field = btn.getAttribute("data-field");
+        var val = btn.getAttribute("data-val");
+        state.respondent[field] = state.respondent[field] === val ? "" : val;
+        if (field === "userType" && state.respondent[field] !== "Other") state.respondent.userTypeOther = "";
+        render();
+      });
+    });
+
+    var nameInput = root.querySelector("#f-name");
+    if (nameInput) nameInput.addEventListener("input", function(e) { state.respondent.name = e.target.value; });
+    var ageInput = root.querySelector("#f-age");
+    if (ageInput) ageInput.addEventListener("input", function(e) { state.respondent.age = e.target.value; });
+    var otherInput = root.querySelector("#f-usertype-other");
+    if (otherInput) otherInput.addEventListener("input", function(e) { state.respondent.userTypeOther = e.target.value; });
+    var commentsInput = root.querySelector("#f-comments");
+    if (commentsInput) commentsInput.addEventListener("input", function(e) { state.comments = e.target.value; });
+
+    var backBtn = root.querySelector("#back-btn");
+    if (backBtn) backBtn.addEventListener("click", function() {
+      state.stepIndex -= 1;
+      render();
+    });
+
+    var nextBtn = root.querySelector("#next-btn");
+    if (nextBtn) nextBtn.addEventListener("click", function() { handleNext(step); });
+  }
+
+  function handleNext(step) {
+    if (step.kind === "info") {
+      state._infoTouched = true;
+      var missing = infoMissing();
+      if (missing.length) { render(); focusFirstError(); return; }
+    }
+    if (step.kind === "survey") {
+      state._surveyTouched = state._surveyTouched || {};
+      state._surveyTouched[step.id] = true;
+      var m = stepMissingItems(step);
+      if (m.length) { render(); focusFirstError(); return; }
+    }
+    if (step.kind === "comments") {
+      submitResponse();
+      return;
+    }
+    state.stepIndex += 1;
+    render();
+    root.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function focusFirstError() {
+    var bad = root.querySelector(".item.invalid, .banner.error.show");
+    if (bad) bad.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function genId() {
+    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    return "resp-" + Date.now() + "-" + Math.floor(Math.random() * 100000);
+  }
+
+  async function submitResponse() {
+    if (state.submitting) return;
+    state.submitting = true;
+    state.submitError = null;
+    render();
+
+    var id = genId();
+    var payload = {
+      id: id,
+      submitted_at: new Date().toISOString(),
+      respondent_name: state.respondent.name || null,
+      respondent_age: state.respondent.age ? Number(state.respondent.age) : null,
+      respondent_sex: state.respondent.sex,
+      respondent_user_type: state.respondent.userType === "Other"
+        ? state.respondent.userTypeOther
+        : state.respondent.userType,
+      duration_of_use: state.respondent.duration,
+      answers: state.answers,
+      comments: state.comments || null
+    };
+
+    try {
+      var { error } = await supabaseClient
+        .from("responses")
+        .insert([payload]);
+
+      if (error) throw error;
+
+      state.submitting = false;
+      state.responseId = id.slice(0, 8).toUpperCase();
+      state.stepIndex = STEPS.length - 1;
+      render();
+    } catch (err) {
+      console.error("Submit error:", err);
+      state.submitting = false;
+      state.submitError = "We couldn't save your response. Please check your connection and try again.";
+      render();
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

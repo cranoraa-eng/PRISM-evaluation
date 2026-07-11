@@ -1,0 +1,30 @@
+-- Run this SQL in your Supabase SQL Editor (https://supabase.com/dashboard → SQL Editor)
+
+create table if not exists responses (
+  id              uuid primary key,
+  submitted_at    timestamptz not null default now(),
+  respondent_name text,
+  respondent_age  int,
+  respondent_sex  text not null,
+  respondent_user_type text not null,
+  duration_of_use text not null,
+  answers         jsonb not null default '{}'::jsonb,
+  comments        text
+);
+
+-- Enable Row-Level Security (recommended)
+alter table responses enable row level security;
+
+-- Allow anonymous inserts (needed for the public form)
+create policy "Allow anonymous inserts"
+  on responses
+  for insert
+  to anon
+  with check (true);
+
+-- Optional: allow authenticated reads (for a future admin dashboard)
+create policy "Allow authenticated reads"
+  on responses
+  for select
+  to authenticated
+  using (true);
