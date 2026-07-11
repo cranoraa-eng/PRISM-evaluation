@@ -716,7 +716,7 @@
 
     html += '<div class="chart-grid">';
     html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Section Mean Scores</h3><p class="chart-subtitle">Average rating per section across all respondents</p></div><span class="chart-badge">BAR</span></div><canvas id="chart-bar" height="100"></canvas></div>';
-    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown of survey respondents</p></div><span class="chart-badge">BAR</span></div><canvas id="chart-sex" height="70"></canvas></div>';
+    html += '<div class="chart-card chart-card-wide"><div class="chart-card-header"><div><h3>Sex Distribution</h3><p class="chart-subtitle">Gender breakdown of survey respondents</p></div><span class="chart-badge">DOUGHNUT</span></div><canvas id="chart-sex" height="70"></canvas></div>';
     html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>Section Radar</h3><p class="chart-subtitle">Performance overview by section</p></div><span class="chart-badge">RADAR</span></div><canvas id="chart-radar"></canvas></div>';
     html += '<div class="chart-card chart-card-half"><div class="chart-card-header"><div><h3>User Type Distribution</h3><p class="chart-subtitle">Respondents by role</p></div><span class="chart-badge">DOUGHNUT</span></div><canvas id="chart-type"></canvas></div>';
     html += '</div>';
@@ -894,28 +894,23 @@
     if (sexCtx) {
       var sexColors = ["#2E4066","#A9813E","#3F7A5C","#5B6B85","#D9C08F"];
       STATE.charts.sex = new Chart(sexCtx, {
-        type: "bar",
+        type: "doughnut",
         data: {
           labels: Object.keys(sexCounts),
           datasets: [{
-            label: "Count",
             data: Object.values(sexCounts),
-            backgroundColor: sexColors.slice(0, Object.keys(sexCounts).length).map(function(c){return c+"dd";}),
-            borderColor: sexColors.slice(0, Object.keys(sexCounts).length),
-            borderWidth: 1.5,
-            borderRadius: 8,
-            barPercentage: 0.5
+            backgroundColor: sexColors.slice(0, Object.keys(sexCounts).length),
+            borderColor: "#fff",
+            borderWidth: 3,
+            hoverOffset: 8
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: true,
-          scales: {
-            y: { beginAtZero: true, grid: { color: "rgba(22,35,61,0.06)" }, ticks: { stepSize: 1, font: { size: 11 } } },
-            x: { grid: { display: false }, ticks: { font: { size: 12, weight: "600" } } }
-          },
+          cutout: "55%",
           plugins: {
-            legend: { display: false },
+            legend: { position: "bottom", labels: { boxWidth: 12, padding: 14, font: { size: 11 } } },
             tooltip: {
               backgroundColor: "rgba(22,35,61,0.9)",
               titleFont: { size: 12, weight: "700" },
@@ -926,7 +921,7 @@
                 label: function(ctx) {
                   var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
                   var pct = ((ctx.raw / total) * 100).toFixed(1);
-                  return ctx.raw + " respondents (" + pct + "%)";
+                  return ctx.label + ": " + ctx.raw + " (" + pct + "%)";
                 }
               }
             }
