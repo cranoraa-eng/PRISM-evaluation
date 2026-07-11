@@ -315,7 +315,7 @@
   var root = document.getElementById("admin-root");
 
   var STATE = {
-    loggedIn: false,
+    loggedIn: sessionStorage.getItem("prism_admin") === "1",
     loading: true,
     responses: [],
     activeTab: "overview",
@@ -777,6 +777,7 @@
     if (btn) btn.addEventListener("click", function() {
       if (pass.value === ADMIN_PASSWORD) {
         STATE.loggedIn = true;
+        sessionStorage.setItem("prism_admin", "1");
         loadResponses();
       } else {
         err.style.display = "block";
@@ -805,6 +806,7 @@
     var logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) logoutBtn.addEventListener("click", function() {
       STATE.loggedIn = false;
+      sessionStorage.removeItem("prism_admin");
       STATE.responses = [];
       render();
     });
