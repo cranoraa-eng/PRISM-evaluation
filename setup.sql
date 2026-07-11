@@ -4,36 +4,44 @@
 -- ============================================================
 -- 1. RESPONSES TABLE (with audit, metadata, soft-delete, consent version)
 -- ============================================================
+-- Create table (no-op if exists; columns added individually below)
 create table if not exists responses (
   id               uuid primary key,
   submitted_at     timestamptz not null default now(),
-  respondent_name  text,
-  respondent_age   int,
-  respondent_sex   text,
-  respondent_user_type text not null,
-  consent_given    boolean not null default false,
-  consent_date     timestamptz,
-  consent_version  text default 'v1.0',
-  answers          jsonb not null default '{}'::jsonb,
-  comments         text,
-
-  -- Quality & audit metadata
-  device_info      jsonb,
-  user_agent       text,
-  ip_address       inet,
-  session_id       uuid,
-  time_taken_sec   int,
-  survey_version   text default '1.0',
-  locale           text default 'en',
-  timings          jsonb,
-  response_started_at timestamptz,
-
-  -- Soft-delete & retention
-  deleted_at       timestamptz,
-  deleted_by       uuid,
-  anonymized_at    timestamptz,
-  retain_until     timestamptz generated always as (submitted_at + interval '3 years') stored
+  answers          jsonb not null default '{}'::jsonb
 );
+
+-- Add columns idempotently (safe to run repeatedly)
+alter table responses add column if not exists respondent_name  text;
+alter table responses add column if not exists respondent_age   int;
+alter table responses add column if not exists respondent_sex   text;
+alter table responses add column if not exists respondent_user_type text not null default '';
+alter table responses add column if not exists consent_given    boolean not null default false;
+alter table responses add column if not exists consent_date     timestamptz;
+alter table responses add column if not exists consent_version  text default 'v1.0';
+alter table responses add column if not exists comments         text;
+alter table responses add column if not exists device_info      jsonb;
+alter table responses add column if not exists user_agent       text;
+alter table responses add column if not exists ip_address       inet;
+alter table responses add column if not exists session_id       uuid;
+alter table responses add column if not exists time_taken_sec   int;
+alter table responses add column if not exists survey_version   text default '1.0';
+alter table responses add column if not exists locale           text default 'en';
+alter table responses add column if not exists timings          jsonb;
+alter table responses add column if not exists response_started_at timestamptz;
+alter table responses add column if not exists deleted_at       timestamptz;
+alter table responses add column if not exists deleted_by       uuid;
+alter table responses add column if not exists anonymized_at    timestamptz;
+-- retain_until is a generated column; drop & recreate if missing
+do $$ begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_name='responses' and column_name='retain_until'
+  ) then
+    alter table responses add column retain_until timestamptz
+      generated always as (submitted_at + interval '3 years') stored;
+  end if;
+end $$;
 
 -- Indexes for performance
 create index if not exists idx_responses_submitted_at on responses (submitted_at);
