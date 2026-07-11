@@ -419,14 +419,46 @@
   #prism-root .saved-indicator.show { opacity: 1; }
 
   @media (max-width: 560px) {
-    #prism-root { padding: 16px 0 48px; }
-    #prism-root .masthead, #prism-root .content, #prism-root .footer-nav, #prism-root .progress-wrap { padding-left: 20px; padding-right: 20px; }
+    #prism-root { padding: 8px 0 48px; }
+    #prism-root .masthead, #prism-root .content, #prism-root .footer-nav, #prism-root .progress-wrap { padding-left: 16px; padding-right: 16px; }
     #prism-root .shell { border-radius: 0; border-left: none; border-right: none; }
-    #prism-root .stamp { width: 54px; height: 54px; font-size: 8.5px; top: 20px; right: 16px; }
-    #prism-root h1.title { font-size: 21px; }
-    #prism-root .item-row { flex-direction: column; }
-    #prism-root .likert { margin-left: 0; }
+    #prism-root .stamp { width: 48px; height: 48px; font-size: 7.5px; top: 16px; right: 12px; }
+    #prism-root h1.title { font-size: 19px; }
+    #prism-root .subtitle { font-size: 13px; }
+    #prism-root .eyebrow { font-size: 10px; }
+    #prism-root .item-row { flex-direction: column; gap: 8px; }
+    #prism-root .likert { margin-left: 0; flex-wrap: wrap; }
+    #prism-root .likert-btn { width: 42px; height: 38px; }
     #prism-root .item-num { margin-bottom: 2px; }
+    #prism-root .item-text { font-size: 14px; }
+    #prism-root .scale-key { font-size: 11px; gap: 8px; padding: 8px 10px; }
+    #prism-root .welcome { padding: 24px 16px 24px; }
+    #prism-root .welcome .meta { gap: 14px; }
+    #prism-root .welcome .meta div { font-size: 11.5px; }
+    #prism-root .done-wrap { padding: 32px 16px; }
+    #prism-root .seal { width: 100px; height: 100px; }
+    #prism-root .seal .seal-word { font-size: 13px; }
+    #prism-root .done-wrap h2 { font-size: 18px; }
+    #prism-root .btn { padding: 11px 18px; font-size: 13px; }
+    #prism-root .field label.field-label { font-size: 12.5px; }
+    #prism-root input[type=text], #prism-root input[type=number], #prism-root textarea { font-size: 13px; padding: 9px 10px; }
+    #prism-root .choice-pill { font-size: 12px; padding: 7px 12px; }
+    #prism-root .group-heading { font-size: 11.5px; }
+    #prism-root .section-title { font-size: 16px; }
+    #prism-root .section-note { font-size: 12.5px; }
+  }
+
+  @media (min-width: 561px) and (max-width: 900px) {
+    #prism-root { padding: 24px 12px 56px; }
+    #prism-root .shell { max-width: 700px; }
+    #prism-root .masthead { padding: 28px 28px 18px; }
+    #prism-root .content { padding: 22px 28px 8px; }
+    #prism-root .footer-nav { padding: 16px 28px 24px; }
+    #prism-root .progress-wrap { padding: 12px 28px 0; }
+  }
+
+  @media (min-width: 901px) and (max-width: 1200px) {
+    #prism-root .shell { max-width: 780px; }
   }
 
   @media print {

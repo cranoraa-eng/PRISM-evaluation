@@ -323,13 +323,46 @@
   .chart-card h3 { font-size: 13px; font-weight: 700; margin: 0 0 12px; color: var(--ink); }
   .chart-card canvas { width: 100% !important; }
 
-  @media (max-width: 768px) {
-    .chart-grid { grid-template-columns: 1fr; }
-  }
   @media (max-width: 640px) {
-    .panel { padding: 20px 16px; }
-    .masthead { padding: 20px 16px; }
-    .tabs { padding: 0 16px; }
+    .panel { padding: 16px 14px; }
+    .masthead {
+      padding: 16px 14px;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .masthead h1 { font-size: 18px; }
+    .masthead .sub { font-size: 12px; }
+    .masthead .actions { width: 100%; justify-content: flex-start; }
+    .tabs { padding: 0 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab { padding: 12px 14px; font-size: 12px; }
+    .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-card { padding: 12px 14px; }
+    .stat-card .value { font-size: 22px; }
+    .stat-card .label { font-size: 10.5px; }
+    .chart-grid { grid-template-columns: 1fr; }
+    .chart-card { padding: 14px; }
+    .chart-card h3 { font-size: 12px; }
+    .filter-bar { flex-direction: column; gap: 10px; padding: 12px; }
+    .filter-group { width: 100%; }
+    .filter-group select, .filter-group input { width: 100%; }
+    .section-heading { font-size: 14px; margin: 20px 0 10px; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 10px; }
+    .mean-bar-wrap { min-width: 120px; }
+    .btn { font-size: 12px; padding: 6px 12px; }
+    .login-wrap { margin: 40px 16px; padding: 28px 20px; }
+    .login-wrap h1 { font-size: 20px; }
+  }
+
+  @media (min-width: 641px) and (max-width: 900px) {
+    .panel { padding: 24px 24px; }
+    .masthead { padding: 24px 24px 18px; }
+    .tabs { padding: 0 24px; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (min-width: 901px) and (max-width: 1200px) {
+    .shell { max-width: 1000px; }
   }
 </style>
 </head>
