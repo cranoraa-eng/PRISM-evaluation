@@ -646,7 +646,7 @@
     html += '<p style="font-size:13px;color:var(--muted);margin:0 0 14px;">Showing all ' + r.length + ' submissions. Scroll horizontally to see all columns.</p>';
 
     html += '<div class="table-wrap"><table><thead><tr>';
-    html += '<th>#</th><th>Reference</th><th>Submitted</th><th>Name</th><th>Age</th><th>Sex</th><th>User Type</th><th>Duration</th>';
+    html += '<th>#</th><th>Reference</th><th>Submitted</th><th>Name</th><th>Age</th><th>Sex</th><th>User Type</th>';
     for (var k = 1; k <= TOTAL_ITEMS; k++) {
       html += '<th>Q' + k + '</th>';
     }
@@ -670,7 +670,6 @@
       html += '<td>' + (res.respondent_age || "—") + '</td>';
       html += '<td>' + esc(res.respondent_sex || "—") + '</td>';
       html += '<td>' + esc(res.respondent_user_type || "—") + '</td>';
-      html += '<td>' + esc(res.duration_of_use || "—") + '</td>';
       for (var k2 = 1; k2 <= TOTAL_ITEMS; k2++) {
         var v2 = (res.answers || {})[String(k2)];
         html += '<td style="text-align:center">' + (v2 || "—") + '</td>';
@@ -715,20 +714,6 @@
     Object.keys(typeCounts).forEach(function(k) {
       var pct = n ? (typeCounts[k] / n * 100).toFixed(1) : 0;
       html += '<tr><td>' + esc(k) + '</td><td>' + typeCounts[k] + '</td><td>' + pct + '%</td></tr>';
-    });
-    html += '</tbody></table></div>';
-
-    // duration breakdown
-    var durCounts = {};
-    r.forEach(function(res) {
-      var d = res.duration_of_use || "Unknown";
-      durCounts[d] = (durCounts[d] || 0) + 1;
-    });
-    html += '<div class="section-heading">Duration of Use</div>';
-    html += '<div class="table-wrap"><table><thead><tr><th>Duration</th><th>Count</th><th>Percentage</th></tr></thead><tbody>';
-    Object.keys(durCounts).forEach(function(k) {
-      var pct = n ? (durCounts[k] / n * 100).toFixed(1) : 0;
-      html += '<tr><td>' + esc(k) + '</td><td>' + durCounts[k] + '</td><td>' + pct + '%</td></tr>';
     });
     html += '</tbody></table></div>';
 
@@ -859,7 +844,7 @@
   /* export CSV */
   function exportCSV() {
     if (!STATE.responses.length) return;
-    var headers = ["Reference","Submitted","Name","Age","Sex","User Type","Duration"];
+    var headers = ["Reference","Submitted","Name","Age","Sex","User Type"];
     for (var k = 1; k <= TOTAL_ITEMS; k++) headers.push("Q" + k);
     headers.push("Mean","Comments");
 
@@ -875,7 +860,7 @@
       var dt = res.submitted_at || "";
       var line = [
         ref, dt, res.respondent_name || "", res.respondent_age || "",
-        res.respondent_sex || "", res.respondent_user_type || "", res.duration_of_use || ""
+        res.respondent_sex || "", res.respondent_user_type || ""
       ].concat(vals).concat([m.toFixed(2), res.comments || ""]);
       rows.push(line.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","));
     });

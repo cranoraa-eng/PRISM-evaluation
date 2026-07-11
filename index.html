@@ -547,8 +547,7 @@
   };
 
   var SEX_OPTIONS = ["Male", "Female"];
-  var USER_TYPE_OPTIONS = ["Student", "Faculty / Teacher", "Parent / Guardian", "School Administrator / Staff", "Other"];
-  var DURATION_OPTIONS = ["Less than 1 month", "1–6 months", "7–12 months", "More than 1 year"];
+  var USER_TYPE_OPTIONS = ["Student", "Faculty / Teacher", "Parent / Guardian", "School Administrator / Staff", "IT Expert"];
 
   var root = document.getElementById("prism-root");
 
@@ -581,8 +580,7 @@
     var m = [];
     if (!state.respondent.sex) m.push("sex");
     if (!state.respondent.userType) m.push("userType");
-    if (state.respondent.userType === "Other" && !state.respondent.userTypeOther.trim()) m.push("userTypeOther");
-    if (!state.respondent.duration) m.push("duration");
+    if (state.respondent.userType === "IT Expert" && !state.respondent.userTypeOther.trim()) m.push("userTypeOther");
     if (state.respondent.age && (isNaN(state.respondent.age) || +state.respondent.age < 5 || +state.respondent.age > 100)) m.push("age");
     return m;
   }
@@ -688,15 +686,10 @@
         return '<button type="button" class="choice-pill' + (r.userType === o ? " selected" : "") + '" data-field="userType" data-val="' + esc(o) + '">' + esc(o) + '</button>';
       }).join("") + '</div></div>';
 
-    if (r.userType === "Other") {
+    if (r.userType === "IT Expert") {
       html += '<div class="field"><label class="field-label">Please specify <span class="req">*</span></label>' +
         '<input type="text" id="f-usertype-other" value="' + esc(r.userTypeOther) + '" placeholder="Your role" /></div>';
     }
-
-    html += '<div class="field"><label class="field-label">Length of Time Using PRISM <span class="req">*</span></label><div class="choice-grid">' +
-      DURATION_OPTIONS.map(function(o) {
-        return '<button type="button" class="choice-pill' + (r.duration === o ? " selected" : "") + '" data-field="duration" data-val="' + esc(o) + '">' + esc(o) + '</button>';
-      }).join("") + '</div></div>';
 
     html += '</div>';
     return html;
@@ -777,7 +770,7 @@
     if (restartBtn) restartBtn.addEventListener("click", function() {
       state = {
         stepIndex: 0, answers: {},
-        respondent: { name: "", age: "", sex: "", userType: "", userTypeOther: "", duration: "" },
+    respondent: { name: "", age: "", sex: "", userType: "", userTypeOther: "" },
         comments: "", submitting: false, submitError: null, responseId: null
       };
       render();
@@ -797,7 +790,7 @@
         var field = btn.getAttribute("data-field");
         var val = btn.getAttribute("data-val");
         state.respondent[field] = state.respondent[field] === val ? "" : val;
-        if (field === "userType" && state.respondent[field] !== "Other") state.respondent.userTypeOther = "";
+        if (field === "userType" && state.respondent[field] !== "IT Expert") state.respondent.userTypeOther = "";
         render();
       });
     });
@@ -865,10 +858,9 @@
       respondent_name: state.respondent.name || null,
       respondent_age: state.respondent.age ? Number(state.respondent.age) : null,
       respondent_sex: state.respondent.sex,
-      respondent_user_type: state.respondent.userType === "Other"
+      respondent_user_type: state.respondent.userType === "IT Expert"
         ? state.respondent.userTypeOther
         : state.respondent.userType,
-      duration_of_use: state.respondent.duration,
       answers: state.answers,
       comments: state.comments || null
     };
