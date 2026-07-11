@@ -1263,8 +1263,9 @@
       out[0] = { hpx: 30 };
       out[1] = { hpx: 22 };
       out[2] = { hpx: 8 };
-      out[3] = { hpx: 24 };
-      for (var ri = 4; ri < rows.length; ri++) {
+      out[3] = { hpx: 8 };
+      out[4] = { hpx: 24 };
+      for (var ri = 5; ri < rows.length; ri++) {
         var maxLines = 1;
         Object.keys(wrapHints || {}).forEach(function(key) {
           var ci = Number(key);
@@ -1286,6 +1287,7 @@
         ["PRISM Research Dashboard"],
         [title + " | " + subtitle],
         [""],
+        [""],
         headers
       ].concat(bodyRows);
       var lastCol = headers.length - 1;
@@ -1296,8 +1298,8 @@
         { s: { r: 0, c: 0 }, e: { r: 0, c: lastCol } },
         { s: { r: 1, c: 0 }, e: { r: 1, c: lastCol } }
       ];
-      ws["!freeze"] = { xSplit: 0, ySplit: 4 };
-      ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 3, c: 0 }, e: { r: 3, c: lastCol } }) };
+      ws["!freeze"] = { xSplit: 0, ySplit: 5 };
+      ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 4, c: 0 }, e: { r: 4, c: lastCol } }) };
 
       setStyle(ws, 0, 0, {
         font: { name: "Calibri", sz: 16, bold: true, color: { rgb: "16233D" } },
@@ -1309,7 +1311,7 @@
       });
 
       for (var hc = 0; hc <= lastCol; hc++) {
-        setStyle(ws, 3, hc, {
+        setStyle(ws, 4, hc, {
           font: { name: "Calibri", sz: 10, bold: true, color: { rgb: "FFFFFF" } },
           fill: { fgColor: { rgb: "16233D" } },
           border: clone(BORDER),
@@ -1317,7 +1319,7 @@
         });
       }
 
-      for (var br = 4; br < rows.length; br++) {
+      for (var br = 5; br < rows.length; br++) {
         for (var bc = 0; bc <= lastCol; bc++) {
           var val = rows[br][bc];
           var isBlank = val == null || val === "";
@@ -1387,6 +1389,19 @@
       wrapHints: wrapHints1,
       meanCol: 6 + TOTAL_ITEMS
     });
+    for (var rowIdx1 = 0; rowIdx1 < rows1.length; rowIdx1++) {
+      var sheetRowIdx = rowIdx1 + 5;
+      var excelRowNum = sheetRowIdx + 1;
+      var meanCellAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 6 + TOTAL_ITEMS });
+      var startQAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 6 }).replace(/\d+$/, "");
+      var endQAddr = XLSX.utils.encode_cell({ r: sheetRowIdx, c: 6 + TOTAL_ITEMS - 1 }).replace(/\d+$/, "");
+      if (ws1[meanCellAddr]) {
+        ws1[meanCellAddr].f = "AVERAGE(" + startQAddr + excelRowNum + ":" + endQAddr + excelRowNum + ")";
+        ws1[meanCellAddr].v = rows1[rowIdx1][6 + TOTAL_ITEMS];
+        ws1[meanCellAddr].t = "n";
+        ws1[meanCellAddr].z = "0.00";
+      }
+    }
 
     /* ---- Sheet 2: Section Means ---- */
     var rows2 = [];
