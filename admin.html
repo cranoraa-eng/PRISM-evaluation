@@ -839,12 +839,15 @@
     STATE.loading = true;
     render();
     try {
-      var { data, error } = await supabaseClient
+      console.log("Fetching responses...");
+      var result = await supabaseClient
         .from("responses")
         .select("*")
         .order("submitted_at", { ascending: false });
-      if (error) throw error;
-      STATE.responses = data || [];
+      console.log("Supabase result:", result);
+      if (result.error) throw result.error;
+      STATE.responses = result.data || [];
+      console.log("Loaded", STATE.responses.length, "responses");
     } catch (err) {
       console.error("Load error:", err);
       STATE.responses = [];
