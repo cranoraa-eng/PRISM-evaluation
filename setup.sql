@@ -116,6 +116,7 @@ create index if not exists idx_admin_roles_user_id on admin_roles (user_id);
 
 alter table admin_roles enable row level security;
 
+drop policy if exists "Users read own role" on admin_roles;
 -- Authenticated users can read their own role
 create policy "Users read own role"
   on admin_roles
@@ -142,6 +143,7 @@ create index if not exists idx_audit_log_performed on audit_log (performed_at);
 
 alter table audit_log enable row level security;
 
+drop policy if exists "Audit log access" on audit_log;
 -- Authenticated users can insert and read audit logs
 create policy "Audit log access"
   on audit_log
@@ -163,6 +165,7 @@ create table if not exists consent_versions (
 );
 
 alter table consent_versions enable row level security;
+drop policy if exists "Consent versions readable by all" on consent_versions;
 create policy "Consent versions readable by all"
   on consent_versions for select to authenticated, anon
   using (true);
@@ -178,6 +181,7 @@ create table if not exists survey_versions (
 );
 
 alter table survey_versions enable row level security;
+drop policy if exists "Survey versions readable by all" on survey_versions;
 create policy "Survey versions readable by all"
   on survey_versions for select to authenticated, anon
   using (true);
