@@ -5,12 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PRISM — Research Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
   const SUPABASE_URL  = "https://qwkkpmxpmugkrlspbiri.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3a2twbXhwbXVna3Jsc3BiaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NjQwMDEsImV4cCI6MjA5OTM0MDAwMX0.HT3V9wXTEm0ehxoqgChUEDrqetPKwnB1fanGwHWtDdI";
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-  // Simple password gate — change this to your own password
   const ADMIN_PASSWORD = "prism2025";
 </script>
 </head>
@@ -28,7 +27,6 @@
     --muted: #5B6B85;
     --success: #3F7A5C;
     --error: #B3432E;
-    --radius: 10px;
   }
   *, *::before, *::after { box-sizing: border-box; }
   body {
@@ -41,7 +39,6 @@
   }
   .serif { font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; }
 
-  /* login */
   .login-wrap {
     max-width: 380px;
     margin: 80px auto;
@@ -79,7 +76,6 @@
   }
   .login-wrap button:hover { background: var(--ink-2); }
 
-  /* shell */
   .shell {
     max-width: 1100px;
     margin: 24px auto;
@@ -125,8 +121,8 @@
   .btn-ghost:hover { border-color: var(--ink-2); }
   .btn-danger { background: var(--error); color: #fff; }
   .btn-danger:hover { opacity: 0.85; }
+  .btn-sm { font-size: 12px; padding: 5px 10px; }
 
-  /* tabs */
   .tabs {
     display: flex;
     border-bottom: 1px solid var(--line);
@@ -148,11 +144,9 @@
   .tab:hover { color: var(--ink-2); }
   .tab.active { color: var(--ink); border-bottom-color: var(--gold); }
 
-  /* panels */
   .panel { display: none; padding: 28px 32px; }
   .panel.active { display: block; }
 
-  /* stat cards */
   .stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -169,7 +163,6 @@
   .stat-card .value { font-size: 28px; font-weight: 700; color: var(--ink); margin-top: 4px; }
   .stat-card .note { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-  /* tables */
   .table-wrap {
     overflow-x: auto;
     border: 1px solid var(--line);
@@ -200,7 +193,6 @@
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(22,35,61,0.02); }
 
-  /* mean bar */
   .mean-bar-wrap {
     display: flex;
     align-items: center;
@@ -226,7 +218,6 @@
     text-align: right;
   }
 
-  /* interpretation badge */
   .interp {
     display: inline-block;
     font-size: 11.5px;
@@ -240,7 +231,6 @@
   .interp.fair { background: #FFF8E1; color: #F57F17; }
   .interp.poor { background: #FBEAE5; color: var(--error); }
 
-  /* section heading */
   .section-heading {
     font-size: 16px;
     font-weight: 700;
@@ -251,7 +241,6 @@
   }
   .section-heading:first-child { margin-top: 0; }
 
-  /* loading */
   .loading {
     text-align: center;
     padding: 60px 20px;
@@ -268,11 +257,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* export dropdown */
-  .export-menu {
-    position: relative;
-    display: inline-block;
-  }
+  .export-menu { position: relative; display: inline-block; }
   .export-dropdown {
     display: none;
     position: absolute;
@@ -298,7 +283,49 @@
   }
   .export-dropdown button:hover { background: var(--paper); }
 
-  /* responsive */
+  /* filters */
+  .filter-bar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-group label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .filter-group select, .filter-group input {
+    padding: 7px 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .filter-group select:focus, .filter-group input:focus { outline: 2px solid var(--ink-2); border-color: var(--ink-2); }
+  .filter-count { font-size: 12px; color: var(--muted); padding: 7px 0; }
+
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  .chart-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .chart-card h3 { font-size: 13px; font-weight: 700; margin: 0 0 12px; color: var(--ink); }
+  .chart-card canvas { width: 100% !important; }
+
+  @media (max-width: 768px) {
+    .chart-grid { grid-template-columns: 1fr; }
+  }
   @media (max-width: 640px) {
     .panel { padding: 20px 16px; }
     .masthead { padding: 20px 16px; }
@@ -318,141 +345,96 @@
     loggedIn: sessionStorage.getItem("prism_admin") === "1",
     loading: true,
     responses: [],
+    filteredResponses: [],
     activeTab: "overview",
-    exportOpen: false
+    exportOpen: false,
+    filters: { userType: "all", dateFrom: "", dateTo: "" },
+    charts: {}
   };
 
   var SECTIONS = [
-    {
-      key: "usability",
-      title: "A. Usability",
-      items: [
-        "PRISM is easy to access and use for my school-related tasks.",
-        "I can easily understand how to navigate through PRISM.",
-        "The arrangement of menus, buttons, and features in PRISM is clear and organized.",
-        "The interface design of PRISM is simple and user-friendly.",
-        "The labels, icons, and controls in PRISM are easy to understand.",
-        "I can quickly learn how to use PRISM without requiring extensive assistance.",
-        "I can easily find the information and features I need in PRISM.",
-        "The information displayed in PRISM is presented clearly and is easy to understand.",
-        "PRISM can be accessed and used effectively on different devices such as computers, tablets, and smartphones.",
-        "PRISM allows me to complete my tasks efficiently.",
-        "The different modules of PRISM provide a consistent user experience.",
-        "Overall, PRISM provides a convenient and user-friendly experience."
-      ]
-    },
-    {
-      key: "func_general",
-      title: "B1. General System Functions",
-      items: [
-        "PRISM's features and functions operate properly.",
-        "PRISM performs the functions expected from a school management system.",
-        "PRISM provides the necessary tools to support school operations.",
-        "PRISM responds properly when users interact with its features.",
-        "PRISM minimizes errors and technical problems during use."
-      ]
-    },
-    {
-      key: "func_records",
-      title: "B2. Records Management",
-      items: [
-        "PRISM effectively organizes and manages student records.",
-        "PRISM allows authorized users to access required records efficiently.",
-        "The records stored in PRISM are accurate and reliable.",
-        "PRISM helps reduce difficulties associated with manual record management."
-      ]
-    },
-    {
-      key: "func_enrollment",
-      title: "B3. Enrollment Management",
-      items: [
-        "PRISM provides an effective process for managing student enrollment information.",
-        "PRISM helps organize enrollment applications and related documents."
-      ]
-    },
-    {
-      key: "func_attendance",
-      title: "B4. Attendance and Grade Management",
-      items: [
-        "PRISM effectively supports attendance monitoring and record keeping.",
-        "PRISM helps teachers manage student grades efficiently.",
-        "PRISM supports accurate computation and management of academic records.",
-        "PRISM helps generate academic reports such as report cards efficiently."
-      ]
-    },
-    {
-      key: "func_communication",
-      title: "B5. Communication and Learning Features",
-      items: [
-        "PRISM improves access to school announcements and important updates.",
-        "The messaging and communication features of PRISM help users exchange information effectively.",
-        "PRISM makes learning materials easier to access and manage.",
-        "PRISM provides useful notifications regarding school activities, assignments, attendance, and academic information."
-      ]
-    },
-    {
-      key: "func_security",
-      title: "B6. Security and User Management",
-      items: [
-        "PRISM provides appropriate access based on user roles (administrator, teacher, student, and parent).",
-        "PRISM protects school information from unauthorized access."
-      ]
-    },
-    {
-      key: "sat_content",
-      title: "C1. Content",
-      items: [
-        "PRISM provides the information that I need for my school-related activities.",
-        "The information provided by PRISM is relevant and useful."
-      ]
-    },
-    {
-      key: "sat_accuracy",
-      title: "C2. Accuracy",
-      items: [
-        "The information and records provided by PRISM are accurate.",
-        "PRISM provides reliable information for decision-making and monitoring."
-      ]
-    },
-    {
-      key: "sat_format",
-      title: "C3. Format",
-      items: [
-        "The information displayed in PRISM is organized and easy to interpret.",
-        "The design and presentation of PRISM information are appropriate for users."
-      ]
-    },
-    {
-      key: "sat_timeliness",
-      title: "C4. Timeliness",
-      items: [
-        "PRISM provides updated information when needed.",
-        "PRISM allows users to receive announcements and notifications on time."
-      ]
-    },
-    {
-      key: "sat_overall",
-      title: "C5. Overall Satisfaction",
-      items: [
-        "PRISM meets my expectations as a school management portal.",
-        "I am satisfied with the overall performance of PRISM.",
-        "I would recommend the continued use of PRISM in school operations."
-      ]
-    }
+    { key: "usability", title: "A. Usability", items: [
+      "PRISM is easy to access and use for my school-related tasks.",
+      "I can easily understand how to navigate through PRISM.",
+      "The arrangement of menus, buttons, and features in PRISM is clear and organized.",
+      "The interface design of PRISM is simple and user-friendly.",
+      "The labels, icons, and controls in PRISM are easy to understand.",
+      "I can quickly learn how to use PRISM without requiring extensive assistance.",
+      "I can easily find the information and features I need in PRISM.",
+      "The information displayed in PRISM is presented clearly and is easy to understand.",
+      "PRISM can be accessed and used effectively on different devices such as computers, tablets, and smartphones.",
+      "PRISM allows me to complete my tasks efficiently.",
+      "The different modules of PRISM provide a consistent user experience.",
+      "Overall, PRISM provides a convenient and user-friendly experience."
+    ]},
+    { key: "func_general", title: "B1. General System Functions", items: [
+      "PRISM's features and functions operate properly.",
+      "PRISM performs the functions expected from a school management system.",
+      "PRISM provides the necessary tools to support school operations.",
+      "PRISM responds properly when users interact with its features.",
+      "PRISM minimizes errors and technical problems during use."
+    ]},
+    { key: "func_records", title: "B2. Records Management", items: [
+      "PRISM effectively organizes and manages student records.",
+      "PRISM allows authorized users to access required records efficiently.",
+      "The records stored in PRISM are accurate and reliable.",
+      "PRISM helps reduce difficulties associated with manual record management."
+    ]},
+    { key: "func_enrollment", title: "B3. Enrollment Management", items: [
+      "PRISM provides an effective process for managing student enrollment information.",
+      "PRISM helps organize enrollment applications and related documents."
+    ]},
+    { key: "func_attendance", title: "B4. Attendance and Grade Management", items: [
+      "PRISM effectively supports attendance monitoring and record keeping.",
+      "PRISM helps teachers manage student grades efficiently.",
+      "PRISM supports accurate computation and management of academic records.",
+      "PRISM helps generate academic reports such as report cards efficiently."
+    ]},
+    { key: "func_communication", title: "B5. Communication and Learning Features", items: [
+      "PRISM improves access to school announcements and important updates.",
+      "The messaging and communication features of PRISM help users exchange information effectively.",
+      "PRISM makes learning materials easier to access and manage.",
+      "PRISM provides useful notifications regarding school activities, assignments, attendance, and academic information."
+    ]},
+    { key: "func_security", title: "B6. Security and User Management", items: [
+      "PRISM provides appropriate access based on user roles (administrator, teacher, student, and parent).",
+      "PRISM protects school information from unauthorized access."
+    ]},
+    { key: "sat_content", title: "C1. Content", items: [
+      "PRISM provides the information that I need for my school-related activities.",
+      "The information provided by PRISM is relevant and useful."
+    ]},
+    { key: "sat_accuracy", title: "C2. Accuracy", items: [
+      "The information and records provided by PRISM are accurate.",
+      "PRISM provides reliable information for decision-making and monitoring."
+    ]},
+    { key: "sat_format", title: "C3. Format", items: [
+      "The information displayed in PRISM is organized and easy to interpret.",
+      "The design and presentation of PRISM information are appropriate for users."
+    ]},
+    { key: "sat_timeliness", title: "C4. Timeliness", items: [
+      "PRISM provides updated information when needed.",
+      "PRISM allows users to receive announcements and notifications on time."
+    ]},
+    { key: "sat_overall", title: "C5. Overall Satisfaction", items: [
+      "PRISM meets my expectations as a school management portal.",
+      "I am satisfied with the overall performance of PRISM.",
+      "I would recommend the continued use of PRISM in school operations."
+    ]}
   ];
 
-  // flatten items to get itemNum -> text mapping (1-indexed in document order)
   var ITEM_MAP = {};
   var idx = 1;
   SECTIONS.forEach(function(sec) {
-    sec.items.forEach(function(text) {
-      ITEM_MAP[idx] = text;
-      idx++;
-    });
+    sec.items.forEach(function(text) { ITEM_MAP[idx] = text; idx++; });
   });
-  var TOTAL_ITEMS = idx - 1; // 44
+  var TOTAL_ITEMS = idx - 1;
 
-  /* helpers */
+  var COLORS = [
+    "#2E4066","#A9813E","#3F7A5C","#B3432E","#5B6B85",
+    "#D9C08F","#1565C0","#F57F17","#7B1FA2","#00838F"
+  ];
+
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function(c) {
       return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
@@ -498,7 +480,34 @@
     return mean(vals);
   }
 
-  /* render login */
+  /* filters */
+  function applyFilters() {
+    var r = STATE.responses;
+    var f = STATE.filters;
+    if (f.userType !== "all") {
+      r = r.filter(function(res) { return res.respondent_user_type === f.userType; });
+    }
+    if (f.dateFrom) {
+      var from = new Date(f.dateFrom);
+      r = r.filter(function(res) { return new Date(res.submitted_at) >= from; });
+    }
+    if (f.dateTo) {
+      var to = new Date(f.dateTo);
+      to.setHours(23,59,59,999);
+      r = r.filter(function(res) { return new Date(res.submitted_at) <= to; });
+    }
+    STATE.filteredResponses = r;
+  }
+
+  function getUserTypes() {
+    var types = {};
+    STATE.responses.forEach(function(r) {
+      var t = r.respondent_user_type || "Unknown";
+      types[t] = true;
+    });
+    return Object.keys(types).sort();
+  }
+
   function renderLogin() {
     return (
       '<div class="login-wrap">' +
@@ -511,12 +520,30 @@
     );
   }
 
-  /* render main dashboard */
+  function renderFilters() {
+    var types = getUserTypes();
+    var typeOptions = '<option value="all">All User Types</option>';
+    types.forEach(function(t) {
+      typeOptions += '<option value="' + esc(t) + '"' + (STATE.filters.userType === t ? ' selected' : '') + '>' + esc(t) + '</option>';
+    });
+    return (
+      '<div class="filter-bar">' +
+        '<div class="filter-group"><label>User Type</label><select id="f-type">' + typeOptions + '</select></div>' +
+        '<div class="filter-group"><label>From</label><input type="date" id="f-from" value="' + STATE.filters.dateFrom + '" /></div>' +
+        '<div class="filter-group"><label>To</label><input type="date" id="f-to" value="' + STATE.filters.dateTo + '" /></div>' +
+        '<div class="filter-count">Showing <b>' + STATE.filteredResponses.length + '</b> of ' + STATE.responses.length + ' responses</div>' +
+        '<button class="btn btn-ghost btn-sm" id="f-reset">Reset</button>' +
+      '</div>'
+    );
+  }
+
   function renderDashboard() {
-    var r = STATE.responses;
+    var r = STATE.filteredResponses;
     var tabs = [
       { id: "overview", label: "Overview" },
+      { id: "charts", label: "Charts" },
       { id: "means", label: "Mean Scores" },
+      { id: "bytype", label: "By User Type" },
       { id: "responses", label: "All Responses" },
       { id: "demographics", label: "Demographics" }
     ];
@@ -530,16 +557,18 @@
     html += '<button class="btn btn-danger" id="logout-btn">Logout</button>';
     html += '</div></div>';
 
-    // tabs
     html += '<div class="tabs">';
     tabs.forEach(function(t) {
       html += '<button class="tab' + (STATE.activeTab === t.id ? " active" : "") + '" data-tab="' + t.id + '">' + t.label + '</button>';
     });
     html += '</div>';
 
-    // panels
+    html += renderFilters();
+
     if (STATE.activeTab === "overview") html += renderOverview(r);
+    else if (STATE.activeTab === "charts") html += renderCharts(r);
     else if (STATE.activeTab === "means") html += renderMeans(r);
+    else if (STATE.activeTab === "bytype") html += renderByType(r);
     else if (STATE.activeTab === "responses") html += renderResponses(r);
     else if (STATE.activeTab === "demographics") html += renderDemographics(r);
 
@@ -547,12 +576,9 @@
     return html;
   }
 
-  /* ---- OVERVIEW ---- */
   function renderOverview(r) {
     var html = '<div class="panel active">';
     var n = r.length;
-
-    // compute overall mean
     var allVals = [];
     r.forEach(function(res) {
       for (var k = 1; k <= TOTAL_ITEMS; k++) {
@@ -561,8 +587,6 @@
       }
     });
     var overallMean = mean(allVals);
-
-    // count unique user types
     var userTypes = {};
     r.forEach(function(res) {
       var t = res.respondent_user_type || "Unknown";
@@ -576,7 +600,6 @@
     html += '<div class="stat-card"><div class="label">User Types</div><div class="value">' + Object.keys(userTypes).length + '</div><div class="note">categories represented</div></div>';
     html += '</div>';
 
-    // section summary table
     html += '<div class="section-heading">Section Mean Summary</div>';
     html += '<div class="table-wrap"><table><thead><tr><th>Section</th><th>Items</th><th>Mean</th><th>Interpretation</th></tr></thead><tbody>';
     var itemNum = 1;
@@ -592,16 +615,116 @@
       itemNum += sec.items.length;
     });
     html += '</tbody></table></div>';
-
     html += '</div>';
     return html;
   }
 
-  /* ---- MEAN SCORES ---- */
+  /* ---- CHARTS ---- */
+  function renderCharts(r) {
+    var html = '<div class="panel active">';
+    html += '<div class="chart-grid">';
+    html += '<div class="chart-card"><h3>Section Mean Scores (Radar)</h3><canvas id="chart-radar"></canvas></div>';
+    html += '<div class="chart-card"><h3>User Type Distribution</h3><canvas id="chart-type"></canvas></div>';
+    html += '<div class="chart-card"><h3>Sex Distribution</h3><canvas id="chart-sex"></canvas></div>';
+    html += '<div class="chart-card"><h3>Section Means (Bar)</h3><canvas id="chart-bar"></canvas></div>';
+    html += '</div>';
+    html += '</div>';
+    return html;
+  }
+
+  function initCharts(r) {
+    Object.values(STATE.charts).forEach(function(c) { c.destroy(); });
+    STATE.charts = {};
+
+    var sectionLabels = [];
+    var sectionMeans = [];
+    var itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      sectionLabels.push(sec.title.replace(/^[A-Z]\d+\.\s*/, ""));
+      sectionMeans.push(+(calcSectionMean(r, sec, itemNum)).toFixed(2));
+      itemNum += sec.items.length;
+    });
+
+    var radarCtx = document.getElementById("chart-radar");
+    if (radarCtx) {
+      STATE.charts.radar = new Chart(radarCtx, {
+        type: "radar",
+        data: {
+          labels: sectionLabels,
+          datasets: [{
+            label: "Mean Score",
+            data: sectionMeans,
+            backgroundColor: "rgba(46,64,102,0.15)",
+            borderColor: "#2E4066",
+            pointBackgroundColor: "#A9813E",
+            pointRadius: 4
+          }]
+        },
+        options: {
+          scales: { r: { min: 0, max: 4, ticks: { stepSize: 1 } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    var typeCounts = {};
+    r.forEach(function(res) {
+      var t = res.respondent_user_type || "Unknown";
+      typeCounts[t] = (typeCounts[t] || 0) + 1;
+    });
+    var typeCtx = document.getElementById("chart-type");
+    if (typeCtx) {
+      STATE.charts.type = new Chart(typeCtx, {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(typeCounts),
+          datasets: [{ data: Object.values(typeCounts), backgroundColor: COLORS }]
+        },
+        options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } } } }
+      });
+    }
+
+    var sexCounts = {};
+    r.forEach(function(res) {
+      var s = res.respondent_sex || "Unknown";
+      sexCounts[s] = (sexCounts[s] || 0) + 1;
+    });
+    var sexCtx = document.getElementById("chart-sex");
+    if (sexCtx) {
+      STATE.charts.sex = new Chart(sexCtx, {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(sexCounts),
+          datasets: [{ data: Object.values(sexCounts), backgroundColor: ["#2E4066","#A9813E","#3F7A5C","#5B6B85"] }]
+        },
+        options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } } } }
+      });
+    }
+
+    var barCtx = document.getElementById("chart-bar");
+    if (barCtx) {
+      STATE.charts.bar = new Chart(barCtx, {
+        type: "bar",
+        data: {
+          labels: sectionLabels,
+          datasets: [{
+            label: "Mean",
+            data: sectionMeans,
+            backgroundColor: COLORS.slice(0, sectionLabels.length)
+          }]
+        },
+        options: {
+          indexAxis: "y",
+          scales: { x: { min: 0, max: 4 } },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+  }
+
   function renderMeans(r) {
     var html = '<div class="panel active">';
     html += '<p style="font-size:13px;color:var(--muted);margin:0 0 18px;">Mean score for each statement across all ' + r.length + ' responses.</p>';
-
     var itemNum = 1;
     SECTIONS.forEach(function(sec) {
       html += '<div class="section-heading">' + esc(sec.title) + '</div>';
@@ -621,7 +744,6 @@
       html += '</tbody></table></div>';
     });
 
-    // interpretation guide
     html += '<div class="section-heading">Interpretation Guide</div>';
     html += '<div class="table-wrap"><table><thead><tr><th>Mean Range</th><th>Interpretation</th><th>Description</th></tr></thead><tbody>';
     html += '<tr><td><span class="interp excellent">3.50 – 4.00</span></td><td><b>Excellent</b></td><td>Strongly Agree — respondents overwhelmingly agree</td></tr>';
@@ -629,29 +751,79 @@
     html += '<tr><td><span class="interp fair">1.50 – 2.49</span></td><td><b>Fair</b></td><td>Disagree — respondents tend to disagree</td></tr>';
     html += '<tr><td><span class="interp poor">1.00 – 1.49</span></td><td><b>Poor</b></td><td>Strongly Disagree — respondents strongly disagree</td></tr>';
     html += '</tbody></table></div>';
+    html += '</div>';
+    return html;
+  }
+
+  /* ---- BY USER TYPE ---- */
+  function renderByType(r) {
+    var html = '<div class="panel active">';
+    var types = {};
+    r.forEach(function(res) {
+      var t = res.respondent_user_type || "Unknown";
+      if (!types[t]) types[t] = [];
+      types[t].push(res);
+    });
+    var typeKeys = Object.keys(types).sort();
+
+    html += '<p style="font-size:13px;color:var(--muted);margin:0 0 18px;">Comparison of mean scores across user types for each section.</p>';
+
+    html += '<div class="section-heading">Section Means by User Type</div>';
+    html += '<div class="table-wrap"><table><thead><tr><th>Section</th>';
+    typeKeys.forEach(function(t) { html += '<th>' + esc(t) + ' (n=' + types[t].length + ')</th>'; });
+    html += '<th>All</th></tr></thead><tbody>';
+    var itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      html += '<tr><td>' + esc(sec.title) + '</td>';
+      var allM = calcSectionMean(r, sec, itemNum);
+      typeKeys.forEach(function(t) {
+        var m = calcSectionMean(types[t], sec, itemNum);
+        var interp = interpret(m);
+        html += '<td><span class="interp ' + interp.cls + '">' + m.toFixed(2) + '</span></td>';
+      });
+      var allInterp = interpret(allM);
+      html += '<td><b>' + allM.toFixed(2) + '</b> <span class="interp ' + allInterp.cls + '">' + allInterp.label + '</span></td>';
+      html += '</tr>';
+      itemNum += sec.items.length;
+    });
+    html += '</tbody></table></div>';
+
+    html += '<div class="section-heading">Per-Question Breakdown by User Type</div>';
+    itemNum = 1;
+    SECTIONS.forEach(function(sec) {
+      html += '<h3 style="font-size:14px;margin:20px 0 8px;">' + esc(sec.title) + '</h3>';
+      html += '<div class="table-wrap"><table><thead><tr><th style="width:30px">#</th><th>Statement</th>';
+      typeKeys.forEach(function(t) { html += '<th>' + esc(t) + '</th>'; });
+      html += '</tr></thead><tbody>';
+      sec.items.forEach(function(text) {
+        html += '<tr><td style="font-weight:700;color:var(--gold)">' + itemNum + '</td><td>' + esc(text) + '</td>';
+        typeKeys.forEach(function(t) {
+          var m = calcItemMean(types[t], itemNum);
+          var interp = interpret(m);
+          html += '<td><span class="interp ' + interp.cls + '">' + m.toFixed(2) + '</span></td>';
+        });
+        html += '</tr>';
+        itemNum++;
+      });
+      html += '</tbody></table></div>';
+    });
 
     html += '</div>';
     return html;
   }
 
-  /* ---- ALL RESPONSES ---- */
   function renderResponses(r) {
     var html = '<div class="panel active">';
     if (!r.length) {
-      html += '<div class="loading">No responses yet.</div>';
+      html += '<div class="loading">No responses match your filters.</div>';
       html += '</div>';
       return html;
     }
-
-    html += '<p style="font-size:13px;color:var(--muted);margin:0 0 14px;">Showing all ' + r.length + ' submissions. Scroll horizontally to see all columns.</p>';
-
+    html += '<p style="font-size:13px;color:var(--muted);margin:0 0 14px;">Showing ' + r.length + ' submissions. Scroll horizontally to see all columns.</p>';
     html += '<div class="table-wrap"><table><thead><tr>';
     html += '<th>#</th><th>Reference</th><th>Submitted</th><th>Name</th><th>Age</th><th>Sex</th><th>User Type</th>';
-    for (var k = 1; k <= TOTAL_ITEMS; k++) {
-      html += '<th>Q' + k + '</th>';
-    }
+    for (var k = 1; k <= TOTAL_ITEMS; k++) html += '<th>Q' + k + '</th>';
     html += '<th>Mean</th><th>Comments</th></tr></thead><tbody>';
-
     r.forEach(function(res, i) {
       var vals = [];
       for (var k = 1; k <= TOTAL_ITEMS; k++) {
@@ -660,86 +832,64 @@
       }
       var m = mean(vals);
       var interp = interpret(m);
-      var dt = res.submitted_at ? new Date(res.submitted_at).toLocaleDateString("en-US", { year:"numeric", month:"short", day:"numeric" }) : "—";
-
+      var dt = res.submitted_at ? new Date(res.submitted_at).toLocaleDateString("en-US", { year:"numeric", month:"short", day:"numeric" }) : "\u2014";
       html += '<tr>';
       html += '<td>' + (i + 1) + '</td>';
-      html += '<td style="font-family:monospace;font-size:12px">' + (res.id ? res.id.slice(0, 8).toUpperCase() : "—") + '</td>';
+      html += '<td style="font-family:monospace;font-size:12px">' + (res.id ? res.id.slice(0, 8).toUpperCase() : "\u2014") + '</td>';
       html += '<td>' + dt + '</td>';
-      html += '<td>' + esc(res.respondent_name || "—") + '</td>';
-      html += '<td>' + (res.respondent_age || "—") + '</td>';
-      html += '<td>' + esc(res.respondent_sex || "—") + '</td>';
-      html += '<td>' + esc(res.respondent_user_type || "—") + '</td>';
+      html += '<td>' + esc(res.respondent_name || "\u2014") + '</td>';
+      html += '<td>' + (res.respondent_age || "\u2014") + '</td>';
+      html += '<td>' + esc(res.respondent_sex || "\u2014") + '</td>';
+      html += '<td>' + esc(res.respondent_user_type || "\u2014") + '</td>';
       for (var k2 = 1; k2 <= TOTAL_ITEMS; k2++) {
         var v2 = (res.answers || {})[String(k2)];
-        html += '<td style="text-align:center">' + (v2 || "—") + '</td>';
+        html += '<td style="text-align:center">' + (v2 || "\u2014") + '</td>';
       }
       html += '<td style="font-weight:700"><span class="interp ' + interp.cls + '">' + m.toFixed(2) + '</span></td>';
-      html += '<td style="max-width:180px;white-space:normal;font-size:12px">' + esc(res.comments || "—") + '</td>';
+      html += '<td style="max-width:180px;white-space:normal;font-size:12px">' + esc(res.comments || "\u2014") + '</td>';
       html += '</tr>';
     });
-
     html += '</tbody></table></div>';
     html += '</div>';
     return html;
   }
 
-  /* ---- DEMOGRAPHICS ---- */
   function renderDemographics(r) {
     var html = '<div class="panel active">';
     var n = r.length;
-
-    // sex breakdown
     var sexCounts = {};
-    r.forEach(function(res) {
-      var s = res.respondent_sex || "Unknown";
-      sexCounts[s] = (sexCounts[s] || 0) + 1;
-    });
+    r.forEach(function(res) { var s = res.respondent_sex || "Unknown"; sexCounts[s] = (sexCounts[s] || 0) + 1; });
     html += '<div class="section-heading">Sex Distribution</div>';
     html += '<div class="table-wrap"><table><thead><tr><th>Sex</th><th>Count</th><th>Percentage</th></tr></thead><tbody>';
     Object.keys(sexCounts).forEach(function(k) {
-      var pct = n ? (sexCounts[k] / n * 100).toFixed(1) : 0;
-      html += '<tr><td>' + esc(k) + '</td><td>' + sexCounts[k] + '</td><td>' + pct + '%</td></tr>';
+      html += '<tr><td>' + esc(k) + '</td><td>' + sexCounts[k] + '</td><td>' + (n ? (sexCounts[k]/n*100).toFixed(1) : 0) + '%</td></tr>';
     });
     html += '</tbody></table></div>';
 
-    // user type breakdown
     var typeCounts = {};
-    r.forEach(function(res) {
-      var t = res.respondent_user_type || "Unknown";
-      typeCounts[t] = (typeCounts[t] || 0) + 1;
-    });
+    r.forEach(function(res) { var t = res.respondent_user_type || "Unknown"; typeCounts[t] = (typeCounts[t] || 0) + 1; });
     html += '<div class="section-heading">User Type Distribution</div>';
     html += '<div class="table-wrap"><table><thead><tr><th>User Type</th><th>Count</th><th>Percentage</th></tr></thead><tbody>';
     Object.keys(typeCounts).forEach(function(k) {
-      var pct = n ? (typeCounts[k] / n * 100).toFixed(1) : 0;
-      html += '<tr><td>' + esc(k) + '</td><td>' + typeCounts[k] + '</td><td>' + pct + '%</td></tr>';
+      html += '<tr><td>' + esc(k) + '</td><td>' + typeCounts[k] + '</td><td>' + (n ? (typeCounts[k]/n*100).toFixed(1) : 0) + '%</td></tr>';
     });
     html += '</tbody></table></div>';
 
-    // age stats
     var ages = [];
-    r.forEach(function(res) {
-      if (res.respondent_age) ages.push(Number(res.respondent_age));
-    });
+    r.forEach(function(res) { if (res.respondent_age) ages.push(Number(res.respondent_age)); });
     if (ages.length) {
-      var minAge = Math.min.apply(null, ages);
-      var maxAge = Math.max.apply(null, ages);
-      var avgAge = mean(ages);
       html += '<div class="section-heading">Age Statistics</div>';
       html += '<div class="stat-grid">';
-      html += '<div class="stat-card"><div class="label">Lowest Age</div><div class="value">' + minAge + '</div></div>';
-      html += '<div class="stat-card"><div class="label">Highest Age</div><div class="value">' + maxAge + '</div></div>';
-      html += '<div class="stat-card"><div class="label">Average Age</div><div class="value">' + avgAge.toFixed(1) + '</div></div>';
-      html += '<div class="stat-card"><div class="label">Respondents with Age</div><div class="value">' + ages.length + ' / ' + n + '</div></div>';
+      html += '<div class="stat-card"><div class="label">Lowest Age</div><div class="value">' + Math.min.apply(null, ages) + '</div></div>';
+      html += '<div class="stat-card"><div class="label">Highest Age</div><div class="value">' + Math.max.apply(null, ages) + '</div></div>';
+      html += '<div class="stat-card"><div class="label">Average Age</div><div class="value">' + mean(ages).toFixed(1) + '</div></div>';
       html += '</div>';
     }
-
     html += '</div>';
     return html;
   }
 
-  /* main render */
+  /* render */
   function render() {
     if (!STATE.loggedIn) {
       root.innerHTML = renderLogin();
@@ -750,11 +900,12 @@
       root.innerHTML = '<div class="loading"><div class="spinner"></div>Loading responses from Supabase...</div>';
       return;
     }
+    applyFilters();
     root.innerHTML = renderDashboard();
     attachDashboardHandlers();
+    if (STATE.activeTab === "charts") initCharts(STATE.filteredResponses);
   }
 
-  /* login handlers */
   function attachLoginHandlers() {
     var btn = document.getElementById("login-btn");
     var pass = document.getElementById("login-pass");
@@ -768,26 +919,20 @@
         err.style.display = "block";
       }
     });
-    if (pass) pass.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") btn.click();
-    });
+    if (pass) pass.addEventListener("keydown", function(e) { if (e.key === "Enter") btn.click(); });
   }
 
-  /* dashboard handlers */
   function attachDashboardHandlers() {
-    // tabs
     document.querySelectorAll(".tab").forEach(function(t) {
       t.addEventListener("click", function() {
         STATE.activeTab = t.getAttribute("data-tab");
-  if (STATE.loggedIn) loadResponses(); else render();
+        render();
       });
     });
 
-    // refresh
     var refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) refreshBtn.addEventListener("click", function() { loadResponses(); });
 
-    // logout
     var logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) logoutBtn.addEventListener("click", function() {
       STATE.loggedIn = false;
@@ -796,43 +941,39 @@
       render();
     });
 
-    // export toggle
     var exportToggle = document.getElementById("export-toggle");
     var exportDropdown = document.getElementById("export-dropdown");
     if (exportToggle && exportDropdown) {
-      exportToggle.addEventListener("click", function() {
-        exportDropdown.classList.toggle("show");
-      });
+      exportToggle.addEventListener("click", function() { exportDropdown.classList.toggle("show"); });
       document.addEventListener("click", function(e) {
-        if (!exportToggle.contains(e.target) && !exportDropdown.contains(e.target)) {
-          exportDropdown.classList.remove("show");
-        }
+        if (!exportToggle.contains(e.target) && !exportDropdown.contains(e.target)) exportDropdown.classList.remove("show");
       });
     }
-
-    // export csv
     var exportCsv = document.getElementById("export-csv");
     if (exportCsv) exportCsv.addEventListener("click", function() { exportCSV(); });
-
-    // export json
     var exportJson = document.getElementById("export-json");
     if (exportJson) exportJson.addEventListener("click", function() { exportJSON(); });
+
+    var fType = document.getElementById("f-type");
+    var fFrom = document.getElementById("f-from");
+    var fTo = document.getElementById("f-to");
+    var fReset = document.getElementById("f-reset");
+    if (fType) fType.addEventListener("change", function() { STATE.filters.userType = fType.value; render(); });
+    if (fFrom) fFrom.addEventListener("change", function() { STATE.filters.dateFrom = fFrom.value; render(); });
+    if (fTo) fTo.addEventListener("change", function() { STATE.filters.dateTo = fTo.value; render(); });
+    if (fReset) fReset.addEventListener("click", function() { STATE.filters = { userType: "all", dateFrom: "", dateTo: "" }; render(); });
   }
 
-  /* data loading */
   async function loadResponses() {
     STATE.loading = true;
     render();
     try {
-      console.log("Fetching responses...");
-      var result = await supabaseClient
+      var { data, error } = await supabaseClient
         .from("responses")
         .select("*")
         .order("submitted_at", { ascending: false });
-      console.log("Supabase result:", result);
-      if (result.error) throw result.error;
-      STATE.responses = result.data || [];
-      console.log("Loaded", STATE.responses.length, "responses");
+      if (error) throw error;
+      STATE.responses = data || [];
     } catch (err) {
       console.error("Load error:", err);
       STATE.responses = [];
@@ -841,15 +982,14 @@
     render();
   }
 
-  /* export CSV */
   function exportCSV() {
-    if (!STATE.responses.length) return;
+    var r = STATE.filteredResponses;
+    if (!r.length) return;
     var headers = ["Reference","Submitted","Name","Age","Sex","User Type"];
     for (var k = 1; k <= TOTAL_ITEMS; k++) headers.push("Q" + k);
     headers.push("Mean","Comments");
-
     var rows = [headers.join(",")];
-    STATE.responses.forEach(function(res) {
+    r.forEach(function(res) {
       var vals = [];
       for (var k = 1; k <= TOTAL_ITEMS; k++) {
         var v = (res.answers || {})[String(k)];
@@ -858,13 +998,10 @@
       var m = mean(vals);
       var ref = res.id ? res.id.slice(0, 8).toUpperCase() : "";
       var dt = res.submitted_at || "";
-      var line = [
-        ref, dt, res.respondent_name || "", res.respondent_age || "",
-        res.respondent_sex || "", res.respondent_user_type || ""
-      ].concat(vals).concat([m.toFixed(2), res.comments || ""]);
+      var line = [ref, dt, res.respondent_name || "", res.respondent_age || "", res.respondent_sex || "", res.respondent_user_type || ""]
+        .concat(vals).concat([m.toFixed(2), res.comments || ""]);
       rows.push(line.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","));
     });
-
     var blob = new Blob([rows.join("\n")], { type: "text/csv" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -872,17 +1009,17 @@
     a.click();
   }
 
-  /* export JSON */
   function exportJSON() {
-    if (!STATE.responses.length) return;
-    var blob = new Blob([JSON.stringify(STATE.responses, null, 2)], { type: "application/json" });
+    var r = STATE.filteredResponses;
+    if (!r.length) return;
+    var blob = new Blob([JSON.stringify(r, null, 2)], { type: "application/json" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "prism_responses_" + new Date().toISOString().slice(0,10) + ".json";
     a.click();
   }
 
-  render();
+  if (STATE.loggedIn) loadResponses(); else render();
 })();
 </script>
 </body>
