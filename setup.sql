@@ -1,4 +1,5 @@
 -- Run this SQL in your Supabase SQL Editor (https://supabase.com/dashboard → SQL Editor)
+-- Then create an admin user: Authentication → Users → Add User
 
 create table if not exists responses (
   id              uuid primary key,
@@ -13,26 +14,26 @@ create table if not exists responses (
   comments        text
 );
 
--- Enable Row-Level Security (recommended)
+-- Enable Row-Level Security
 alter table responses enable row level security;
 
--- Allow anonymous inserts (needed for the public form)
+-- Allow anonymous inserts only (respondents submitting the form)
 create policy "Allow anonymous inserts"
   on responses
   for insert
   to anon
   with check (true);
 
--- Allow anonymous reads (for the admin dashboard — password-protected client-side)
-create policy "Allow anonymous reads"
+-- Allow only authenticated users (admin) to read responses
+create policy "Allow authenticated reads only"
   on responses
   for select
-  to anon
+  to authenticated
   using (true);
 
--- Allow authenticated reads (if using Supabase Auth)
-create policy "Allow authenticated reads"
+-- Allow only authenticated users (admin) to delete responses
+create policy "Allow authenticated deletes only"
   on responses
-  for select
+  for delete
   to authenticated
   using (true);

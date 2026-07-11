@@ -828,7 +828,6 @@
         '</div>' +
         '<button type="button" class="btn btn-primary" id="start-btn">Proceed to Consent</button>' +
         counterHtml +
-        '<p style="margin-top:24px;font-size:11px;color:var(--muted);"><a href="admin.html" style="color:var(--muted);text-decoration:underline;">Researcher Dashboard</a></p>' +
       '</div>'
     );
   }
@@ -1073,9 +1072,18 @@
     return "resp-" + Date.now() + "-" + Math.floor(Math.random() * 100000);
   }
 
+  var RATE_LIMIT_MS = 30000;
+
   async function submitResponse() {
     if (state.submitting) return;
     if (!confirm("You are about to submit your evaluation. This action cannot be undone. Continue?")) return;
+    var lastSub = parseInt(localStorage.getItem("prism_last_submit") || "0");
+    if (Date.now() - lastSub < RATE_LIMIT_MS) {
+      state.submitError = "Please wait at least 30 seconds between submissions.";
+      state.submitting = false;
+      render();
+      return;
+    }
     state.submitting = true;
     state.submitError = null;
     render();
@@ -1103,6 +1111,7 @@
 
       if (error) throw error;
 
+      try { localStorage.setItem("prism_last_submit", String(Date.now())); } catch(e) {}
       state.submitting = false;
       state.responseId = id.slice(0, 8).toUpperCase();
       state.stepIndex = STEPS.length - 1;

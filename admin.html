@@ -11,7 +11,10 @@
   const SUPABASE_URL  = "https://qwkkpmxpmugkrlspbiri.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3a2twbXhwbXVna3Jsc3BiaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NjQwMDEsImV4cCI6MjA5OTM0MDAwMX0.HT3V9wXTEm0ehxoqgChUEDrqetPKwnB1fanGwHWtDdI";
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-  const ADMIN_PASSWORD = "prism2025";
+  /* Admin login uses Supabase Auth with email/password.
+     Create an admin user in your Supabase dashboard:
+       Authentication → Users → Add User
+     Then sign in below with that email and password. */
 </script>
 <style>
   :root {
@@ -538,7 +541,7 @@
   var root = document.getElementById("admin-root");
 
   var STATE = {
-    loggedIn: sessionStorage.getItem("prism_admin") === "1",
+    loggedIn: false,
     loading: true,
     loadError: null,
     responses: [],
@@ -837,11 +840,13 @@
     return (
       '<div class="login-wrap">' +
         '<h1 class="serif">PRISM Dashboard</h1>' +
-        '<p>Enter the researcher password to access survey results.</p>' +
-        '<div class="err" id="login-err">Incorrect password. Try again.</div>' +
+        '<p>Sign in with your Supabase Auth credentials to access survey results.</p>' +
+        '<div class="err" id="login-err">Invalid email or password. Try again.</div>' +
+        '<label for="login-email" style="display:none;">Email</label>' +
+        '<input type="email" id="login-email" placeholder="Email" autocomplete="email" />' +
         '<label for="login-pass" style="display:none;">Password</label>' +
-        '<input type="password" id="login-pass" placeholder="Password" aria-label="Password" />' +
-        '<button id="login-btn">Access Dashboard</button>' +
+        '<input type="password" id="login-pass" placeholder="Password" autocomplete="current-password" />' +
+        '<button id="login-btn">Sign In</button>' +
       '</div>'
     );
   }
@@ -1733,18 +1738,21 @@
 
   function attachLoginHandlers() {
     var btn = document.getElementById("login-btn");
+    var email = document.getElementById("login-email");
     var pass = document.getElementById("login-pass");
     var err = document.getElementById("login-err");
-    if (btn) btn.addEventListener("click", function() {
-      if (pass.value === ADMIN_PASSWORD) {
+    function doLogin() {
+      if (!email.value || !pass.value) { err.style.display = "block"; return; }
+      supabaseClient.auth.signInWithPassword({ email: email.value, password: pass.value }).then(function(res) {
+        if (res.error) { err.style.display = "block"; return; }
         STATE.loggedIn = true;
         sessionStorage.setItem("prism_admin", "1");
         loadResponses();
-      } else {
-        err.style.display = "block";
-      }
-    });
-    if (pass) pass.addEventListener("keydown", function(e) { if (e.key === "Enter") btn.click(); });
+      });
+    }
+    if (btn) btn.addEventListener("click", doLogin);
+    if (pass) pass.addEventListener("keydown", function(e) { if (e.key === "Enter") doLogin(); });
+    if (email) email.addEventListener("keydown", function(e) { if (e.key === "Enter") doLogin(); });
   }
 
   function attachDashboardHandlers() {
@@ -1767,6 +1775,7 @@
 
     var logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) logoutBtn.addEventListener("click", function() {
+      supabaseClient.auth.signOut();
       STATE.loggedIn = false;
       sessionStorage.removeItem("prism_admin");
       STATE.responses = [];
@@ -2238,7 +2247,15 @@
     showToast("Excel exported (" + r.length + " responses, 4 sheets)");
   }
 
-  if (STATE.loggedIn) loadResponses(); else render();
+  supabaseClient.auth.getSession().then(function(res) {
+    if (res.data && res.data.session) {
+      STATE.loggedIn = true;
+      sessionStorage.setItem("prism_admin", "1");
+      loadResponses();
+    } else {
+      render();
+    }
+  });
 })();
 </script>
 </body>
