@@ -794,7 +794,7 @@
     document.querySelectorAll(".tab").forEach(function(t) {
       t.addEventListener("click", function() {
         STATE.activeTab = t.getAttribute("data-tab");
-        render();
+  if (STATE.loggedIn) loadResponses(); else render();
       });
     });
 
