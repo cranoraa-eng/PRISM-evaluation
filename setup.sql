@@ -55,17 +55,31 @@ create index if not exists idx_responses_timing      on responses (time_taken_se
 -- Enable Row-Level Security
 alter table responses enable row level security;
 
--- Drop existing policies to recreate
-drop policy if exists "Allow anonymous inserts" on responses;
-drop policy if exists "Allow authenticated reads only" on responses;
-drop policy if exists "Allow authenticated deletes only" on responses;
-
--- Allow anonymous inserts only (respondents submitting the form)
-create policy "Allow anonymous inserts"
-  on responses
-  for insert
-  to anon
-  with check (true);
+-- ============================================================
+-- 1b. RPC: submit_response (bypasses RLS via security definer)
+-- ============================================================
+create or replace function submit_response(
+  p_id              uuid,
+  p_submitted_at    timestamptz,
+  p_respondent_name text,
+  p_respondent_age  int,
+  p_respondent_sex  text,
+  p_respondent_user_type text,
+  p_answers         jsonb,
+  p_comments        text
+) returns void
+language plpgsql security definer
+as $$
+begin
+  insert into responses (
+    id, submitted_at, respondent_name, respondent_age, respondent_sex,
+    respondent_user_type, answers, comments
+  ) values (
+    p_id, p_submitted_at, p_respondent_name, p_respondent_age, p_respondent_sex,
+    p_respondent_user_type, p_answers, p_comments
+  );
+end;
+$$;
 
 -- Allow authenticated users to read non-deleted responses
 create policy "Allow authenticated reads only"

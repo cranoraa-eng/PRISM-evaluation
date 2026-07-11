@@ -766,7 +766,16 @@
     var remaining = [];
     for (var i = 0; i < queue.length; i++) {
       try {
-        var { error } = await supabaseClient.from("responses").insert([queue[i]]);
+        var { error } = await supabaseClient.rpc("submit_response", {
+          p_id: queue[i].id,
+          p_submitted_at: queue[i].submitted_at,
+          p_respondent_name: queue[i].respondent_name,
+          p_respondent_age: queue[i].respondent_age,
+          p_respondent_sex: queue[i].respondent_sex,
+          p_respondent_user_type: queue[i].respondent_user_type,
+          p_answers: queue[i].answers,
+          p_comments: queue[i].comments
+        });
         if (error) { remaining.push(queue[i]); }
       } catch(e) { remaining.push(queue[i]); }
     }
@@ -1381,9 +1390,16 @@
     }
 
     try {
-      var { error } = await supabaseClient
-        .from("responses")
-        .insert([payload]);
+      var { error } = await supabaseClient.rpc("submit_response", {
+        p_id: id,
+        p_submitted_at: payload.submitted_at,
+        p_respondent_name: payload.respondent_name,
+        p_respondent_age: payload.respondent_age,
+        p_respondent_sex: payload.respondent_sex,
+        p_respondent_user_type: payload.respondent_user_type,
+        p_answers: payload.answers,
+        p_comments: payload.comments
+      });
 
       if (error) throw error;
 
