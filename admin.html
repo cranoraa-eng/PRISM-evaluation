@@ -13,9 +13,6 @@
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   const ADMIN_PASSWORD = "prism2025";
 </script>
-</head>
-<body>
-<div id="admin-root"></div>
 <style>
   :root {
     --ink: #16233D;
@@ -365,6 +362,38 @@
   .chart-card-wide { grid-column: 1 / -1; }
   .chart-card-half canvas { max-height: 240px; }
 
+  @media print {
+    body { background: #fff; color: #000; }
+    .shell { box-shadow: none; border: 1px solid #ccc; max-width: 100%; margin: 0; border-radius: 0; }
+    .shell::before { display: none; }
+    .tabs { display: none; }
+    .filter-bar { display: none; }
+    .masthead .actions { display: none; }
+    .panel { display: block !important; padding: 20px; }
+    .stat-card { break-inside: avoid; background: #f5f5f5; }
+    .chart-card { break-inside: avoid; }
+    .chart-grid { page-break-after: always; }
+    canvas { max-width: 100% !important; }
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: #fff;
+    font-size: 13px;
+    padding: 10px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(22,35,61,0.25);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
   @media (max-width: 640px) {
     .panel { padding: 16px 14px; }
     .masthead {
@@ -419,6 +448,7 @@
   var STATE = {
     loggedIn: sessionStorage.getItem("prism_admin") === "1",
     loading: true,
+    loadError: null,
     responses: [],
     filteredResponses: [],
     activeTab: "overview",
@@ -500,7 +530,7 @@
 
   function mean(arr) {
     if (!arr.length) return 0;
-    return arr.reduce(function(a, b) { return a + b; }, 0) / arr.length;
+    return arr.reduce(function(a, b) { return a + Number(b); }, 0) / arr.length;
   }
 
   function calcSectionMean(responses, section, itemStartNum) {
@@ -529,12 +559,6 @@
     var m = mean(arr);
     var sumSq = arr.reduce(function(s, v) { return s + Math.pow(v - m, 2); }, 0);
     return Math.sqrt(sumSq / (arr.length - 1));
-  }
-
-  function weightedMean(arr) {
-    if (!arr.length) return 0;
-    var sum = arr.reduce(function(s, v) { return s + v * v; }, 0);
-    return sum / arr.reduce(function(s, v) { return s + v; }, 0);
   }
 
   function freqCount(arr) {
@@ -609,7 +633,8 @@
     var se = Math.sqrt(v1/n1 + v2/n2);
     if (se === 0) return null;
     var t = (m1 - m2) / se;
-    var df = n1 + n2 - 2;
+    var num = v1/n1 + v2/n2;
+    var df = Math.pow(num, 2) / (Math.pow(v1/n1, 2)/(n1-1) + Math.pow(v2/n2, 2)/(n2-1));
     var p = 2 * (1 - tCDF(Math.abs(t), df));
     return { t: t, df: df, p: p, mean1: m1, mean2: m2 };
   }
@@ -640,12 +665,11 @@
       r = r.filter(function(res) { return res.respondent_user_type === f.userType; });
     }
     if (f.dateFrom) {
-      var from = new Date(f.dateFrom);
+      var from = new Date(f.dateFrom + "T00:00:00Z");
       r = r.filter(function(res) { return new Date(res.submitted_at) >= from; });
     }
     if (f.dateTo) {
-      var to = new Date(f.dateTo);
-      to.setHours(23,59,59,999);
+      var to = new Date(f.dateTo + "T23:59:59.999Z");
       r = r.filter(function(res) { return new Date(res.submitted_at) <= to; });
     }
     STATE.filteredResponses = r;
@@ -666,7 +690,8 @@
         '<h1 class="serif">PRISM Dashboard</h1>' +
         '<p>Enter the researcher password to access survey results.</p>' +
         '<div class="err" id="login-err">Incorrect password. Try again.</div>' +
-        '<input type="password" id="login-pass" placeholder="Password" />' +
+        '<label for="login-pass" style="display:none;">Password</label>' +
+        '<input type="password" id="login-pass" placeholder="Password" aria-label="Password" />' +
         '<button id="login-btn">Access Dashboard</button>' +
       '</div>'
     );
@@ -704,27 +729,27 @@
     html += '<div class="masthead"><div><h1 class="serif">PRISM Evaluation Dashboard</h1><p class="sub">Portal for Records, Information, and School Management</p></div>';
     html += '<div class="actions">';
     html += '<a href="index.html" class="btn btn-ghost">Back to Form</a>';
-    html += '<div class="export-menu"><button class="btn btn-ghost" id="export-toggle">&#8681; Export</button>';
-    html += '<div class="export-dropdown" id="export-dropdown"><button id="export-excel">Export Excel</button><button id="export-csv">Export CSV</button><button id="export-json">Export JSON</button></div></div>';
-    html += '<button class="btn btn-ghost" id="refresh-btn">&#8635; Refresh</button>';
-    html += '<button class="btn btn-danger" id="logout-btn">Logout</button>';
+    html += '<div class="export-menu"><button class="btn btn-ghost" id="export-toggle" aria-label="Export" aria-haspopup="true" aria-expanded="false">&#8681; Export</button>';
+    html += '<div class="export-dropdown" id="export-dropdown" role="menu"><button id="export-excel" role="menuitem">Export Excel</button><button id="export-csv" role="menuitem">Export CSV</button><button id="export-json" role="menuitem">Export JSON</button></div></div>';
+    html += '<button class="btn btn-ghost" id="refresh-btn" aria-label="Refresh data">&#8635; Refresh</button>';
+    html += '<button class="btn btn-danger" id="logout-btn" aria-label="Logout">Logout</button>';
     html += '</div></div>';
 
-    html += '<div class="tabs">';
+    html += '<div class="tabs" role="tablist" aria-label="Dashboard tabs">';
     tabs.forEach(function(t) {
-      html += '<button class="tab' + (STATE.activeTab === t.id ? " active" : "") + '" data-tab="' + t.id + '">' + t.label + '</button>';
+      html += '<button class="tab' + (STATE.activeTab === t.id ? " active" : "") + '" role="tab" aria-selected="' + (STATE.activeTab === t.id ? "true" : "false") + '" data-tab="' + t.id + '">' + t.label + '</button>';
     });
     html += '</div>';
 
     html += renderFilters();
 
-    if (STATE.activeTab === "overview") html += renderOverview(r);
-    else if (STATE.activeTab === "charts") html += renderCharts(r);
-    else if (STATE.activeTab === "means") html += renderMeans(r);
-    else if (STATE.activeTab === "statistics") html += renderStatistics(r);
-    else if (STATE.activeTab === "bytype") html += renderByType(r);
-    else if (STATE.activeTab === "responses") html += renderResponses(r);
-    else if (STATE.activeTab === "demographics") html += renderDemographics(r);
+    if (STATE.activeTab === "overview") html += '<div role="tabpanel" id="panel-overview">' + renderOverview(r) + '</div>';
+    else if (STATE.activeTab === "charts") html += '<div role="tabpanel" id="panel-charts">' + renderCharts(r) + '</div>';
+    else if (STATE.activeTab === "means") html += '<div role="tabpanel" id="panel-means">' + renderMeans(r) + '</div>';
+    else if (STATE.activeTab === "statistics") html += '<div role="tabpanel" id="panel-statistics">' + renderStatistics(r) + '</div>';
+    else if (STATE.activeTab === "bytype") html += '<div role="tabpanel" id="panel-bytype">' + renderByType(r) + '</div>';
+    else if (STATE.activeTab === "responses") html += '<div role="tabpanel" id="panel-responses">' + renderResponses(r) + '</div>';
+    else if (STATE.activeTab === "demographics") html += '<div role="tabpanel" id="panel-demographics">' + renderDemographics(r) + '</div>';
 
     html += '</div>';
     return html;
@@ -1104,13 +1129,12 @@
     itemNum = 1;
     SECTIONS.forEach(function(sec) {
       html += '<h3 style="font-size:14px;margin:20px 0 8px;">' + esc(sec.title) + '</h3>';
-      html += '<div class="table-wrap"><table><thead><tr><th>#</th><th>Statement</th><th>n</th><th>Mean</th><th>SD</th><th>WM</th><th style="color:#2E7D32">SA</th><th style="color:#1565C0">A</th><th style="color:#F57F17">D</th><th style="color:#B3432E">SD</th></tr></thead><tbody>';
+      html += '<div class="table-wrap"><table><thead><tr><th>#</th><th>Statement</th><th>n</th><th>Mean</th><th>SD</th><th>Interpretation</th><th style="color:#2E7D32">SA</th><th style="color:#1565C0">A</th><th style="color:#F57F17">D</th><th style="color:#B3432E">SD</th></tr></thead><tbody>';
       sec.items.forEach(function(text) {
         var iv = itemValues(r, itemNum);
         var im = mean(iv);
         var isd = stdDev(iv);
-        var wm = weightedMean(iv);
-        var fc = freqCount(iv);
+        var interp = interpret(im);
         var nn = iv.length;
         html += '<tr>';
         html += '<td style="font-weight:700;color:var(--gold)">' + itemNum + '</td>';
@@ -1118,7 +1142,7 @@
         html += '<td>' + nn + '</td>';
         html += '<td><b>' + im.toFixed(2) + '</b></td>';
         html += '<td>' + isd.toFixed(2) + '</td>';
-        html += '<td>' + wm.toFixed(2) + '</td>';
+        html += '<td><span class="interp ' + interp.cls + '">' + interp.label + '</span></td>';
         html += '<td>' + fc[4] + ' <span style="color:var(--muted)">(' + (nn ? (fc[4]/nn*100).toFixed(1) : 0) + '%)</span></td>';
         html += '<td>' + fc[3] + ' <span style="color:var(--muted)">(' + (nn ? (fc[3]/nn*100).toFixed(1) : 0) + '%)</span></td>';
         html += '<td>' + fc[2] + ' <span style="color:var(--muted)">(' + (nn ? (fc[2]/nn*100).toFixed(1) : 0) + '%)</span></td>';
@@ -1249,6 +1273,13 @@
     return html;
   }
 
+  var SORT = { col: "submitted", dir: -1 };
+
+  function sortArrow(col) {
+    if (SORT.col !== col) return "";
+    return SORT.dir === 1 ? " \u25B2" : " \u25BC";
+  }
+
   function renderResponses(r) {
     var html = '<div class="panel active">';
     if (!r.length) {
@@ -1256,12 +1287,35 @@
       html += '</div>';
       return html;
     }
-    html += '<p style="font-size:13px;color:var(--muted);margin:0 0 14px;">Showing ' + r.length + ' submissions. Scroll horizontally to see all columns.</p>';
+    html += '<p style="font-size:13px;color:var(--muted);margin:0 0 14px;">Showing ' + r.length + ' submissions. Click column headers to sort. Scroll horizontally to see all columns.</p>';
     html += '<div class="table-wrap"><table><thead><tr>';
-    html += '<th>#</th><th>Reference</th><th>Submitted</th><th>Name</th><th>Age</th><th>Sex</th><th>User Type</th>';
+    html += '<th><button class="sort-btn" data-sort="num" style="all:unset;cursor:pointer;font-weight:inherit">#' + sortArrow("num") + '</button></th>';
+    html += '<th><button class="sort-btn" data-sort="ref" style="all:unset;cursor:pointer;font-weight:inherit">Reference' + sortArrow("ref") + '</button></th>';
+    html += '<th><button class="sort-btn" data-sort="date" style="all:unset;cursor:pointer;font-weight:inherit">Submitted' + sortArrow("date") + '</button></th>';
+    html += '<th><button class="sort-btn" data-sort="name" style="all:unset;cursor:pointer;font-weight:inherit">Name' + sortArrow("name") + '</button></th>';
+    html += '<th>Age</th><th>Sex</th><th>User Type</th>';
     for (var k = 1; k <= TOTAL_ITEMS; k++) html += '<th>Q' + k + '</th>';
-    html += '<th>Mean</th><th>Comments</th></tr></thead><tbody>';
-    r.forEach(function(res, i) {
+    html += '<th><button class="sort-btn" data-sort="mean" style="all:unset;cursor:pointer;font-weight:inherit">Mean' + sortArrow("mean") + '</button></th>';
+    html += '<th>Comments</th></tr></thead><tbody>';
+    var sorted = r.slice().sort(function(a, b) {
+      var va, vb;
+      switch (SORT.col) {
+        case "num": va = r.indexOf(a); vb = r.indexOf(b); break;
+        case "ref": va = (a.id || "").toUpperCase(); vb = (b.id || "").toUpperCase(); break;
+        case "date": va = a.submitted_at || ""; vb = b.submitted_at || ""; break;
+        case "name": va = (a.respondent_name || "").toLowerCase(); vb = (b.respondent_name || "").toLowerCase(); break;
+        case "mean":
+          var av = [], bv = [];
+          for (var k3 = 1; k3 <= TOTAL_ITEMS; k3++) { var v3 = (a.answers || {})[String(k3)]; if (v3) av.push(v3); }
+          for (var k4 = 1; k4 <= TOTAL_ITEMS; k4++) { var v4 = (b.answers || {})[String(k4)]; if (v4) bv.push(v4); }
+          va = mean(av); vb = mean(bv); break;
+        default: va = ""; vb = "";
+      }
+      if (va < vb) return -1 * SORT.dir;
+      if (va > vb) return 1 * SORT.dir;
+      return 0;
+    });
+    sorted.forEach(function(res, i) {
       var vals = [];
       for (var k = 1; k <= TOTAL_ITEMS; k++) {
         var v = (res.answers || {})[String(k)];
@@ -1337,10 +1391,23 @@
       root.innerHTML = '<div class="loading"><div class="spinner"></div>Loading responses from Supabase...</div>';
       return;
     }
+    if (STATE.loadError) {
+      root.innerHTML = '<div class="loading"><div style="color:var(--error);font-size:18px;font-weight:700;margin-bottom:8px;">Error Loading Data</div><div style="font-size:13px;color:var(--muted);max-width:500px;margin:0 auto;">' + esc(STATE.loadError) + '</div><button class="btn btn-primary" style="margin-top:20px;" onclick="location.reload()">Retry</button></div>';
+      return;
+    }
     applyFilters();
     root.innerHTML = renderDashboard();
     attachDashboardHandlers();
-    if (STATE.activeTab === "charts") initCharts(STATE.filteredResponses);
+    if (STATE.filteredResponses.length) initCharts(STATE.filteredResponses);
+  }
+
+  function showToast(msg) {
+    var el = document.getElementById("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(el._hide);
+    el._hide = setTimeout(function() { el.classList.remove("show"); }, 2500);
   }
 
   function attachLoginHandlers() {
@@ -1381,9 +1448,23 @@
     var exportToggle = document.getElementById("export-toggle");
     var exportDropdown = document.getElementById("export-dropdown");
     if (exportToggle && exportDropdown) {
-      exportToggle.addEventListener("click", function() { exportDropdown.classList.toggle("show"); });
+      exportToggle.addEventListener("click", function() {
+        var show = !exportDropdown.classList.contains("show");
+        exportDropdown.classList.toggle("show");
+        exportToggle.setAttribute("aria-expanded", String(show));
+      });
+      document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape" && exportDropdown.classList.contains("show")) {
+          exportDropdown.classList.remove("show");
+          exportToggle.setAttribute("aria-expanded", "false");
+          exportToggle.focus();
+        }
+      });
       document.addEventListener("click", function(e) {
-        if (!exportToggle.contains(e.target) && !exportDropdown.contains(e.target)) exportDropdown.classList.remove("show");
+        if (!exportToggle.contains(e.target) && !exportDropdown.contains(e.target)) {
+          exportDropdown.classList.remove("show");
+          exportToggle.setAttribute("aria-expanded", "false");
+        }
       });
     }
     var exportCsv = document.getElementById("export-csv");
@@ -1401,6 +1482,15 @@
     if (fFrom) fFrom.addEventListener("change", function() { STATE.filters.dateFrom = fFrom.value; render(); });
     if (fTo) fTo.addEventListener("change", function() { STATE.filters.dateTo = fTo.value; render(); });
     if (fReset) fReset.addEventListener("click", function() { STATE.filters = { userType: "all", dateFrom: "", dateTo: "" }; render(); });
+
+    document.querySelectorAll(".sort-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var col = btn.getAttribute("data-sort");
+        if (SORT.col === col) SORT.dir *= -1;
+        else { SORT.col = col; SORT.dir = -1; }
+        render();
+      });
+    });
   }
 
   async function loadResponses() {
@@ -1413,9 +1503,11 @@
         .order("submitted_at", { ascending: false });
       if (error) throw error;
       STATE.responses = data || [];
+      STATE.loadError = null;
     } catch (err) {
       console.error("Load error:", err);
       STATE.responses = [];
+      STATE.loadError = err.message || "Failed to load data from Supabase.";
     }
     STATE.loading = false;
     render();
@@ -1439,23 +1531,29 @@
       var dt = res.submitted_at || "";
       var line = [ref, dt, res.respondent_name || "", res.respondent_age || "", res.respondent_sex || "", res.respondent_user_type || ""]
         .concat(vals).concat([m.toFixed(2), res.comments || ""]);
-      rows.push(line.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","));
+      rows.push(line.map(function(c) { return '"' + String(c).replace(/"/g, '""').replace(/^[=+\-@\t\r]/, "'") + '"'; }).join(","));
     });
     var blob = new Blob([rows.join("\n")], { type: "text/csv" });
+    var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
+    a.href = url;
     a.download = "prism_responses_" + new Date().toISOString().slice(0,10) + ".csv";
     a.click();
+    URL.revokeObjectURL(url);
+    showToast("CSV exported (" + r.length + " responses)");
   }
 
   function exportJSON() {
     var r = STATE.filteredResponses;
     if (!r.length) return;
     var blob = new Blob([JSON.stringify(r, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
+    a.href = url;
     a.download = "prism_responses_" + new Date().toISOString().slice(0,10) + ".json";
     a.click();
+    URL.revokeObjectURL(url);
+    showToast("JSON exported (" + r.length + " responses)");
   }
 
   function exportExcelFile() {
@@ -1740,6 +1838,7 @@
     XLSX.utils.book_append_sheet(wb, ws3, "Item Means");
     XLSX.utils.book_append_sheet(wb, ws4, "Demographics");
     XLSX.writeFile(wb, "prism_responses_" + now.toISOString().slice(0,10) + ".xlsx");
+    showToast("Excel exported (" + r.length + " responses, 4 sheets)");
   }
 
   if (STATE.loggedIn) loadResponses(); else render();
