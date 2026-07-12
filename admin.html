@@ -578,7 +578,8 @@
     background: var(--ink); color: #fff; padding: 14px 18px; font-size: 14px; font-weight: 700;
     display: flex; justify-content: space-between; align-items: center;
   }
-  #chat-header button { background: none; border: none; color: #fff; cursor: pointer; font-size: 18px; }
+  #chat-header button { background: none; border: none; color: #fff; cursor: pointer; font-size: 18px; padding: 0 4px; opacity: 0.75; }
+  #chat-header button:hover { opacity: 1; }
   #chat-msgs {
     flex: 1; overflow-y: auto; padding: 14px 16px; font-size: 13px;
     min-height: 200px; max-height: 340px;
@@ -608,6 +609,9 @@
   }
   #chat-input-area button:disabled { opacity: 0.5; cursor: default; }
   #chat-msgs .typing span { display: inline-block; background: var(--paper); color: var(--muted); padding: 8px 14px; border-radius: 4px 16px 16px 16px; }
+  .chat-suggestions { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 4px; }
+  .chat-suggest { all: unset; cursor: pointer; font-size: 12px; color: var(--ink-2); background: var(--paper); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); transition: all 0.15s; text-align: left; }
+  .chat-suggest:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
   @media (max-width: 480px) {
     #chat-panel { width: calc(100% - 32px); right: 16px; bottom: 80px; }
   }
@@ -643,6 +647,14 @@
     chatMessages: [],
     chatLoading: false
   };
+  var CHAT_STORAGE_KEY = "prism_chat_messages";
+
+  function loadChatMessages() {
+    try { var raw = localStorage.getItem(CHAT_STORAGE_KEY); if (raw) STATE.chatMessages = JSON.parse(raw); } catch(e) {}
+  }
+  function saveChatMessages() {
+    try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(STATE.chatMessages)); } catch(e) {}
+  }
 
   var AI_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
   var AI_MODEL = "llama-3.3-70b-versatile";
@@ -3021,16 +3033,17 @@
     showToast("Excel exported (" + r.length + " responses, 7 sheets)");
   }
 
-  /* ---- Ollama AI Chat ---- */
+  /* ---- AI Chat ---- */
   function renderChatUI() {
     var msgs = STATE.chatMessages;
     var html = '';
     html += '<button id="chat-btn" onclick="void 0">&#128172;</button>';
     html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '">';
-    html += '<div id="chat-header"><span>AI Research Assistant</span><button id="chat-close">&times;</button></div>';
+    html += '<div id="chat-header"><span>AI Research Assistant</span><div><button id="chat-clear" title="Clear conversation">&empty;</button><button id="chat-close">&times;</button></div></div>';
     html += '<div id="chat-msgs">';
     if (!msgs.length) {
-      html += '<div class="msg bot"><span>Hello! I can help you analyze the survey data. Ask me about the results, trends, or recommendations.</span></div>';
+      html += '<div class="msg bot"><span>Hello! I can help you analyze the survey data. Ask me anything about the results.</span></div>';
+      html += '<div class="chat-suggestions"><button class="chat-suggest" data-q="Summarize the overall survey results">&#9654; Overall summary</button><button class="chat-suggest" data-q="Which section scored the lowest and what can we improve?">&#9654; Lowest section + improvements</button><button class="chat-suggest" data-q="Show me the respondent demographics">&#9654; Demographics</button><button class="chat-suggest" data-q="What are the key recommendations based on the data?">&#9654; Recommendations</button></div>';
     } else {
       msgs.forEach(function(m) {
         var content = m.role === "bot" ? renderMarkdown(m.content) : esc(m.content);
@@ -3038,11 +3051,11 @@
       });
     }
     if (STATE.chatLoading) {
-      html += '<div class="msg bot typing"><span>Thinking\u2026</span></div>';
+      html += '<div class="msg bot typing"><span>Thinking&#8230;</span></div>';
     }
     html += '</div>';
     html += '<div id="chat-input-area">';
-    html += '<input type="text" id="chat-input" placeholder="Ask about the data\u2026" />';
+    html += '<input type="text" id="chat-input" placeholder="Ask about the data&#8230;" />';
     html += '<button id="chat-send" ' + (STATE.chatLoading ? 'disabled' : '') + '>Send</button>';
     html += '</div></div>';
     return html;
@@ -3087,10 +3100,17 @@
     var send = document.getElementById("chat-send");
     var input = document.getElementById("chat-input");
     var panel = document.getElementById("chat-panel");
-    if (btn) btn.addEventListener("click", function() { STATE.chatOpen = !STATE.chatOpen; render(); });
+    if (btn) btn.addEventListener("click", function() { STATE.chatOpen = !STATE.chatOpen; render(); setTimeout(scrollChat, 100); });
     if (close) close.addEventListener("click", function() { STATE.chatOpen = false; render(); });
     if (send) send.addEventListener("click", function() { sendChatMessage(); });
     if (input) input.addEventListener("keydown", function(e) { if (e.key === "Enter") { e.preventDefault(); sendChatMessage(); } });
+    var clearBtn = document.getElementById("chat-clear");
+    if (clearBtn) clearBtn.addEventListener("click", function() {
+      if (confirm("Clear chat history?")) { STATE.chatMessages = []; saveChatMessages(); render(); }
+    });
+    document.querySelectorAll(".chat-suggest").forEach(function(b) {
+      b.addEventListener("click", function() { sendChatMessage(b.getAttribute("data-q")); });
+    });
   }
 
   function buildDataContext() {
@@ -3208,18 +3228,23 @@
     return lines.join("\n");
   }
 
-  async function sendChatMessage() {
+  async function sendChatMessage(forcedText) {
     var input = document.getElementById("chat-input");
-    if (!input || !input.value.trim() || STATE.chatLoading) return;
-    var text = input.value.trim();
-    input.value = "";
+    var text;
+    if (forcedText) { text = forcedText; }
+    else {
+      if (!input || !input.value.trim() || STATE.chatLoading) return;
+      text = input.value.trim();
+      input.value = "";
+    }
+    if (!text || STATE.chatLoading) return;
     STATE.chatMessages.push({ role: "user", content: text });
     STATE.chatLoading = true;
     render();
     scrollChat();
     var context = buildDataContext();
     var systemPrompt = "You are a helpful research assistant for the PRISM (Portal for Records, Information, and School Management) evaluation survey. "
-      + "You have FULL ACCESS to the survey data below — all item statistics, section scores, demographics, reliability, correlations, and t-tests. "
+      + "You have FULL ACCESS to the survey data below \u2014 all item statistics, section scores, demographics, reliability, correlations, and t-tests. "
       + "Answer concisely based on this data. If asked about recommendations, suggest practical improvements.\n\n"
       + "The survey uses a 4-point Likert scale (1=Strongly Disagree, 2=Disagree, 3=Agree, 4=Strongly Agree).\n\n"
       + "Formatting rules:\n"
@@ -3227,8 +3252,16 @@
       + "- Use bullet points for lists.\n"
       + "- Keep paragraphs short (under 3 sentences).\n"
       + "- Start with a direct summary.\n"
-      + "- DO NOT include images, diagrams, or attachments — text only.\n\n"
+      + "- DO NOT include images, diagrams, or attachments \u2014 text only.\n\n"
       + "Here is the complete computed data:\n" + context;
+    var apiMessages = [
+      { role: "system", content: systemPrompt }
+    ];
+    // Include recent conversation history (last 10 exchanges) for context
+    var history = STATE.chatMessages.slice(-20);
+    history.forEach(function(m) {
+      apiMessages.push({ role: m.role === "bot" ? "assistant" : "user", content: m.content });
+    });
     try {
       var controller = new AbortController();
       var timeout = setTimeout(function() { controller.abort(); }, 30000);
@@ -3239,10 +3272,7 @@
         body: JSON.stringify({
           endpoint: AI_ENDPOINT,
           model: AI_MODEL,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: text }
-          ]
+          messages: apiMessages
         })
       });
       clearTimeout(timeout);
@@ -3261,9 +3291,10 @@
       STATE.chatMessages.push({ role: "bot", content: reply });
     } catch (err) {
       console.error("Chat error:", err);
-      STATE.chatMessages.push({ role: "bot", content: "Error: " + (err.name === "AbortError" ? "Request timed out (30s)" : err.message) + " — Make sure AI_API_KEY is set in Vercel env vars and endpoint is correct." });
+      STATE.chatMessages.push({ role: "bot", content: "Error: " + (err.name === "AbortError" ? "Request timed out (30s)" : err.message) + " \u2014 Make sure AI_API_KEY is set in Vercel env vars." });
     }
     STATE.chatLoading = false;
+    saveChatMessages();
     render();
     scrollChat();
   }
@@ -3275,6 +3306,7 @@
     }, 50);
   }
 
+  loadChatMessages();
   supabaseClient.auth.getSession().then(function(res) {
     if (res.data && res.data.session) {
       STATE.loggedIn = true;
