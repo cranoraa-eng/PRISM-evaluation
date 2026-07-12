@@ -3098,52 +3098,117 @@
   function buildDataContext() {
     var r = STATE.filteredResponses;
     if (!r.length) return "No survey data available yet.";
-    var totalItems = TOTAL_ITEMS;
-    var allScores = [];
-    var itemMeans = [];
-    for (var k = 1; k <= totalItems; k++) {
-      var vals = itemValues(r, k);
-      itemMeans.push(mean(vals));
+    var n = r.length, lines = [];
+
+    lines.push("SURVEY DATA REPORT");
+    lines.push("Total respondents: " + n);
+
+    // Age info
+    var ages = r.map(function(x){return x.respondent_age}).filter(function(a){return a && a>0});
+    if (ages.length) {
+      var avgAge = ages.reduce(function(s,v){return s+v},0) / ages.length;
+      lines.push("Age range: " + Math.min.apply(null,ages) + " to " + Math.max.apply(null,ages) + " (mean " + avgAge.toFixed(1) + ")");
     }
+
+    // Overall stats
+    var allScores = [];
     r.forEach(function(res) {
       var s = 0;
-      for (var k = 1; k <= totalItems; k++) { var v = (res.answers || {})[String(k)]; if (v) s += v; }
+      for (var k = 1; k <= TOTAL_ITEMS; k++) { var v = (res.answers || {})[String(k)]; if (v) s += v; }
       allScores.push(s);
     });
-    var overallMean = mean(allScores) / totalItems;
-    var sectionSummaries = [];
-    var itemNum = 1;
+    var overallMean = mean(allScores) / TOTAL_ITEMS;
+    var overallSD = stdDev(allScores) / TOTAL_ITEMS;
+    lines.push("Overall mean: " + overallMean.toFixed(2) + " (SD: " + overallSD.toFixed(2) + " on 1-4 scale)");
+
+    var totalAlpha = cronbachAlpha(r);
+    lines.push("Overall Cronbach's alpha: " + (totalAlpha !== null ? totalAlpha.toFixed(3) : "N/A") + " — " + alphaLabel(totalAlpha));
+
+    // Per-item stats
+    lines.push(""); lines.push("ITEM-LEVEL STATISTICS");
+    for (var k = 1; k <= TOTAL_ITEMS; k++) {
+      var vals = itemValues(r, k);
+      var m = mean(vals);
+      var sd = stdDev(vals);
+      var freq = freqCount(vals);
+      lines.push("Item " + k + ": mean=" + m.toFixed(2) + " SD=" + sd.toFixed(2) + " freq={1:" + freq[1] + ",2:" + freq[2] + ",3:" + freq[3] + ",4:" + freq[4] + "}");
+    }
+
+    // Section-level stats
+    lines.push(""); lines.push("SECTION-LEVEL STATISTICS");
+    var itemIdx = 1;
     SECTIONS.forEach(function(sec) {
       var svals = [];
       r.forEach(function(res) {
         var s = 0;
         sec.items.forEach(function(_, j) {
-          var v = (res.answers || {})[String(itemNum + j)];
+          var v = (res.answers || {})[String(itemIdx + j)];
           if (v) s += v;
         });
-        svals.push(s);
+        svals.push(s / sec.items.length);
       });
-      sectionSummaries.push({ title: sec.title, mean: mean(svals) / sec.items.length });
-      itemNum += sec.items.length;
+      var secMean = mean(svals);
+      var secSD = stdDev(svals);
+      var secAlpha = cronbachAlphaSection(r, sec, itemIdx);
+      lines.push(sec.title + ": mean=" + secMean.toFixed(2) + " SD=" + secSD.toFixed(2) + " alpha=" + (secAlpha !== null ? secAlpha.toFixed(3) : "N/A"));
+      itemIdx += sec.items.length;
     });
-    var sexCounts = {};
-    var typeCounts = {};
+
+    // Demographics
+    lines.push(""); lines.push("DEMOGRAPHICS");
+    var sexCounts = {}, typeCounts = {};
     r.forEach(function(res) {
       var sx = res.respondent_sex || "Unknown"; sexCounts[sx] = (sexCounts[sx] || 0) + 1;
       var tp = res.respondent_user_type || "Unknown"; typeCounts[tp] = (typeCounts[tp] || 0) + 1;
     });
-    var context = "Survey Data Summary:\n";
-    context += "- Total respondents: " + r.length + "\n";
-    context += "- Overall mean score (1-4 scale): " + overallMean.toFixed(2) + "\n";
-    sectionSummaries.forEach(function(s) {
-      context += "- " + s.title + " mean: " + s.mean.toFixed(2) + "\n";
+    lines.push("Sex: " + JSON.stringify(sexCounts));
+    lines.push("User types: " + JSON.stringify(typeCounts));
+
+    // Inter-section correlations
+    lines.push(""); lines.push("INTER-SECTION CORRELATIONS (Pearson r)");
+    var secMeans = [];
+    itemIdx = 1;
+    SECTIONS.forEach(function(sec) {
+      var svals = [];
+      r.forEach(function(res) {
+        var s = 0;
+        sec.items.forEach(function(_, j) {
+          var v = (res.answers || {})[String(itemIdx + j)];
+          if (v) s += v;
+        });
+        svals.push(s);
+      });
+      secMeans.push({ title: sec.title, vals: svals });
+      itemIdx += sec.items.length;
     });
-    context += "- Sex distribution: " + JSON.stringify(sexCounts) + "\n";
-    context += "- User type distribution: " + JSON.stringify(typeCounts) + "\n";
-    context += "- Age range: " + (r.length ? Math.min.apply(null, r.map(function(x){return x.respondent_age||99})) + " to " + Math.max.apply(null, r.map(function(x){return x.respondent_age||0})) : "N/A") + "\n";
-    var alpha = cronbachAlpha(r);
-    context += "- Cronbach's alpha: " + (alpha !== null ? alpha.toFixed(3) : "N/A") + "\n";
-    return context;
+    for (var i = 0; i < secMeans.length; i++) {
+      for (var j2 = i+1; j2 < secMeans.length; j2++) {
+        var corr = pearsonCorr(secMeans[i].vals, secMeans[j2].vals);
+        var label = "weak";
+        if (Math.abs(corr) >= 0.7) label = "strong";
+        else if (Math.abs(corr) >= 0.4) label = "moderate";
+        lines.push(secMeans[i].title + " vs " + secMeans[j2].title + ": r=" + corr.toFixed(3) + " (" + label + ")");
+      }
+    }
+
+    // T-test: Students vs Faculty (if both present)
+    var studentScores = [], facultyScores = [];
+    r.forEach(function(res) {
+      var s = 0;
+      for (var k = 1; k <= TOTAL_ITEMS; k++) { var v = (res.answers || {})[String(k)]; if (v) s += v; }
+      if (res.respondent_user_type === "Student") studentScores.push(s / TOTAL_ITEMS);
+      if (res.respondent_user_type === "Faculty / Teacher") facultyScores.push(s / TOTAL_ITEMS);
+    });
+    if (studentScores.length > 1 && facultyScores.length > 1) {
+      var tt = tTestIndependent(studentScores, facultyScores);
+      if (tt) {
+        lines.push(""); lines.push("T-TEST: Students vs Faculty");
+        lines.push("Students mean=" + tt.mean1.toFixed(2) + " (n=" + studentScores.length + "), Faculty mean=" + tt.mean2.toFixed(2) + " (n=" + facultyScores.length + ")");
+        lines.push("t(" + tt.df.toFixed(1) + ")=" + tt.t.toFixed(3) + " p=" + tt.p.toFixed(4));
+      }
+    }
+
+    return lines.join("\n");
   }
 
   async function sendChatMessage() {
