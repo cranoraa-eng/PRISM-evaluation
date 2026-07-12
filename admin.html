@@ -2249,13 +2249,8 @@
     if (STATE.userRole === "viewer") { showToast("Viewers cannot delete responses."); return; }
     if (!confirm("Delete " + ids.length + " selected response(s)? This action cannot be undone.")) return;
     try {
-      /* Soft delete via RPC */
-      var { data, error } = await supabaseClient.rpc("soft_delete_responses", { p_ids: ids });
-      if (error) {
-        /* Fallback: direct update */
-        var { error: updErr } = await supabaseClient.from("responses").update({ deleted_at: new Date().toISOString() }).in("id", ids);
-        if (updErr) throw updErr;
-      }
+      var { error: updErr } = await supabaseClient.from("responses").update({ deleted_at: new Date().toISOString() }).in("id", ids);
+      if (updErr) throw updErr;
       STATE.selectedIds = {};
       showToast("Deleted " + ids.length + " response(s).");
       loadResponses();
