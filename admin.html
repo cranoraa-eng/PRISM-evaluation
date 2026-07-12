@@ -3560,7 +3560,8 @@
       STATE.chatController = null;
       if (!resp.ok) {
         var errBody = await resp.json().catch(function(){ return {error:"Failed to connect"}; });
-        throw new Error(errBody.error || "HTTP " + resp.status);
+        var errMsg = typeof errBody.error === "object" && errBody.error ? errBody.error.message || errBody.error : errBody.error;
+        throw new Error(errMsg || "HTTP " + resp.status);
       }
       var data = await resp.json();
       var reply = "No response.";
@@ -3574,7 +3575,7 @@
     } catch (err) {
       console.error("Chat error:", err);
       STATE.chatController = null;
-      var msg = (err.name === "AbortError" ? "Request cancelled." : "Sorry, I couldn't reach the assistant just now. Please try again.");
+      var msg = err.name === "AbortError" ? "Request cancelled." : (err.message || "Sorry, I couldn't reach the assistant just now. Please try again.");
       STATE.chatMessages.push({ role: "bot", content: msg, isError: true });
     }
     STATE.chatLoading = false;
