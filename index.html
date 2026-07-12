@@ -1109,7 +1109,8 @@
         '<h1 class="title serif">PRISM Evaluation Questionnaire</h1>' +
         '<p class="subtitle">Portal for Records, Information, and School Management</p>' +
         '<div class="rule"></div>' +
-        '<p>This questionnaire gathers your honest assessment of PRISM. Your responses help evaluate the system\u2019s usability, functional suitability, and overall user satisfaction as a school management portal.</p>' +
+        '<p>This questionnaire gathers your honest assessment of <a href="https://cranoraa-eng-cranoraa-knhs-website.vercel.app/" target="_blank" rel="noopener" style="color:var(--ink-2);font-weight:600;">the PRISM school management portal</a>. Your responses help evaluate the system\u2019s usability, functional suitability, and overall user satisfaction.</p>' +
+        '<p style="margin:14px 0 0;"><a href="https://cranoraa-eng-cranoraa-knhs-website.vercel.app/" target="_blank" rel="noopener" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">&#128279; Visit the Website</a></p>' +
         '<p>Your participation is <b>voluntary</b> and your responses are <b>confidential</b>. You must be at least <b>18 years of age</b> (or have parental consent) to participate. You may withdraw at any time before submission by closing the form.</p>' +
         '<div class="meta">' +
           '<div><b>' + TOTAL_ITEMS + ' statements</b>3 sections</div>' +
@@ -1235,7 +1236,9 @@
     var inner = '<div class="shell">' + renderStamp() + '<div class="masthead">' +
       '<p class="eyebrow">PRISM \u00b7 Portal for Records, Information, and School Management</p>' +
       '<h1 class="title serif">Evaluation Questionnaire</h1>' +
-      '<p class="subtitle">Usability \u00b7 Functional Suitability \u00b7 User Satisfaction</p>' +
+      '<p class="subtitle">Usability \u00b7 Functional Suitability \u00b7 User Satisfaction' +
+      (step.kind !== "welcome" ? ' \u00b7 <a href="https://cranoraa-eng-cranoraa-knhs-website.vercel.app/" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;font-weight:600;">cranoraa-eng-cranoraa-knhs-website.vercel.app</a>' : '') +
+      '</p>' +
       '</div>';
 
     inner += renderProgress();
