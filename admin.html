@@ -3619,16 +3619,16 @@
         msg = "Request cancelled.";
       } else if (err.message && /rate.limit|rate_limit_exceeded/i.test(err.message)) {
         var m = err.message;
-        var model = (m.match(/model\s+`([^`]+)`/) || [])[1] || "";
-        var waitTime = (m.match(/try again in\s+([^\.]+)/) || [])[1] || "";
-        var usage = (m.match(/Limit\s+(\d+),\s*Used\s+(\d+),\s*Requested\s+(\d+)/) || []);
-        var pct = usage ? Math.round(Number(usage[2]) / Number(usage[1]) * 100) : 0;
+        var model = (m.match(/model\s+`?([^`\s]+)`?/) || [])[1] || "";
+        var waitTime = (m.match(/try again in\s+([^\s.]+)/) || [])[1] || "";
+        var usage = (m.match(/(?:Limit|limit)\D*?(\d+)\D*?Used\D*?(\d+)\D*?Requested\D*?(\d+)/) || []);
+        var pct = usage.length >= 3 ? Math.round(Number(usage[2]) / Number(usage[1]) * 100) : 0;
         STATE.tokenUsage = { model: model, limit: usage[1], used: usage[2], pct: pct, waitTime: waitTime };
-        try { localStorage.setItem("prism_token_usage", JSON.stringify(STATE.tokenUsage)); } catch(e) {}
+        if (usage.length >= 3) try { localStorage.setItem("prism_token_usage", JSON.stringify(STATE.tokenUsage)); } catch(e) {}
         var link = (m.match(/https?:\/\/\S+/g) || [])[0] || "";
         msg = "**Rate limit exceeded**" + (model ? " for **" + model + "**" : "")
           + (waitTime ? "\n\nPlease try again in **" + waitTime + "**." : "")
-          + (usage ? "\n\nToken usage: **" + pct + "%** of daily limit (" + usage[2] + "/" + usage[1] + ")" : "")
+          + (usage.length >= 3 ? "\n\nToken usage: **" + pct + "%** of daily limit (" + usage[2] + "/" + usage[1] + ")" : "")
           + (link ? "\n\n[Upgrade at Groq Console](" + link + ")" : "");
       } else {
         msg = err.message || "Sorry, I couldn't reach the assistant just now. Please try again.";
