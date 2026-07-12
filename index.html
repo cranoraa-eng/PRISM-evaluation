@@ -151,12 +151,17 @@
     font-weight: 700;
     color: var(--ink);
     margin: 0 0 4px;
+    padding-left: 14px;
+    border-left: 4px solid var(--gold);
   }
   #prism-root .section-note {
     font-size: 13.5px;
     color: var(--muted);
-    font-style: italic;
     margin: 0 0 20px;
+    padding: 10px 14px;
+    background: #F4F6FA;
+    border-radius: 8px;
+    border: 1px solid var(--line);
   }
   #prism-root .group-heading {
     font-size: 12.5px;
@@ -174,15 +179,36 @@
     display: flex;
     gap: 14px;
     flex-wrap: wrap;
-    background: var(--paper);
+    background: #F4F6FA;
     border: 1px solid var(--line);
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: 12px 16px;
     margin: 0 0 22px;
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--ink-2);
+    justify-content: center;
   }
-  #prism-root .scale-key b { color: var(--ink); }
+  #prism-root .scale-key span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  #prism-root .scale-key b {
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    font-size: 11px;
+  }
+  #prism-root .scale-key .scale-full { display: inline; }
+  @media (max-width: 560px) {
+    #prism-root .scale-key .scale-full { display: none; }
+  }
 
   #prism-root .item {
     padding: 14px 0;
@@ -197,6 +223,9 @@
     align-items: flex-start;
     gap: 16px;
     flex-wrap: wrap;
+  }
+  @media (min-width: 561px) {
+    #prism-root .item-row { flex-wrap: nowrap; }
   }
   #prism-root .item-num {
     flex: 0 0 auto;
@@ -217,17 +246,20 @@
     color: var(--ink);
     padding-top: 2px;
   }
+  @media (min-width: 561px) {
+    #prism-root .item-text { flex: 1 1 0; min-width: 200px; }
+  }
   #prism-root .likert {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     flex: 0 0 auto;
     margin-left: auto;
   }
   #prism-root .likert-btn {
     all: unset;
     cursor: pointer;
-    width: 46px;
-    height: 40px;
+    width: 56px;
+    height: 48px;
     border: 1.5px solid var(--line);
     border-radius: 8px;
     display: flex;
@@ -239,13 +271,15 @@
     transition: all 0.15s ease;
     background: var(--surface);
   }
-  #prism-root .likert-btn b { font-size: 13px; line-height: 1.1; color: inherit; }
-  #prism-root .likert-btn:hover { border-color: var(--ink-2); color: var(--ink-2); }
+  #prism-root .likert-btn b { font-size: 14px; line-height: 1.2; color: inherit; }
+  #prism-root .likert-btn:hover { border-color: var(--ink-2); color: var(--ink-2); background: #F8F9FB; }
   #prism-root .likert-btn:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
   #prism-root .likert-btn.selected {
     background: var(--ink);
     border-color: var(--ink);
     color: #fff;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(22,35,61,0.2);
   }
 
   #prism-root .field { margin-bottom: 20px; }
@@ -517,7 +551,7 @@
     }
     #prism-root .likert-btn {
       width: 100%;
-      height: 40px;
+      height: 44px;
       font-size: 11px;
       border-radius: 8px;
     }
@@ -525,9 +559,11 @@
 
     #prism-root .scale-key {
       font-size: 10.5px;
-      gap: 6px;
+      gap: 4px;
       padding: 8px 10px;
-      flex-direction: column;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     #prism-root .welcome { padding: 20px 16px 24px; }
@@ -630,7 +666,19 @@
       surveyRequired: "Please answer every statement before continuing.",
       queued: "Response saved offline. It will be submitted when your connection is restored.",
       lastSaved: "Last saved at",
-      queuedTitle: "Queued for submission"
+      queuedTitle: "Queued for submission",
+      /* Section titles & notes */
+      usabilityTitle: "A. Usability",
+      usabilityNote: "Ease of use, navigation, accessibility, and overall user experience.",
+      funcTitle: "B. Functional Suitability",
+      funcNote: "System features, records management, communication, and school operations.",
+      satisfactionTitle: "C. User Satisfaction",
+      satisfactionNote: "Content quality, accuracy, format, timeliness, and overall satisfaction.",
+      /* Scale labels */
+      scaleSA: "Strongly Agree",
+      scaleA: "Agree",
+      scaleD: "Disagree",
+      scaleSD: "Strongly Disagree"
     },
     fil: {
       skip: "Laktawan ang nilalaman",
@@ -1038,7 +1086,7 @@
     var stepNote = step.noteKey ? t(step.noteKey) : step.note;
     html += '<h2 class="section-title serif">' + esc(stepTitle) + '</h2>';
     if (stepNote) html += '<p class="section-note">' + esc(stepNote) + '</p>';
-    html += '<div class="scale-key" role="group" aria-label="Response scale"><span><b>4</b> ' + t("scaleSA") + '</span><span><b>3</b> ' + t("scaleA") + '</span><span><b>2</b> ' + t("scaleD") + '</span><span><b>1</b> ' + t("scaleSD") + '</span></div>';
+    html += '<div class="scale-key" role="group" aria-label="Response scale"><span><b>4</b> <span class="scale-full">' + t("scaleSA") + ' </span>SA</span><span><b>3</b> <span class="scale-full">' + t("scaleA") + ' </span>A</span><span><b>2</b> <span class="scale-full">' + t("scaleD") + ' </span>D</span><span><b>1</b> <span class="scale-full">' + t("scaleSD") + ' </span>SD</span></div>';
     html += '<div class="banner error' + (missing.length ? " show" : "") + '" role="alert">' + t("surveyRequired") + '</div>';
     step.groups.forEach(function(g) {
       if (g.heading) html += '<div class="group-heading">' + esc(g.heading) + '</div>';
