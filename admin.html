@@ -645,6 +645,7 @@
 
   var OLLAMA_ENDPOINT = "http://localhost:11434/api/chat";
   var OLLAMA_MODEL = "llama3.2";
+  var OLLAMA_API_KEY = ""; // Set your API key here if using a hosted Ollama service
 
   var SECTIONS = [
     { key: "usability", title: "A. Usability", items: [
@@ -3125,9 +3126,11 @@
       + "Answer concisely based on the data provided. If asked about recommendations, suggest practical improvements.\n\n"
       + "Current data:\n" + context;
     try {
+      var headers = { "Content-Type": "application/json" };
+      if (OLLAMA_API_KEY) headers["Authorization"] = "Bearer " + OLLAMA_API_KEY;
       var resp = await fetch(OLLAMA_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: headers,
         body: JSON.stringify({
           model: OLLAMA_MODEL,
           messages: [
