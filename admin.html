@@ -619,6 +619,13 @@
   .chat-suggest:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
   .chat-retry { all: unset; cursor: pointer; font-size: 12px; color: var(--error); background: #FBEAE5; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--error); transition: all 0.15s; text-align: center; display: block; width: 100%; }
   .chat-retry:hover { background: var(--error); color: #fff; }
+  #chat-resize-handle {
+    position: absolute; bottom: 0; right: 0; width: 20px; height: 20px;
+    cursor: nw-resize; color: var(--muted); font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none; z-index: 11;
+  }
+  #chat-resize-handle:hover { color: var(--ink-2); }
   #chat-settings-overlay {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     background: var(--surface); z-index: 10; border-radius: 12px;
@@ -737,7 +744,11 @@
       var raw = localStorage.getItem("prism_ai_settings");
       if (raw) {
         var s = JSON.parse(raw);
-        if (s && s.aiEndpoint && s.aiModel) return s;
+        if (s && s.aiEndpoint && s.aiModel) {
+          var d = defaultSettings();
+          for (var k in d) { if (s[k] === undefined) s[k] = d[k]; }
+          return s;
+        }
       }
     } catch(e) {}
     return defaultSettings();
@@ -3212,6 +3223,7 @@
     html += renderChatSettings();
     var charCount = STATE.chatInputChars || 0;
     var showCount = charCount > CHAT_MAX_CHARS * 0.7;
+    html += '<div id="chat-resize-handle" title="Drag to resize">&#9698;</div>';
     html += '<div id="chat-input-area">';
     html += '<textarea id="chat-input" rows="1" placeholder="Ask about the data&#8230;" maxlength="' + CHAT_MAX_CHARS + '"></textarea>';
     html += '<div style="display:flex;flex-direction:column;gap:4px;align-items:stretch;">';
@@ -3291,6 +3303,33 @@
     if (settingsBtn) settingsBtn.addEventListener("click", function() {
       STATE.chatSettingsOpen = !STATE.chatSettingsOpen;
       render();
+    });
+    var resizeHandle = document.getElementById("chat-resize-handle");
+    if (resizeHandle) resizeHandle.addEventListener("mousedown", function(e) {
+      e.preventDefault();
+      var panel = document.getElementById("chat-panel");
+      if (!panel) return;
+      var startX = e.clientX, startY = e.clientY;
+      var startW = panel.offsetWidth, startH = panel.offsetHeight;
+      function onMove(ev) {
+        var w = Math.min(800, Math.max(280, startW + (ev.clientX - startX)));
+        var h = Math.min(900, Math.max(300, startH + (ev.clientY - startY)));
+        panel.style.width = w + "px";
+        panel.style.maxHeight = h + "px";
+      }
+      function onUp() {
+        SETTINGS.panelWidth = String(panel.offsetWidth);
+        SETTINGS.panelHeight = String(panel.offsetHeight);
+        saveSettings();
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        document.body.style.userSelect = "";
+        document.body.style.cursor = "";
+      }
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+      document.body.style.userSelect = "none";
+      document.body.style.cursor = "nw-resize";
     });
     document.addEventListener("click", function(e) {
       var suggest = e.target.closest(".chat-suggest");
