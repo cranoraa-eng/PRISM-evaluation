@@ -3179,6 +3179,12 @@
       + '<input type="url" id="chat-set-endpoint" value="' + esc(s.aiEndpoint) + '" />'
       + '<label for="chat-set-model">Model</label>'
       + '<input type="text" id="chat-set-model" value="' + esc(s.aiModel) + '" />'
+      + '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 2px;">'
+      + '<button class="chat-model-preset" data-model="llama-3.3-70b-versatile" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Llama 3.3 70B</button>'
+      + '<button class="chat-model-preset" data-model="llama-3.1-8b-instant" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Llama 3.1 8B</button>'
+      + '<button class="chat-model-preset" data-model="mixtral-8x7b-32768" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Mixtral 8x7B</button>'
+      + '<button class="chat-model-preset" data-model="gemma2-9b-it" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemma 2 9B</button>'
+      + '</div>'
       + '<label for="chat-set-provider">Provider</label>'
       + '<select id="chat-set-provider"><option value="openai"' + (s.aiProvider === 'openai' ? ' selected' : '') + '>OpenAI-compatible</option><option value="ollama"' + (s.aiProvider === 'ollama' ? ' selected' : '') + '>Ollama</option></select>'
       + '<div style="display:flex;gap:8px;"><div style="flex:1;"><label for="chat-set-width">Width (px)</label><input type="number" id="chat-set-width" value="' + (s.panelWidth || 380) + '" min="280" max="800" /></div>'
@@ -3340,6 +3346,12 @@
       }
       var retry = e.target.closest(".chat-retry");
       if (retry) retryLastMessage();
+      var preset = e.target.closest(".chat-model-preset");
+      if (preset) {
+        var model = preset.getAttribute("data-model");
+        var input = document.getElementById("chat-set-model");
+        if (model && input) { input.value = model; }
+      }
     });
     var saveBtn = document.getElementById("chat-settings-save");
     if (saveBtn) saveBtn.addEventListener("click", function() {
