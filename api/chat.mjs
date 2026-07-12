@@ -1,4 +1,5 @@
-// Vercel serverless function: proxies to Ollama API (bypasses CORS)
+// Vercel serverless function: proxies to Groq/OpenAI-compatible API (bypasses CORS)
+// Set AI_API_KEY as a Vercel environment variable for production
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -11,6 +12,8 @@ export default async function handler(req, res) {
 
   try {
     const headers = { "Content-Type": "application/json" };
+    if (process.env.AI_API_KEY) headers["Authorization"] = "Bearer " + process.env.AI_API_KEY;
+
     const resp = await fetch(endpoint, {
       method: "POST",
       headers,

@@ -643,9 +643,9 @@
     chatLoading: false
   };
 
-  var AI_ENDPOINT = "http://localhost:11434/api/chat";
-  var AI_MODEL = "llama3.2";
-  var AI_PROVIDER = "ollama"; // "openai" or "ollama" — affects response parsing
+  var AI_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+  var AI_MODEL = "llama3-70b-8192";
+  var AI_PROVIDER = "openai"; // "openai" or "ollama" — affects response parsing
 
   var SECTIONS = [
     { key: "usability", title: "A. Usability", items: [
@@ -3138,20 +3138,8 @@
         })
       });
       if (!resp.ok) {
-        // Proxy failed — try direct call (works for local Ollama)
-        var directResp = await fetch(AI_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model: AI_MODEL, messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: text }
-          ], stream: false })
-        });
-        if (!directResp.ok) {
-          var errText = await directResp.text().catch(function(){ return "Unknown error"; });
-          throw new Error("HTTP " + directResp.status + ": " + errText);
-        }
-        resp = directResp;
+        var errBody = await resp.json().catch(function(){ return {error:"Failed to connect"}; });
+        throw new Error(errBody.error || "HTTP " + resp.status);
       }
       var data = await resp.json();
       var reply = "No response.";
