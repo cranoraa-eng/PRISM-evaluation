@@ -3035,7 +3035,8 @@
       html += '<div class="msg bot"><span>Hello! I can help you analyze the survey data. Ask me about the results, trends, or recommendations.</span></div>';
     } else {
       msgs.forEach(function(m) {
-        html += '<div class="msg ' + m.role + '"><span>' + esc(m.content) + '</span></div>';
+        var content = m.role === "bot" ? renderMarkdown(m.content) : esc(m.content);
+        html += '<div class="msg ' + m.role + '"><span>' + content + '</span></div>';
       });
     }
     if (STATE.chatLoading) {
@@ -3047,6 +3048,39 @@
     html += '<button id="chat-send" ' + (STATE.chatLoading ? 'disabled' : '') + '>Send</button>';
     html += '</div></div>';
     return html;
+  }
+
+  function renderMarkdown(text) {
+    // Strip image references (AI cannot send images)
+    text = text.replace(/!\[.*?\]\(.*?\)/g, "[image not supported]");
+    // Escape HTML first to prevent XSS, then apply markdown
+    text = esc(text);
+    text = text.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    text = text.replace(/\*(.+?)\*/g, "<i>$1</i>");
+    text = text.replace(/`(.+?)`/g, "<code>$1</code>");
+    // Lists: lines starting with "- " or "* "
+    var lines = text.split("\n");
+    var result = [];
+    var inUl = false, inOl = false;
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (/^[-*]\s/.test(line)) {
+        if (inOl) { result.push("</ol>"); inOl = false; }
+        if (!inUl) { result.push("<ul>"); inUl = true; }
+        result.push("<li>" + line.replace(/^[-*]\s/, "") + "</li>");
+      } else if (/^\d+[.)]\s/.test(line)) {
+        if (inUl) { result.push("</ul>"); inUl = false; }
+        if (!inOl) { result.push("<ol>"); inOl = true; }
+        result.push("<li>" + line.replace(/^\d+[.)]\s/, "") + "</li>");
+      } else {
+        if (inUl) { result.push("</ul>"); inUl = false; }
+        if (inOl) { result.push("</ol>"); inOl = false; }
+        if (line === "") { result.push("<br>"); } else { result.push(line); }
+      }
+    }
+    if (inUl) result.push("</ul>");
+    if (inOl) result.push("</ol>");
+    return result.join("\n");
   }
 
   function attachChatHandlers() {
@@ -3125,6 +3159,12 @@
     var systemPrompt = "You are a helpful research assistant for the PRISM (Portal for Records, Information, and School Management) evaluation survey. "
       + "The survey uses a 4-point Likert scale (1=Strongly Disagree, 2=Disagree, 3=Agree, 4=Strongly Agree). "
       + "Answer concisely based on the data provided. If asked about recommendations, suggest practical improvements.\n\n"
+      + "Formatting rules:\n"
+      + "- Use **bold** for key terms and numbers.\n"
+      + "- Use bullet points for lists.\n"
+      + "- Keep paragraphs short (under 3 sentences).\n"
+      + "- Start with a direct summary.\n"
+      + "- DO NOT include images, diagrams, or attachments — text only.\n\n"
       + "Current data:\n" + context;
     try {
       var controller = new AbortController();
@@ -3154,6 +3194,7 @@
       } else if (data.message && data.message.content) {
         reply = data.message.content;
       }
+      reply = reply.replace(/!\[.*?\]\(.*?\)/g, "").replace(/\[image[^\]]*\]/gi, "");
       STATE.chatMessages.push({ role: "bot", content: reply });
     } catch (err) {
       console.error("Chat error:", err);
