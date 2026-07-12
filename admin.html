@@ -3240,6 +3240,7 @@
     text = text.replace(/!\[.*?\]\(.*?\)/g, "[image not supported]");
     // Escape HTML first to prevent XSS, then apply markdown
     text = esc(text);
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;">$1</a>');
     text = text.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
     text = text.replace(/\*(.+?)\*/g, "<i>$1</i>");
     text = text.replace(/`(.+?)`/g, "<code>$1</code>");
@@ -3575,7 +3576,23 @@
     } catch (err) {
       console.error("Chat error:", err);
       STATE.chatController = null;
-      var msg = err.name === "AbortError" ? "Request cancelled." : (err.message || "Sorry, I couldn't reach the assistant just now. Please try again.");
+      var msg;
+      if (err.name === "AbortError") {
+        msg = "Request cancelled.";
+      } else if (err.message && /rate.limit|rate_limit_exceeded/i.test(err.message)) {
+        var m = err.message;
+        var model = (m.match(/model\s+`([^`]+)`/) || [])[1] || "";
+        var waitTime = (m.match(/try again in\s+([^\.]+)/) || [])[1] || "";
+        var usage = (m.match(/Limit\s+(\d+),\s*Used\s+(\d+),\s*Requested\s+(\d+)/) || []);
+        var pct = usage ? Math.round(Number(usage[2]) / Number(usage[1]) * 100) : 0;
+        var link = (m.match(/https?:\/\/\S+/g) || [])[0] || "";
+        msg = "**Rate limit exceeded**" + (model ? " for **" + model + "**" : "")
+          + (waitTime ? "\n\nPlease try again in **" + waitTime + "**." : "")
+          + (usage ? "\n\nToken usage: **" + pct + "%** of daily limit (" + usage[2] + "/" + usage[1] + ")" : "")
+          + (link ? "\n\n[Upgrade at Groq Console](" + link + ")" : "");
+      } else {
+        msg = err.message || "Sorry, I couldn't reach the assistant just now. Please try again.";
+      }
       STATE.chatMessages.push({ role: "bot", content: msg, isError: true });
     }
     STATE.chatLoading = false;
