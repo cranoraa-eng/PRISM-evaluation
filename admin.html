@@ -644,7 +644,7 @@
   };
 
   var AI_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
-  var AI_MODEL = "openai/gpt-4o";
+  var AI_MODEL = "meta-llama/llama-3.2-3b-instruct:free";
   var AI_PROVIDER = "openai"; // "openai" or "ollama" — affects response parsing
 
   var SECTIONS = [
@@ -3064,7 +3064,6 @@
   function buildDataContext() {
     var r = STATE.filteredResponses;
     if (!r.length) return "No survey data available yet.";
-    var n = r.length;
     var totalItems = TOTAL_ITEMS;
     var allScores = [];
     var itemMeans = [];

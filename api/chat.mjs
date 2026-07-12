@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     const resp = await fetch(endpoint, {
       method: "POST",
       headers,
-      body: JSON.stringify({ model, messages, stream: false }),
+      body: JSON.stringify({ model, messages, max_tokens: 400, stream: false }),
     });
 
     if (!resp.ok) {
