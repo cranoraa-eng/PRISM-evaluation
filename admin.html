@@ -619,6 +619,22 @@
   .chat-suggest:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
   .chat-retry { all: unset; cursor: pointer; font-size: 12px; color: var(--error); background: #FBEAE5; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--error); transition: all 0.15s; text-align: center; display: block; width: 100%; }
   .chat-retry:hover { background: var(--error); color: #fff; }
+  #chat-settings-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--surface); z-index: 10; border-radius: 12px;
+    display: flex; flex-direction: column; padding: 16px; overflow-y: auto;
+  }
+  #chat-settings-overlay h3 { margin: 0 0 12px; font-size: 15px; color: var(--ink); }
+  #chat-settings-overlay label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 10px 0 4px; display: block; }
+  #chat-settings-overlay input, #chat-settings-overlay textarea {
+    width: 100%; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 6px;
+    font-size: 13px; font-family: inherit; color: var(--ink); background: var(--surface);
+    outline: none;
+  }
+  #chat-settings-overlay input:focus, #chat-settings-overlay textarea:focus { border-color: var(--ink-2); }
+  #chat-settings-overlay textarea { min-height: 100px; resize: vertical; }
+  #chat-settings-overlay .settings-actions { display: flex; gap: 8px; margin-top: 14px; }
+  #chat-settings-overlay .settings-actions button { flex: 1; }
   @media (max-width: 480px) {
     #chat-panel { width: calc(100% - 32px); right: 16px; bottom: 80px; }
   }
@@ -651,6 +667,7 @@
     detailResponse: null,
     savedPages: {},
     chatOpen: false,
+    chatSettingsOpen: false,
     chatMessages: [],
     chatLoading: false,
     chatController: null,
@@ -673,9 +690,60 @@
     try { sessionStorage.setItem(chatStorageKey(), JSON.stringify(STATE.chatMessages)); } catch(e) {}
   }
 
-  var AI_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-  var AI_MODEL = "llama-3.3-70b-versatile";
-  var AI_PROVIDER = "openai"; // "openai" or "ollama" — affects response parsing
+  var DEFAULT_SYSTEM_PROMPT = "You are **PRISM AI Research Assistant**, an intelligent assistant designed for analyzing the evaluation results of the PRISM School Management Portal.\n\n"
+    + "**Your responsibilities:**\n"
+    + "1. Analyze survey data accurately.\n"
+    + "2. Explain statistical results.\n"
+    + "3. Generate research interpretations.\n"
+    + "4. Assist in Chapter 4 writing.\n"
+    + "5. Provide recommendations based on evidence.\n"
+    + "6. Explain system quality using ISO/IEC 25010.\n"
+    + "7. Help researchers prepare for thesis defense.\n\n"
+    + "**When explaining statistical data or answering user questions:**\n"
+    + "- Avoid dense walls of text.\n"
+    + "- Use **bold text** for key terms and numerical values.\n"
+    + "- Use bullet points and short paragraphs for readability.\n"
+    + "- When asked for Chapter 4 content, structure your response with the following sections:\n"
+    + "  1. Introduction of the evaluation category\n"
+    + "  2. Presented numerical findings\n"
+    + "  3. Interpretation of the mean score\n"
+    + "  4. Explanation of what the results indicate\n"
+    + "  5. Connection to the purpose of PRISM\n"
+    + "  6. Practical implications\n\n"
+    + "**Rules:**\n"
+    + "- Always use available PRISM data.\n"
+    + "- Never invent results.\n"
+    + "- Always mention numerical evidence.\n"
+    + "- Use academic but understandable language.\n"
+    + "- Prioritize accuracy over assumptions.\n"
+    + "- Clearly separate facts, interpretations, and recommendations.\n\n"
+    + "**Your goal** is to help researchers understand and improve PRISM.";
+
+  var SETTINGS = loadSettings();
+
+  function defaultSettings() {
+    return {
+      aiEndpoint: "https://api.groq.com/openai/v1/chat/completions",
+      aiModel: "llama-3.3-70b-versatile",
+      aiProvider: "openai",
+      systemPrompt: DEFAULT_SYSTEM_PROMPT
+    };
+  }
+
+  function loadSettings() {
+    try {
+      var raw = localStorage.getItem("prism_ai_settings");
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && s.aiEndpoint && s.aiModel) return s;
+      }
+    } catch(e) {}
+    return defaultSettings();
+  }
+
+  function saveSettings() {
+    try { localStorage.setItem("prism_ai_settings", JSON.stringify(SETTINGS)); } catch(e) {}
+  }
 
   var FOLLOWUP_SUGGESTIONS = [
     "Summarize the overall survey results",
@@ -3089,12 +3157,32 @@
     return html;
   }
 
+  function renderChatSettings() {
+    if (!STATE.chatSettingsOpen) return '';
+    var s = SETTINGS;
+    return '<div id="chat-settings-overlay">'
+      + '<h3>AI Settings</h3>'
+      + '<label for="chat-set-endpoint">API Endpoint</label>'
+      + '<input type="url" id="chat-set-endpoint" value="' + esc(s.aiEndpoint) + '" />'
+      + '<label for="chat-set-model">Model</label>'
+      + '<input type="text" id="chat-set-model" value="' + esc(s.aiModel) + '" />'
+      + '<label for="chat-set-provider">Provider</label>'
+      + '<select id="chat-set-provider"><option value="openai"' + (s.aiProvider === 'openai' ? ' selected' : '') + '>OpenAI-compatible</option><option value="ollama"' + (s.aiProvider === 'ollama' ? ' selected' : '') + '>Ollama</option></select>'
+      + '<label for="chat-set-prompt">System Prompt</label>'
+      + '<textarea id="chat-set-prompt">' + esc(s.systemPrompt) + '</textarea>'
+      + '<div class="settings-actions">'
+      + '<button class="btn btn-primary" id="chat-settings-save">Save</button>'
+      + '<button class="btn btn-ghost" id="chat-settings-cancel">Cancel</button>'
+      + '<button class="btn btn-ghost" id="chat-settings-reset" style="color:var(--error);">Reset Defaults</button>'
+      + '</div></div>';
+  }
+
   function renderChatUI() {
     var msgs = STATE.chatMessages;
     var html = '';
     html += '<button id="chat-btn" aria-label="Toggle AI chat assistant" onclick="void 0">&#128172;</button>';
     html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '" role="dialog" aria-label="AI Research Assistant">';
-    html += '<div id="chat-header"><span>AI Research Assistant</span><div><button id="chat-clear" title="Clear conversation">&empty;</button><button id="chat-close">&times;</button></div></div>';
+    html += '<div id="chat-header"><span>AI Research Assistant</span><div><button id="chat-settings-btn" title="AI Settings">&#9881;</button><button id="chat-clear" title="Clear conversation">&empty;</button><button id="chat-close">&times;</button></div></div>';
     html += '<div id="chat-msgs" role="log" aria-live="polite">';
     if (!msgs.length) {
       html += '<div class="msg bot"><span>Hello! I can help you analyze the survey data. Ask me anything about the results.</span></div>';
@@ -3115,6 +3203,7 @@
       html += '<div class="msg bot typing"><span>Thinking&#8230;</span></div>';
     }
     html += '</div>';
+    html += renderChatSettings();
     var charCount = STATE.chatInputChars || 0;
     var showCount = charCount > CHAT_MAX_CHARS * 0.7;
     html += '<div id="chat-input-area">';
@@ -3192,6 +3281,11 @@
     if (clearBtn) clearBtn.addEventListener("click", function() {
       if (confirm("Clear chat history?")) { STATE.chatMessages = []; saveChatMessages(); render(); }
     });
+    var settingsBtn = document.getElementById("chat-settings-btn");
+    if (settingsBtn) settingsBtn.addEventListener("click", function() {
+      STATE.chatSettingsOpen = !STATE.chatSettingsOpen;
+      render();
+    });
     document.addEventListener("click", function(e) {
       var suggest = e.target.closest(".chat-suggest");
       if (suggest) {
@@ -3200,6 +3294,38 @@
       }
       var retry = e.target.closest(".chat-retry");
       if (retry) retryLastMessage();
+    });
+    var saveBtn = document.getElementById("chat-settings-save");
+    if (saveBtn) saveBtn.addEventListener("click", function() {
+      var ep = document.getElementById("chat-set-endpoint");
+      var md = document.getElementById("chat-set-model");
+      var pv = document.getElementById("chat-set-provider");
+      var sp = document.getElementById("chat-set-prompt");
+      if (ep && md && pv && sp) {
+        SETTINGS.aiEndpoint = ep.value.trim();
+        SETTINGS.aiModel = md.value.trim();
+        SETTINGS.aiProvider = pv.value;
+        SETTINGS.systemPrompt = sp.value;
+        saveSettings();
+        STATE.chatSettingsOpen = false;
+        render();
+        showToast("AI settings saved");
+      }
+    });
+    var cancelBtn = document.getElementById("chat-settings-cancel");
+    if (cancelBtn) cancelBtn.addEventListener("click", function() {
+      STATE.chatSettingsOpen = false;
+      render();
+    });
+    var resetBtn = document.getElementById("chat-settings-reset");
+    if (resetBtn) resetBtn.addEventListener("click", function() {
+      if (confirm("Reset AI settings to defaults?")) {
+        SETTINGS = defaultSettings();
+        saveSettings();
+        STATE.chatSettingsOpen = false;
+        render();
+        showToast("AI settings reset to defaults");
+      }
     });
   }
 
@@ -3352,35 +3478,8 @@
 
   async function callChatAPI() {
     var context = buildDataContext();
-    var systemPrompt = "You are **PRISM AI Research Assistant**, an intelligent assistant designed for analyzing the evaluation results of the PRISM School Management Portal.\n\n"
-      + "**Your responsibilities:**\n"
-      + "1. Analyze survey data accurately.\n"
-      + "2. Explain statistical results.\n"
-      + "3. Generate research interpretations.\n"
-      + "4. Assist in Chapter 4 writing.\n"
-      + "5. Provide recommendations based on evidence.\n"
-      + "6. Explain system quality using ISO/IEC 25010.\n"
-      + "7. Help researchers prepare for thesis defense.\n\n"
-      + "**When explaining statistical data or answering user questions:**\n"
-      + "- Avoid dense walls of text.\n"
-      + "- Use **bold text** for key terms and numerical values.\n"
-      + "- Use bullet points and short paragraphs for readability.\n"
-      + "- When asked for Chapter 4 content, structure your response with the following sections:\n"
-      + "  1. Introduction of the evaluation category\n"
-      + "  2. Presented numerical findings\n"
-      + "  3. Interpretation of the mean score\n"
-      + "  4. Explanation of what the results indicate\n"
-      + "  5. Connection to the purpose of PRISM\n"
-      + "  6. Practical implications\n\n"
-      + "**Rules:**\n"
-      + "- Always use available PRISM data.\n"
-      + "- Never invent results.\n"
-      + "- Always mention numerical evidence.\n"
-      + "- Use academic but understandable language.\n"
-      + "- Prioritize accuracy over assumptions.\n"
-      + "- Clearly separate facts, interpretations, and recommendations.\n\n"
-      + "**Your goal** is to help researchers understand and improve PRISM.\n\n"
-      + "You have access to the following data:\n"
+    var systemPrompt = (SETTINGS.systemPrompt || DEFAULT_SYSTEM_PROMPT)
+      + "\n\nYou have access to the following data:\n"
       + "- Survey responses\n"
       + "- Mean scores\n"
       + "- Section results\n"
@@ -3403,8 +3502,8 @@
         signal: STATE.chatController.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          endpoint: AI_ENDPOINT,
-          model: AI_MODEL,
+          endpoint: SETTINGS.aiEndpoint,
+          model: SETTINGS.aiModel,
           messages: apiMessages
         })
       });
@@ -3416,7 +3515,7 @@
       }
       var data = await resp.json();
       var reply = "No response.";
-      if (AI_PROVIDER === "openai" && data.choices && data.choices[0] && data.choices[0].message) {
+      if (SETTINGS.aiProvider === "openai" && data.choices && data.choices[0] && data.choices[0].message) {
         reply = data.choices[0].message.content || reply;
       } else if (data.message && data.message.content) {
         reply = data.message.content;
