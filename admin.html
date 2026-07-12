@@ -620,7 +620,7 @@
   .chat-retry { all: unset; cursor: pointer; font-size: 12px; color: var(--error); background: #FBEAE5; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--error); transition: all 0.15s; text-align: center; display: block; width: 100%; }
   .chat-retry:hover { background: var(--error); color: #fff; }
   #chat-resize-handle {
-    position: absolute; bottom: 0; right: 0; width: 20px; height: 20px;
+    position: absolute; top: 0; left: 0; width: 20px; height: 20px;
     cursor: nw-resize; color: var(--muted); font-size: 14px;
     display: flex; align-items: center; justify-content: center;
     user-select: none; z-index: 11;
@@ -3312,8 +3312,8 @@
       var startX = e.clientX, startY = e.clientY;
       var startW = panel.offsetWidth, startH = panel.offsetHeight;
       function onMove(ev) {
-        var w = Math.min(800, Math.max(280, startW + (ev.clientX - startX)));
-        var h = Math.min(900, Math.max(300, startH + (ev.clientY - startY)));
+        var w = Math.min(800, Math.max(280, startW - (ev.clientX - startX)));
+        var h = Math.min(900, Math.max(300, startH - (ev.clientY - startY)));
         panel.style.width = w + "px";
         panel.style.maxHeight = h + "px";
       }
