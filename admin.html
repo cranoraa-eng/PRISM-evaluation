@@ -2022,7 +2022,7 @@
       STATE.loadError = null;
       applyFilters();
       render();
-      if (STATE.filteredResponses.length) initCharts(STATE.filteredResponses);
+      if (STATE.filteredResponses.length && STATE.activeTab === "charts") initCharts(STATE.filteredResponses);
     });
   }
 
@@ -2094,6 +2094,7 @@
         STATE.activeTab = t.getAttribute("data-tab");
         STATE.page = STATE.savedPages[STATE.activeTab] || 1;
         render();
+        if (STATE.activeTab === "charts" && STATE.filteredResponses.length) initCharts(STATE.filteredResponses);
       });
     });
 
@@ -2145,11 +2146,12 @@
     var fTo = document.getElementById("f-to");
     var fSearch = document.getElementById("f-search");
     var fReset = document.getElementById("f-reset");
-    if (fType) fType.addEventListener("change", function() { STATE.filters.userType = fType.value; applyFilters(); render(); });
-    if (fFrom) fFrom.addEventListener("change", function() { STATE.filters.dateFrom = fFrom.value; applyFilters(); render(); });
-    if (fTo) fTo.addEventListener("change", function() { STATE.filters.dateTo = fTo.value; applyFilters(); render(); });
-    if (fSearch) fSearch.addEventListener("input", function() { STATE.filters.search = fSearch.value; applyFilters(); render(); });
-    if (fReset) fReset.addEventListener("click", function() { STATE.filters = { userType: "all", dateFrom: "", dateTo: "", search: "" }; applyFilters(); render(); });
+    function reinitCharts() { if (STATE.activeTab === "charts" && STATE.filteredResponses.length) initCharts(STATE.filteredResponses); }
+    if (fType) fType.addEventListener("change", function() { STATE.filters.userType = fType.value; applyFilters(); render(); reinitCharts(); });
+    if (fFrom) fFrom.addEventListener("change", function() { STATE.filters.dateFrom = fFrom.value; applyFilters(); render(); reinitCharts(); });
+    if (fTo) fTo.addEventListener("change", function() { STATE.filters.dateTo = fTo.value; applyFilters(); render(); reinitCharts(); });
+    if (fSearch) fSearch.addEventListener("input", function() { STATE.filters.search = fSearch.value; applyFilters(); render(); reinitCharts(); });
+    if (fReset) fReset.addEventListener("click", function() { STATE.filters = { userType: "all", dateFrom: "", dateTo: "", search: "" }; applyFilters(); render(); reinitCharts(); });
 
     document.querySelectorAll(".sort-btn").forEach(function(btn) {
       btn.addEventListener("click", function() {
