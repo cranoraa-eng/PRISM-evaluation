@@ -3768,6 +3768,7 @@
     }
     STATE.imgLoading = true;
     render();
+    try {
     var imgModels = ["gemini-3-pro-image", "gemini-3-pro-image-preview"];
     var lastErr = null;
     for (var mi = 0; mi < imgModels.length; mi++) {
@@ -3808,22 +3809,6 @@
       } catch (e) { lastErr = e; }
     }
     throw lastErr || new Error("All image models failed");
-      var data = await resp.json();
-      if (!STATE.generatedImages) STATE.generatedImages = [];
-      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-        data.candidates[0].content.parts.forEach(function(part) {
-          if (part.inlineData && part.inlineData.mimeType && part.inlineData.mimeType.indexOf("image/") === 0 && part.inlineData.data) {
-            STATE.generatedImages.push({ dataUrl: "data:" + part.inlineData.mimeType + ";base64," + part.inlineData.data, alt: text });
-          }
-        });
-      }
-      if (!STATE.generatedImages.length) {
-        var reply = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts ? data.candidates[0].content.parts.map(function(p){return p.text}).join("\n") : "";
-        showToast(reply || "No image data returned. Try a more detailed prompt.");
-      } else {
-        prompt.value = "";
-        showToast("Image generated!");
-      }
     } catch (err) {
       console.error("Image gen error:", err);
       var em = err.message || "";
