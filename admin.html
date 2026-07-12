@@ -643,7 +643,8 @@
   #chat-settings-overlay .settings-actions { display: flex; gap: 8px; margin-top: 14px; }
   #chat-settings-overlay .settings-actions button { flex: 1; }
   @media (max-width: 480px) {
-    #chat-panel { width: calc(100% - 32px); right: 16px; bottom: 80px; }
+    #chat-panel { width: calc(100% - 32px) !important; max-height: 480px !important; right: 16px; bottom: 80px; }
+    #chat-resize-handle { display: none !important; }
   }
 </style>
 </head>
@@ -682,7 +683,8 @@
     chatContextDirty: true,
     chatInputChars: 0,
     userId: null,
-    userEmail: null
+    userEmail: null,
+    tokenUsage: null
   };
   var CHAT_MAX_CHARS = 1000;
 
@@ -3230,6 +3232,13 @@
     var charCount = STATE.chatInputChars || 0;
     var showCount = charCount > CHAT_MAX_CHARS * 0.7;
     html += '<div id="chat-resize-handle" title="Drag to resize">&#9698;</div>';
+    var tu = STATE.tokenUsage;
+    var usageHtml = '';
+    if (tu && tu.model === SETTINGS.aiModel) {
+      var barColor = tu.pct >= 90 ? 'var(--error)' : tu.pct >= 70 ? 'var(--gold)' : 'var(--success)';
+      usageHtml = '<span style="white-space:nowrap;color:var(--muted);">' + tu.pct + '%</span>'
+        + '<div style="width:40px;height:4px;background:var(--line);border-radius:2px;overflow:hidden;"><div style="width:' + tu.pct + '%;height:100%;background:' + barColor + ';border-radius:2px;"></div></div>';
+    }
     html += '<div style="display:flex;gap:4px;padding:2px 14px 0;border-top:1px solid var(--line);background:var(--paper);font-size:10px;align-items:center;">';
     html += '<span style="color:var(--muted);white-space:nowrap;">Model:</span>';
     html += '<select id="chat-model-select" style="flex:1;font-size:10px;padding:2px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink-2);">';
@@ -3237,7 +3246,7 @@
     html += '<option value="llama-3.1-8b-instant"' + (SETTINGS.aiModel === 'llama-3.1-8b-instant' ? ' selected' : '') + '>Llama 3.1 8B</option>';
     html += '<option value="mixtral-8x7b-32768"' + (SETTINGS.aiModel === 'mixtral-8x7b-32768' ? ' selected' : '') + '>Mixtral 8x7B</option>';
     html += '<option value="gemma2-9b-it"' + (SETTINGS.aiModel === 'gemma2-9b-it' ? ' selected' : '') + '>Gemma 2 9B</option>';
-    html += '</select></div>';
+    html += '</select>' + usageHtml + '</div>';
     html += '<div id="chat-input-area">';
     html += '<textarea id="chat-input" rows="1" placeholder="Ask about the data&#8230;" maxlength="' + CHAT_MAX_CHARS + '"></textarea>';
     html += '<div style="display:flex;flex-direction:column;gap:4px;align-items:stretch;">';
@@ -3400,6 +3409,7 @@
     var modelSelect = document.getElementById("chat-model-select");
     if (modelSelect) modelSelect.addEventListener("change", function() {
       SETTINGS.aiModel = this.value;
+      STATE.tokenUsage = null;
       saveSettings();
       showToast("Model switched to " + this.options[this.selectedIndex].text);
     });
@@ -3611,6 +3621,7 @@
         var waitTime = (m.match(/try again in\s+([^\.]+)/) || [])[1] || "";
         var usage = (m.match(/Limit\s+(\d+),\s*Used\s+(\d+),\s*Requested\s+(\d+)/) || []);
         var pct = usage ? Math.round(Number(usage[2]) / Number(usage[1]) * 100) : 0;
+        STATE.tokenUsage = { model: model, limit: usage[1], used: usage[2], pct: pct, waitTime: waitTime };
         var link = (m.match(/https?:\/\/\S+/g) || [])[0] || "";
         msg = "**Rate limit exceeded**" + (model ? " for **" + model + "**" : "")
           + (waitTime ? "\n\nPlease try again in **" + waitTime + "**." : "")
