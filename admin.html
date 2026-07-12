@@ -597,12 +597,14 @@
   #chat-msgs .msg.bot p { margin: 4px 0; }
   #chat-input-area {
     display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line);
+    align-items: flex-end;
   }
-  #chat-input-area input {
+  #chat-input-area textarea {
     flex: 1; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px;
-    font-size: 13px; outline: none;
+    font-size: 13px; outline: none; font-family: inherit; resize: none;
+    min-height: 36px; max-height: 120px; line-height: 1.4;
   }
-  #chat-input-area input:focus { border-color: var(--ink); }
+  #chat-input-area textarea:focus { border-color: var(--ink); }
   #chat-input-area button {
     background: var(--ink); color: #fff; border: none; border-radius: 8px;
     padding: 8px 14px; cursor: pointer; font-size: 13px;
@@ -3055,7 +3057,7 @@
     }
     html += '</div>';
     html += '<div id="chat-input-area">';
-    html += '<input type="text" id="chat-input" placeholder="Ask about the data&#8230;" />';
+    html += '<textarea id="chat-input" rows="1" placeholder="Ask about the data&#8230;"></textarea>';
     html += '<button id="chat-send" ' + (STATE.chatLoading ? 'disabled' : '') + '>Send</button>';
     html += '</div></div>';
     return html;
@@ -3103,7 +3105,15 @@
     if (btn) btn.addEventListener("click", function() { STATE.chatOpen = !STATE.chatOpen; render(); setTimeout(scrollChat, 100); });
     if (close) close.addEventListener("click", function() { STATE.chatOpen = false; render(); });
     if (send) send.addEventListener("click", function() { sendChatMessage(); });
-    if (input) input.addEventListener("keydown", function(e) { if (e.key === "Enter") { e.preventDefault(); sendChatMessage(); } });
+    if (input) {
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+      });
+      input.addEventListener("input", function() {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 120) + "px";
+      });
+    }
     var clearBtn = document.getElementById("chat-clear");
     if (clearBtn) clearBtn.addEventListener("click", function() {
       if (confirm("Clear chat history?")) { STATE.chatMessages = []; saveChatMessages(); render(); }
@@ -3236,6 +3246,7 @@
       if (!input || !input.value.trim() || STATE.chatLoading) return;
       text = input.value.trim();
       input.value = "";
+      input.style.height = "auto";
     }
     if (!text || STATE.chatLoading) return;
     STATE.chatMessages.push({ role: "user", content: text });
