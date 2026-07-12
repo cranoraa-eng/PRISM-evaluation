@@ -3207,7 +3207,15 @@
     var pw = Number(SETTINGS.panelWidth) || 380;
     var ph = Number(SETTINGS.panelHeight) || 520;
     html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '" role="dialog" aria-label="AI Research Assistant" style="width:' + pw + 'px;max-height:' + ph + 'px;">';
-    html += '<div id="chat-header"><span>AI Research Assistant</span><div><button id="chat-settings-btn" title="AI Settings">&#9881;</button><button id="chat-clear" title="Clear conversation">&empty;</button><button id="chat-close">&times;</button></div></div>';
+    var tu = STATE.tokenUsage;
+    var showUsage = tu && tu.model === SETTINGS.aiModel;
+    var barColor = showUsage ? (tu.pct >= 90 ? 'var(--error)' : tu.pct >= 70 ? 'var(--gold)' : 'var(--success)') : 'var(--line)';
+    html += '<div id="chat-header"><span>AI Research Assistant</span><div style="display:flex;align-items:center;gap:6px;">';
+    html += '<span style="font-size:10px;font-weight:400;display:flex;align-items:center;gap:3px;opacity:0.7;">'
+      + '<span style="white-space:nowrap;">' + (showUsage ? tu.pct + '%' : '--') + '</span>'
+      + '<div style="width:30px;height:3px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;"><div style="width:' + (showUsage ? tu.pct : 0) + '%;height:100%;background:' + barColor + ';border-radius:2px;"></div></div>'
+      + '</span>';
+    html += '<button id="chat-settings-btn" title="AI Settings">&#9881;</button><button id="chat-clear" title="Clear conversation">&empty;</button><button id="chat-close">&times;</button></div></div>';
     html += '<div id="chat-msgs" role="log" aria-live="polite">';
     if (!msgs.length) {
       html += '<div class="msg bot"><span>Hello! I can help you analyze the survey data. Ask me anything about the results.</span></div>';
@@ -3232,11 +3240,6 @@
     var charCount = STATE.chatInputChars || 0;
     var showCount = charCount > CHAT_MAX_CHARS * 0.7;
     html += '<div id="chat-resize-handle" title="Drag to resize">&#9698;</div>';
-    var tu = STATE.tokenUsage;
-    var showUsage = tu && tu.model === SETTINGS.aiModel;
-    var barColor = showUsage ? (tu.pct >= 90 ? 'var(--error)' : tu.pct >= 70 ? 'var(--gold)' : 'var(--success)') : 'var(--line)';
-    var usageHtml = '<span style="white-space:nowrap;color:var(--muted);">' + (showUsage ? tu.pct + '%' : '--') + '</span>'
-      + '<div style="width:40px;height:4px;background:var(--line);border-radius:2px;overflow:hidden;"><div style="width:' + (showUsage ? tu.pct : 0) + '%;height:100%;background:' + barColor + ';border-radius:2px;"></div></div>';
     html += '<div style="display:flex;gap:4px;padding:2px 14px 0;border-top:1px solid var(--line);background:var(--paper);font-size:10px;align-items:center;">';
     html += '<span style="color:var(--muted);white-space:nowrap;">Model:</span>';
     html += '<select id="chat-model-select" style="flex:1;font-size:10px;padding:2px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink-2);">';
@@ -3244,7 +3247,7 @@
     html += '<option value="llama-3.1-8b-instant"' + (SETTINGS.aiModel === 'llama-3.1-8b-instant' ? ' selected' : '') + '>Llama 3.1 8B</option>';
     html += '<option value="mixtral-8x7b-32768"' + (SETTINGS.aiModel === 'mixtral-8x7b-32768' ? ' selected' : '') + '>Mixtral 8x7B</option>';
     html += '<option value="gemma2-9b-it"' + (SETTINGS.aiModel === 'gemma2-9b-it' ? ' selected' : '') + '>Gemma 2 9B</option>';
-    html += '</select>' + usageHtml + '</div>';
+    html += '</select></div>';
     html += '<div id="chat-input-area">';
     html += '<textarea id="chat-input" rows="1" placeholder="Ask about the data&#8230;" maxlength="' + CHAT_MAX_CHARS + '"></textarea>';
     html += '<div style="display:flex;flex-direction:column;gap:4px;align-items:stretch;">';
