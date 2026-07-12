@@ -1253,6 +1253,7 @@
     var nextLabel = isLastNav ? (state.submitting ? t("submitting") : t("submit")) : t("next");
     return (
       '<div class="footer-nav">' +
+        '<a href="admin.html" class="btn btn-ghost" style="font-size:12px;padding:8px 14px;text-decoration:none;">&#128274; Admin</a>' +
         '<button type="button" class="btn btn-ghost" id="exit-btn" style="font-size:12px;padding:8px 14px;" aria-label="' + t("exit") + '">&#10005; ' + t("exit") + '</button>' +
         '<div class="spacer"></div>' +
         (isFirstNav
