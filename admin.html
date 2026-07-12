@@ -754,7 +754,6 @@
       aiModel: "llama-3.3-70b-versatile",
       aiProvider: "openai",
       systemPrompt: DEFAULT_SYSTEM_PROMPT,
-      apiKey: "",
       panelWidth: "600",
       panelHeight: "700"
     };
@@ -3207,7 +3206,7 @@
       + '</div>'
       + '<label for="chat-set-provider">Provider</label>'
       + '<select id="chat-set-provider"><option value="openai"' + (s.aiProvider === 'openai' ? ' selected' : '') + '>OpenAI-compatible</option><option value="ollama"' + (s.aiProvider === 'ollama' ? ' selected' : '') + '>Ollama</option><option value="gemini"' + (s.aiProvider === 'gemini' ? ' selected' : '') + '>Google Gemini</option></select>'
-      + (s.aiProvider === 'gemini' ? '<label for="chat-set-apikey">Gemini API Key</label><input type="password" id="chat-set-apikey" value="' + esc(s.apiKey || '') + '" placeholder="AIza..." />' : '')
+      + (s.aiProvider === 'gemini' ? '<div style="font-size:11px;color:var(--muted);padding:4px 0;">Gemini API key is set via <code>GEMINI_API_KEY</code> Vercel env var.</div>' : '')
       + '<div style="display:flex;gap:8px;"><div style="flex:1;"><label for="chat-set-width">Width (px)</label><input type="number" id="chat-set-width" value="' + (s.panelWidth || 380) + '" min="280" max="800" /></div>'
       + '<div style="flex:1;"><label for="chat-set-height">Height (px)</label><input type="number" id="chat-set-height" value="' + (s.panelHeight || 520) + '" min="300" max="900" /></div></div>'
       + '<label for="chat-set-prompt">System Prompt</label>'
@@ -3438,7 +3437,6 @@
       var wd = document.getElementById("chat-set-width");
       var ht = document.getElementById("chat-set-height");
       var sp = document.getElementById("chat-set-prompt");
-      var ak = document.getElementById("chat-set-apikey");
       if (ep && md && pv && wd && ht && sp) {
         SETTINGS.aiEndpoint = ep.value.trim();
         SETTINGS.aiModel = md.value.trim();
@@ -3446,7 +3444,6 @@
         SETTINGS.systemPrompt = sp.value;
         SETTINGS.panelWidth = String(Math.min(1200, Math.max(280, Number(wd.value) || 600)));
         SETTINGS.panelHeight = String(Math.min(1000, Math.max(300, Number(ht.value) || 700)));
-        if (ak) SETTINGS.apiKey = ak.value.trim();
         saveSettings();
         STATE.chatSettingsOpen = false;
         render();
@@ -3657,8 +3654,6 @@
       var timeout = setTimeout(function() { if (STATE.chatController) STATE.chatController.abort(); }, 30000);
       var reply = "No response.";
       if (SETTINGS.aiProvider === "gemini") {
-        var geminiKey = SETTINGS.apiKey || "";
-        if (!geminiKey) throw new Error("Gemini API key not configured. Set it in AI Settings.");
         var geminiModel = SETTINGS.aiModel || "gemini-3.5-flash";
         var geminiContents = [];
         apiMessages.forEach(function(m) {
@@ -3669,11 +3664,11 @@
             geminiContents.push({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] });
           }
         });
-        var resp = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent?key=" + geminiKey, {
+        var resp = await fetch("/api/gemini", {
           method: "POST",
           signal: STATE.chatController.signal,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: geminiContents })
+          body: JSON.stringify({ model: geminiModel, contents: geminiContents })
         });
         clearTimeout(timeout);
         STATE.chatController = null;
@@ -3768,8 +3763,8 @@
     var prompt = document.getElementById("img-prompt");
     if (!prompt || !prompt.value.trim() || STATE.imgLoading) return;
     var text = prompt.value.trim();
-    if (SETTINGS.aiProvider !== "gemini" || !SETTINGS.apiKey) {
-      showToast("Image generation requires Google Gemini provider with API key set in AI Settings");
+    if (SETTINGS.aiProvider !== "gemini") {
+      showToast("Image generation requires Google Gemini provider");
       return;
     }
     STATE.imgLoading = true;
@@ -3780,11 +3775,10 @@
     for (var mi = 0; mi < imgModels.length; mi++) {
       var imgModel = imgModels[mi];
       try {
-        var body = { contents: [{ parts: [{ text: text }] }] };
-        var resp = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + imgModel + ":generateContent?key=" + SETTINGS.apiKey, {
+        var resp = await fetch("/api/gemini", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
+          body: JSON.stringify({ model: imgModel, contents: [{ parts: [{ text: text }] }] })
         });
         if (!resp.ok) {
           var errBody = await resp.json().catch(function(){ return {}; });
