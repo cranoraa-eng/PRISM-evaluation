@@ -3393,8 +3393,11 @@
       var startX = e.clientX, startY = e.clientY;
       var startW = panel.offsetWidth, startH = panel.offsetHeight;
       function onMove(ev) {
-            var w = Math.min(1200, Math.max(280, startW - (ev.clientX - startX)));
-        var h = Math.min(1000, Math.max(300, startH - (ev.clientY - startY)));
+        var vw = window.innerWidth, vh = window.innerHeight;
+        var maxW = Math.min(1200, vw - 32);
+        var maxH = Math.min(1000, vh - 100);
+        var w = Math.min(maxW, Math.max(280, startW - (ev.clientX - startX)));
+        var h = Math.min(maxH, Math.max(300, startH - (ev.clientY - startY)));
         panel.style.width = w + "px";
         panel.style.height = h + "px";
       }
