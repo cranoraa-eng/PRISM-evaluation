@@ -3078,17 +3078,19 @@
     });
     var overallMean = mean(allScores) / totalItems;
     var sectionSummaries = [];
+    var itemNum = 1;
     SECTIONS.forEach(function(sec) {
       var svals = [];
       r.forEach(function(res) {
         var s = 0;
         sec.items.forEach(function(_, j) {
-          var v = (res.answers || {})[String(j + 1)];
+          var v = (res.answers || {})[String(itemNum + j)];
           if (v) s += v;
         });
         svals.push(s);
       });
       sectionSummaries.push({ title: sec.title, mean: mean(svals) / sec.items.length });
+      itemNum += sec.items.length;
     });
     var sexCounts = {};
     var typeCounts = {};
@@ -3097,7 +3099,7 @@
       var tp = res.respondent_user_type || "Unknown"; typeCounts[tp] = (typeCounts[tp] || 0) + 1;
     });
     var context = "Survey Data Summary:\n";
-    context += "- Total respondents: " + n + "\n";
+    context += "- Total respondents: " + r.length + "\n";
     context += "- Overall mean score (1-4 scale): " + overallMean.toFixed(2) + "\n";
     sectionSummaries.forEach(function(s) {
       context += "- " + s.title + " mean: " + s.mean.toFixed(2) + "\n";
