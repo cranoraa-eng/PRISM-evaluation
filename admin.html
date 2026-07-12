@@ -734,8 +734,8 @@
       aiModel: "llama-3.3-70b-versatile",
       aiProvider: "openai",
       systemPrompt: DEFAULT_SYSTEM_PROMPT,
-      panelWidth: "380",
-      panelHeight: "520"
+      panelWidth: "600",
+      panelHeight: "700"
     };
   }
 
@@ -3312,8 +3312,8 @@
       var startX = e.clientX, startY = e.clientY;
       var startW = panel.offsetWidth, startH = panel.offsetHeight;
       function onMove(ev) {
-        var w = Math.min(800, Math.max(280, startW - (ev.clientX - startX)));
-        var h = Math.min(900, Math.max(300, startH - (ev.clientY - startY)));
+            var w = Math.min(1200, Math.max(280, startW - (ev.clientX - startX)));
+        var h = Math.min(1000, Math.max(300, startH - (ev.clientY - startY)));
         panel.style.width = w + "px";
         panel.style.maxHeight = h + "px";
       }
@@ -3353,8 +3353,8 @@
         SETTINGS.aiModel = md.value.trim();
         SETTINGS.aiProvider = pv.value;
         SETTINGS.systemPrompt = sp.value;
-        SETTINGS.panelWidth = String(Math.min(800, Math.max(280, Number(wd.value) || 380)));
-        SETTINGS.panelHeight = String(Math.min(900, Math.max(300, Number(ht.value) || 520)));
+        SETTINGS.panelWidth = String(Math.min(1200, Math.max(280, Number(wd.value) || 600)));
+        SETTINGS.panelHeight = String(Math.min(1000, Math.max(300, Number(ht.value) || 700)));
         saveSettings();
         STATE.chatSettingsOpen = false;
         render();
