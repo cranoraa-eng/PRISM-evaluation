@@ -3287,6 +3287,7 @@
     var charCount = STATE.chatInputChars || 0;
     var showCount = charCount > CHAT_MAX_CHARS * 0.7;
     html += '<div id="chat-resize-handle" title="Drag to resize">&#9698;</div>';
+    if (STATE.chatTab !== 'image') {
     html += '<div style="display:flex;gap:4px;padding:2px 14px 0;border-top:1px solid var(--line);background:var(--paper);font-size:10px;align-items:center;">';
     html += '<span style="color:var(--muted);white-space:nowrap;">Model:</span>';
     html += '<select id="chat-model-select" style="flex:1;font-size:10px;padding:2px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink-2);">';
@@ -3308,7 +3309,9 @@
     if (showCount) {
       html += '<span id="chat-char-count" style="font-size:10px;color:' + (charCount >= CHAT_MAX_CHARS ? 'var(--error)' : 'var(--muted)') + ';text-align:center;">' + charCount + '/' + CHAT_MAX_CHARS + '</span>';
     }
-    html += '</div></div></div>';
+    html += '</div></div>';
+    }
+    html += '</div>';
     return html;
   }
 
