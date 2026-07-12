@@ -1,5 +1,4 @@
-// Vercel serverless function: proxies to OpenAI-compatible API (bypasses CORS)
-// Set AI_API_KEY as a Vercel environment variable (vercel env add AI_API_KEY)
+// Vercel serverless function: proxies to Ollama API (bypasses CORS)
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -11,17 +10,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const headers = {
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://prism-evaluation.vercel.app",
-      "X-Title": "PRISM Evaluation"
-    };
-    if (process.env.AI_API_KEY) headers["Authorization"] = "Bearer " + process.env.AI_API_KEY;
-
+    const headers = { "Content-Type": "application/json" };
     const resp = await fetch(endpoint, {
       method: "POST",
       headers,
-      body: JSON.stringify({ model, messages, max_tokens: 400, stream: false }),
+      body: JSON.stringify({ model, messages, stream: false }),
     });
 
     if (!resp.ok) {
