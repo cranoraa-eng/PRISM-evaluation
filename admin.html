@@ -643,9 +643,9 @@
     chatLoading: false
   };
 
-  var OLLAMA_ENDPOINT = "http://localhost:11434/api/chat";
-  var OLLAMA_MODEL = "llama3.2";
-  var OLLAMA_API_KEY = ""; // Set your API key here if using a hosted Ollama service
+  var AI_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+  var AI_MODEL = "openai/gpt-4o";
+  var AI_PROVIDER = "openai"; // "openai" or "ollama" — affects response parsing
 
   var SECTIONS = [
     { key: "usability", title: "A. Usability", items: [
@@ -3130,9 +3130,8 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          endpoint: OLLAMA_ENDPOINT,
-          model: OLLAMA_MODEL,
-          apiKey: OLLAMA_API_KEY,
+          endpoint: AI_ENDPOINT,
+          model: AI_MODEL,
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: text }
@@ -3144,10 +3143,15 @@
         throw new Error(errBody.error || "HTTP " + resp.status);
       }
       var data = await resp.json();
-      var reply = data.message && data.message.content ? data.message.content : "No response.";
+      var reply = "No response.";
+      if (AI_PROVIDER === "openai" && data.choices && data.choices[0] && data.choices[0].message) {
+        reply = data.choices[0].message.content || reply;
+      } else if (data.message && data.message.content) {
+        reply = data.message.content;
+      }
       STATE.chatMessages.push({ role: "bot", content: reply });
     } catch (err) {
-      STATE.chatMessages.push({ role: "bot", content: "Error: " + (err.message || "Could not reach Ollama.") + ". Make sure Ollama is running (ollama serve) with CORS enabled (set OLLAMA_ORIGINS=*). Endpoint: " + OLLAMA_ENDPOINT + ", Model: " + OLLAMA_MODEL });
+      STATE.chatMessages.push({ role: "bot", content: "Error: " + (err.message || "Could not reach AI service.") + " — Check your endpoint (" + AI_ENDPOINT + ") and API key." });
     }
     STATE.chatLoading = false;
     render();

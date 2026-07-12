@@ -1,17 +1,22 @@
-// Vercel serverless function: proxies to Ollama API (bypasses CORS)
+// Vercel serverless function: proxies to OpenAI-compatible API (bypasses CORS)
+// Set AI_API_KEY as a Vercel environment variable (vercel env add AI_API_KEY)
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { endpoint, model, messages, apiKey } = req.body;
+  const { endpoint, model, messages } = req.body;
   if (!endpoint || !model || !messages) {
     return res.status(400).json({ error: "Missing required fields: endpoint, model, messages" });
   }
 
   try {
-    const headers = { "Content-Type": "application/json" };
-    if (apiKey) headers["Authorization"] = "Bearer " + apiKey;
+    const headers = {
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://prism-evaluation.vercel.app",
+      "X-Title": "PRISM Evaluation"
+    };
+    if (process.env.AI_API_KEY) headers["Authorization"] = "Bearer " + process.env.AI_API_KEY;
 
     const resp = await fetch(endpoint, {
       method: "POST",
@@ -21,12 +26,12 @@ export default async function handler(req, res) {
 
     if (!resp.ok) {
       const text = await resp.text();
-      return res.status(resp.status).json({ error: `Ollama returned ${resp.status}: ${text}` });
+      return res.status(resp.status).json({ error: `API returned ${resp.status}: ${text}` });
     }
 
     const data = await resp.json();
     return res.status(200).json(data);
   } catch (err) {
-    return res.status(500).json({ error: err.message || "Failed to reach Ollama" });
+    return res.status(500).json({ error: err.message || "Failed to reach AI service" });
   }
 }
