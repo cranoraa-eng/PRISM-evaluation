@@ -556,6 +556,61 @@
   @media (min-width: 901px) and (max-width: 1200px) {
     .shell { max-width: 1000px; }
   }
+
+  /* ---- Ollama Chat ---- */
+  #chat-btn {
+    position: fixed; bottom: 24px; right: 24px; z-index: 900;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--ink); color: #fff; border: none; cursor: pointer;
+    font-size: 22px; box-shadow: 0 4px 16px rgba(22,35,61,0.25);
+    transition: transform 0.2s;
+  }
+  #chat-btn:hover { transform: scale(1.08); }
+  #chat-panel {
+    position: fixed; bottom: 88px; right: 24px; z-index: 899;
+    width: 380px; max-height: 520px; background: var(--surface);
+    border-radius: 12px; box-shadow: 0 8px 32px rgba(22,35,61,0.18);
+    display: flex; flex-direction: column; overflow: hidden;
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  #chat-panel.closed { opacity: 0; transform: translateY(12px); pointer-events: none; }
+  #chat-header {
+    background: var(--ink); color: #fff; padding: 14px 18px; font-size: 14px; font-weight: 700;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #chat-header button { background: none; border: none; color: #fff; cursor: pointer; font-size: 18px; }
+  #chat-msgs {
+    flex: 1; overflow-y: auto; padding: 14px 16px; font-size: 13px;
+    min-height: 200px; max-height: 340px;
+  }
+  #chat-msgs .msg { margin-bottom: 10px; line-height: 1.5; }
+  #chat-msgs .msg.user { text-align: right; }
+  #chat-msgs .msg.user span {
+    display: inline-block; background: var(--ink); color: #fff;
+    padding: 8px 14px; border-radius: 16px 16px 4px 16px; max-width: 85%;
+  }
+  #chat-msgs .msg.bot span {
+    display: inline-block; background: var(--paper); color: var(--ink);
+    padding: 8px 14px; border-radius: 4px 16px 16px 16px; max-width: 85%;
+  }
+  #chat-msgs .msg.bot p { margin: 4px 0; }
+  #chat-input-area {
+    display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line);
+  }
+  #chat-input-area input {
+    flex: 1; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 13px; outline: none;
+  }
+  #chat-input-area input:focus { border-color: var(--ink); }
+  #chat-input-area button {
+    background: var(--ink); color: #fff; border: none; border-radius: 8px;
+    padding: 8px 14px; cursor: pointer; font-size: 13px;
+  }
+  #chat-input-area button:disabled { opacity: 0.5; cursor: default; }
+  #chat-msgs .typing span { display: inline-block; background: var(--paper); color: var(--muted); padding: 8px 14px; border-radius: 4px 16px 16px 16px; }
+  @media (max-width: 480px) {
+    #chat-panel { width: calc(100% - 32px); right: 16px; bottom: 80px; }
+  }
 </style>
 </head>
 <body>
@@ -582,8 +637,14 @@
     userRole: "admin",
     idleTimer: null,
     detailResponse: null,
-    savedPages: {}
+    savedPages: {},
+    chatOpen: false,
+    chatMessages: [],
+    chatLoading: false
   };
+
+  var OLLAMA_ENDPOINT = "http://localhost:11434/api/chat";
+  var OLLAMA_MODEL = "llama3.2";
 
   var SECTIONS = [
     { key: "usability", title: "A. Usability", items: [
@@ -1863,9 +1924,10 @@
       app.innerHTML = '<div style="padding:60px;text-align:center;"><p style="color:var(--error);">' + esc(STATE.loadError) + '</p><button class="btn btn-primary" onclick="location.reload()">Retry</button></div>';
       return;
     }
-    app.innerHTML = renderDashboard() + renderDetailModal();
+    app.innerHTML = renderDashboard() + renderDetailModal() + renderChatUI();
     if (STATE.detailResponse) showDetailModal(STATE.detailResponse);
     attachDashboardHandlers();
+    attachChatHandlers();
   }
 
   /* ---- Response Detail Modal ---- */
@@ -2958,6 +3020,140 @@
     XLSX.utils.book_append_sheet(wb, wsDemo, "Demographics");
     XLSX.writeFile(wb, "prism_responses_" + now.toISOString().slice(0,10) + ".xlsx");
     showToast("Excel exported (" + r.length + " responses, 7 sheets)");
+  }
+
+  /* ---- Ollama AI Chat ---- */
+  function renderChatUI() {
+    var msgs = STATE.chatMessages;
+    var html = '';
+    html += '<button id="chat-btn" onclick="void 0">&#128172;</button>';
+    html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '">';
+    html += '<div id="chat-header"><span>AI Research Assistant</span><button id="chat-close">&times;</button></div>';
+    html += '<div id="chat-msgs">';
+    if (!msgs.length) {
+      html += '<div class="msg bot"><span>Hello! I can help you analyze the survey data. Ask me about the results, trends, or recommendations.</span></div>';
+    } else {
+      msgs.forEach(function(m) {
+        html += '<div class="msg ' + m.role + '"><span>' + esc(m.content) + '</span></div>';
+      });
+    }
+    if (STATE.chatLoading) {
+      html += '<div class="msg bot typing"><span>Thinking\u2026</span></div>';
+    }
+    html += '</div>';
+    html += '<div id="chat-input-area">';
+    html += '<input type="text" id="chat-input" placeholder="Ask about the data\u2026" />';
+    html += '<button id="chat-send" ' + (STATE.chatLoading ? 'disabled' : '') + '>Send</button>';
+    html += '</div></div>';
+    return html;
+  }
+
+  function attachChatHandlers() {
+    var btn = document.getElementById("chat-btn");
+    var close = document.getElementById("chat-close");
+    var send = document.getElementById("chat-send");
+    var input = document.getElementById("chat-input");
+    var panel = document.getElementById("chat-panel");
+    if (btn) btn.addEventListener("click", function() { STATE.chatOpen = !STATE.chatOpen; render(); });
+    if (close) close.addEventListener("click", function() { STATE.chatOpen = false; render(); });
+    if (send) send.addEventListener("click", function() { sendChatMessage(); });
+    if (input) input.addEventListener("keydown", function(e) { if (e.key === "Enter") { e.preventDefault(); sendChatMessage(); } });
+  }
+
+  function buildDataContext() {
+    var r = STATE.filteredResponses;
+    if (!r.length) return "No survey data available yet.";
+    var n = r.length;
+    var totalItems = TOTAL_ITEMS;
+    var allScores = [];
+    var itemMeans = [];
+    for (var k = 1; k <= totalItems; k++) {
+      var vals = itemValues(r, k);
+      itemMeans.push(mean(vals));
+    }
+    r.forEach(function(res) {
+      var s = 0;
+      for (var k = 1; k <= totalItems; k++) { var v = (res.answers || {})[String(k)]; if (v) s += v; }
+      allScores.push(s);
+    });
+    var overallMean = mean(allScores) / totalItems;
+    var sectionSummaries = [];
+    SECTIONS.forEach(function(sec) {
+      var svals = [];
+      r.forEach(function(res) {
+        var s = 0;
+        sec.items.forEach(function(_, j) {
+          var v = (res.answers || {})[String(j + 1)];
+          if (v) s += v;
+        });
+        svals.push(s);
+      });
+      sectionSummaries.push({ title: sec.title, mean: mean(svals) / sec.items.length });
+    });
+    var sexCounts = {};
+    var typeCounts = {};
+    r.forEach(function(res) {
+      var sx = res.respondent_sex || "Unknown"; sexCounts[sx] = (sexCounts[sx] || 0) + 1;
+      var tp = res.respondent_user_type || "Unknown"; typeCounts[tp] = (typeCounts[tp] || 0) + 1;
+    });
+    var context = "Survey Data Summary:\n";
+    context += "- Total respondents: " + n + "\n";
+    context += "- Overall mean score (1-4 scale): " + overallMean.toFixed(2) + "\n";
+    sectionSummaries.forEach(function(s) {
+      context += "- " + s.title + " mean: " + s.mean.toFixed(2) + "\n";
+    });
+    context += "- Sex distribution: " + JSON.stringify(sexCounts) + "\n";
+    context += "- User type distribution: " + JSON.stringify(typeCounts) + "\n";
+    context += "- Age range: " + (r.length ? Math.min.apply(null, r.map(function(x){return x.respondent_age||99})) + " to " + Math.max.apply(null, r.map(function(x){return x.respondent_age||0})) : "N/A") + "\n";
+    var alpha = cronbachAlpha(r);
+    context += "- Cronbach's alpha: " + (alpha !== null ? alpha.toFixed(3) : "N/A") + "\n";
+    return context;
+  }
+
+  async function sendChatMessage() {
+    var input = document.getElementById("chat-input");
+    if (!input || !input.value.trim() || STATE.chatLoading) return;
+    var text = input.value.trim();
+    input.value = "";
+    STATE.chatMessages.push({ role: "user", content: text });
+    STATE.chatLoading = true;
+    render();
+    scrollChat();
+    var context = buildDataContext();
+    var systemPrompt = "You are a helpful research assistant for the PRISM (Portal for Records, Information, and School Management) evaluation survey. "
+      + "The survey uses a 4-point Likert scale (1=Strongly Disagree, 2=Disagree, 3=Agree, 4=Strongly Agree). "
+      + "Answer concisely based on the data provided. If asked about recommendations, suggest practical improvements.\n\n"
+      + "Current data:\n" + context;
+    try {
+      var resp = await fetch(OLLAMA_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: OLLAMA_MODEL,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: text }
+          ],
+          stream: false
+        })
+      });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      var data = await resp.json();
+      var reply = data.message && data.message.content ? data.message.content : "No response.";
+      STATE.chatMessages.push({ role: "bot", content: reply });
+    } catch (err) {
+      STATE.chatMessages.push({ role: "bot", content: "Error: " + (err.message || "Could not reach Ollama. Make sure it's running at " + OLLAMA_ENDPOINT) });
+    }
+    STATE.chatLoading = false;
+    render();
+    scrollChat();
+  }
+
+  function scrollChat() {
+    setTimeout(function() {
+      var el = document.getElementById("chat-msgs");
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 50);
   }
 
   supabaseClient.auth.getSession().then(function(res) {
