@@ -3126,21 +3126,23 @@
       + "Answer concisely based on the data provided. If asked about recommendations, suggest practical improvements.\n\n"
       + "Current data:\n" + context;
     try {
-      var headers = { "Content-Type": "application/json" };
-      if (OLLAMA_API_KEY) headers["Authorization"] = "Bearer " + OLLAMA_API_KEY;
-      var resp = await fetch(OLLAMA_ENDPOINT, {
+      var resp = await fetch("/api/chat", {
         method: "POST",
-        headers: headers,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          endpoint: OLLAMA_ENDPOINT,
           model: OLLAMA_MODEL,
+          apiKey: OLLAMA_API_KEY,
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: text }
-          ],
-          stream: false
+          ]
         })
       });
-      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      if (!resp.ok) {
+        var errBody = await resp.json().catch(function(){ return {error:"Unknown"}; });
+        throw new Error(errBody.error || "HTTP " + resp.status);
+      }
       var data = await resp.json();
       var reply = data.message && data.message.content ? data.message.content : "No response.";
       STATE.chatMessages.push({ role: "bot", content: reply });
