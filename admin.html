@@ -568,7 +568,7 @@
   #chat-btn:hover { transform: scale(1.08); }
   #chat-panel {
     position: fixed; bottom: 88px; right: 24px; z-index: 899;
-    width: 380px; max-height: 520px; background: var(--surface);
+    width: 380px; height: 520px; background: var(--surface);
     border-radius: 12px; box-shadow: 0 8px 32px rgba(22,35,61,0.18);
     display: flex; flex-direction: column; overflow: hidden;
     transition: opacity 0.25s, transform 0.25s;
@@ -658,7 +658,7 @@
   #chat-settings-overlay .settings-actions { display: flex; gap: 8px; margin-top: 14px; }
   #chat-settings-overlay .settings-actions button { flex: 1; }
   @media (max-width: 480px) {
-    #chat-panel { width: calc(100% - 32px) !important; max-height: 480px !important; right: 16px; bottom: 80px; }
+    #chat-panel { width: calc(100% - 32px) !important; height: 480px !important; right: 16px; bottom: 80px; }
     #chat-resize-handle { display: none !important; }
   }
 </style>
@@ -3225,7 +3225,7 @@
     html += '<button id="chat-btn" aria-label="Toggle AI chat assistant" onclick="void 0">&#128172;</button>';
     var pw = Number(SETTINGS.panelWidth) || 380;
     var ph = Number(SETTINGS.panelHeight) || 520;
-    html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '" role="dialog" aria-label="AI Research Assistant" style="width:' + pw + 'px;max-height:' + ph + 'px;">';
+    html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '" role="dialog" aria-label="AI Research Assistant" style="width:' + pw + 'px;height:' + ph + 'px;">';
     var tu = STATE.tokenUsage;
     var showUsage = tu && tu.model === SETTINGS.aiModel;
     var barColor = showUsage ? (tu.pct >= 90 ? 'var(--error)' : tu.pct >= 70 ? 'var(--gold)' : 'var(--success)') : 'var(--line)';
@@ -3396,7 +3396,7 @@
             var w = Math.min(1200, Math.max(280, startW - (ev.clientX - startX)));
         var h = Math.min(1000, Math.max(300, startH - (ev.clientY - startY)));
         panel.style.width = w + "px";
-        panel.style.maxHeight = h + "px";
+        panel.style.height = h + "px";
       }
       function onUp() {
         SETTINGS.panelWidth = String(panel.offsetWidth);
