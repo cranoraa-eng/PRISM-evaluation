@@ -3111,15 +3111,14 @@
     }
 
     // Overall stats
-    var allScores = [];
+    var allRatings = [];
     r.forEach(function(res) {
-      var s = 0;
-      for (var k = 1; k <= TOTAL_ITEMS; k++) { var v = (res.answers || {})[String(k)]; if (v) s += v; }
-      allScores.push(s);
+      for (var k = 1; k <= TOTAL_ITEMS; k++) { var v = (res.answers || {})[String(k)]; if (v) allRatings.push(v); }
     });
-    var overallMean = mean(allScores) / TOTAL_ITEMS;
-    var overallSD = stdDev(allScores) / TOTAL_ITEMS;
-    lines.push("Overall mean: " + overallMean.toFixed(2) + " (SD: " + overallSD.toFixed(2) + " on 1-4 scale)");
+    var overallMean = mean(allRatings);
+    var overallSD = stdDev(allRatings);
+    lines.push("Scale: 1=Strongly Disagree, 2=Disagree, 3=Agree, 4=Strongly Agree");
+    lines.push("Overall mean rating: " + overallMean.toFixed(2) + " (SD: " + overallSD.toFixed(2) + ")");
 
     var totalAlpha = cronbachAlpha(r);
     lines.push("Overall Cronbach's alpha: " + (totalAlpha !== null ? totalAlpha.toFixed(3) : "N/A") + " — " + alphaLabel(totalAlpha));
@@ -3222,15 +3221,16 @@
     scrollChat();
     var context = buildDataContext();
     var systemPrompt = "You are a helpful research assistant for the PRISM (Portal for Records, Information, and School Management) evaluation survey. "
-      + "The survey uses a 4-point Likert scale (1=Strongly Disagree, 2=Disagree, 3=Agree, 4=Strongly Agree). "
-      + "Answer concisely based on the data provided. If asked about recommendations, suggest practical improvements.\n\n"
+      + "You have FULL ACCESS to the survey data below — all item statistics, section scores, demographics, reliability, correlations, and t-tests. "
+      + "Answer concisely based on this data. If asked about recommendations, suggest practical improvements.\n\n"
+      + "The survey uses a 4-point Likert scale (1=Strongly Disagree, 2=Disagree, 3=Agree, 4=Strongly Agree).\n\n"
       + "Formatting rules:\n"
       + "- Use **bold** for key terms and numbers.\n"
       + "- Use bullet points for lists.\n"
       + "- Keep paragraphs short (under 3 sentences).\n"
       + "- Start with a direct summary.\n"
       + "- DO NOT include images, diagrams, or attachments — text only.\n\n"
-      + "Current data:\n" + context;
+      + "Here is the complete computed data:\n" + context;
     try {
       var controller = new AbortController();
       var timeout = setTimeout(function() { controller.abort(); }, 30000);
