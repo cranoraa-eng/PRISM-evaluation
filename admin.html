@@ -736,6 +736,7 @@
       aiModel: "llama-3.3-70b-versatile",
       aiProvider: "openai",
       systemPrompt: DEFAULT_SYSTEM_PROMPT,
+      apiKey: "",
       panelWidth: "600",
       panelHeight: "700"
     };
@@ -3182,13 +3183,13 @@
       + '<label for="chat-set-model">Model</label>'
       + '<input type="text" id="chat-set-model" value="' + esc(s.aiModel) + '" />'
       + '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 2px;">'
-      + '<button class="chat-model-preset" data-model="llama-3.3-70b-versatile" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Llama 3.3 70B</button>'
-      + '<button class="chat-model-preset" data-model="llama-3.1-8b-instant" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Llama 3.1 8B</button>'
-      + '<button class="chat-model-preset" data-model="deepseek-r1-distill-llama-70b" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">DeepSeek R1 70B</button>'
-      + '<button class="chat-model-preset" data-model="qwen-2.5-32b" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Qwen 2.5 32B</button>'
+      + (s.aiProvider === 'gemini'
+        ? '<button class="chat-model-preset" data-model="gemini-2.0-flash" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemini 2.0 Flash</button><button class="chat-model-preset" data-model="gemini-2.5-flash" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemini 2.5 Flash</button><button class="chat-model-preset" data-model="gemini-1.5-pro" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemini 1.5 Pro</button>'
+        : '<button class="chat-model-preset" data-model="llama-3.3-70b-versatile" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Llama 3.3 70B</button><button class="chat-model-preset" data-model="llama-3.1-8b-instant" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Llama 3.1 8B</button><button class="chat-model-preset" data-model="deepseek-r1-distill-llama-70b" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">DeepSeek R1 70B</button><button class="chat-model-preset" data-model="qwen-2.5-32b" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Qwen 2.5 32B</button>')
       + '</div>'
       + '<label for="chat-set-provider">Provider</label>'
-      + '<select id="chat-set-provider"><option value="openai"' + (s.aiProvider === 'openai' ? ' selected' : '') + '>OpenAI-compatible</option><option value="ollama"' + (s.aiProvider === 'ollama' ? ' selected' : '') + '>Ollama</option></select>'
+      + '<select id="chat-set-provider"><option value="openai"' + (s.aiProvider === 'openai' ? ' selected' : '') + '>OpenAI-compatible</option><option value="ollama"' + (s.aiProvider === 'ollama' ? ' selected' : '') + '>Ollama</option><option value="gemini"' + (s.aiProvider === 'gemini' ? ' selected' : '') + '>Google Gemini</option></select>'
+      + (s.aiProvider === 'gemini' ? '<label for="chat-set-apikey">Gemini API Key</label><input type="password" id="chat-set-apikey" value="' + esc(s.apiKey || '') + '" placeholder="AIza..." />' : '')
       + '<div style="display:flex;gap:8px;"><div style="flex:1;"><label for="chat-set-width">Width (px)</label><input type="number" id="chat-set-width" value="' + (s.panelWidth || 380) + '" min="280" max="800" /></div>'
       + '<div style="flex:1;"><label for="chat-set-height">Height (px)</label><input type="number" id="chat-set-height" value="' + (s.panelHeight || 520) + '" min="300" max="900" /></div></div>'
       + '<label for="chat-set-prompt">System Prompt</label>'
@@ -3243,10 +3244,16 @@
     html += '<div style="display:flex;gap:4px;padding:2px 14px 0;border-top:1px solid var(--line);background:var(--paper);font-size:10px;align-items:center;">';
     html += '<span style="color:var(--muted);white-space:nowrap;">Model:</span>';
     html += '<select id="chat-model-select" style="flex:1;font-size:10px;padding:2px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink-2);">';
-    html += '<option value="llama-3.3-70b-versatile"' + (SETTINGS.aiModel === 'llama-3.3-70b-versatile' ? ' selected' : '') + '>Llama 3.3 70B</option>';
-    html += '<option value="llama-3.1-8b-instant"' + (SETTINGS.aiModel === 'llama-3.1-8b-instant' ? ' selected' : '') + '>Llama 3.1 8B</option>';
-    html += '<option value="deepseek-r1-distill-llama-70b"' + (SETTINGS.aiModel === 'deepseek-r1-distill-llama-70b' ? ' selected' : '') + '>DeepSeek R1 70B</option>';
-    html += '<option value="qwen-2.5-32b"' + (SETTINGS.aiModel === 'qwen-2.5-32b' ? ' selected' : '') + '>Qwen 2.5 32B</option>';
+    if (SETTINGS.aiProvider === 'gemini') {
+      html += '<option value="gemini-2.0-flash"' + (SETTINGS.aiModel === 'gemini-2.0-flash' ? ' selected' : '') + '>Gemini 2.0 Flash</option>';
+      html += '<option value="gemini-2.5-flash"' + (SETTINGS.aiModel === 'gemini-2.5-flash' ? ' selected' : '') + '>Gemini 2.5 Flash</option>';
+      html += '<option value="gemini-1.5-pro"' + (SETTINGS.aiModel === 'gemini-1.5-pro' ? ' selected' : '') + '>Gemini 1.5 Pro</option>';
+    } else {
+      html += '<option value="llama-3.3-70b-versatile"' + (SETTINGS.aiModel === 'llama-3.3-70b-versatile' ? ' selected' : '') + '>Llama 3.3 70B</option>';
+      html += '<option value="llama-3.1-8b-instant"' + (SETTINGS.aiModel === 'llama-3.1-8b-instant' ? ' selected' : '') + '>Llama 3.1 8B</option>';
+      html += '<option value="deepseek-r1-distill-llama-70b"' + (SETTINGS.aiModel === 'deepseek-r1-distill-llama-70b' ? ' selected' : '') + '>DeepSeek R1 70B</option>';
+      html += '<option value="qwen-2.5-32b"' + (SETTINGS.aiModel === 'qwen-2.5-32b' ? ' selected' : '') + '>Qwen 2.5 32B</option>';
+    }
     html += '</select></div>';
     html += '<div id="chat-input-area">';
     html += '<textarea id="chat-input" rows="1" placeholder="Ask about the data&#8230;" maxlength="' + CHAT_MAX_CHARS + '"></textarea>';
@@ -3379,6 +3386,7 @@
       var wd = document.getElementById("chat-set-width");
       var ht = document.getElementById("chat-set-height");
       var sp = document.getElementById("chat-set-prompt");
+      var ak = document.getElementById("chat-set-apikey");
       if (ep && md && pv && wd && ht && sp) {
         SETTINGS.aiEndpoint = ep.value.trim();
         SETTINGS.aiModel = md.value.trim();
@@ -3386,6 +3394,7 @@
         SETTINGS.systemPrompt = sp.value;
         SETTINGS.panelWidth = String(Math.min(1200, Math.max(280, Number(wd.value) || 600)));
         SETTINGS.panelHeight = String(Math.min(1000, Math.max(300, Number(ht.value) || 700)));
+        if (ak) SETTINGS.apiKey = ak.value.trim();
         saveSettings();
         STATE.chatSettingsOpen = false;
         render();
@@ -3585,29 +3594,60 @@
     try {
       STATE.chatController = new AbortController();
       var timeout = setTimeout(function() { if (STATE.chatController) STATE.chatController.abort(); }, 30000);
-      var resp = await fetch("/api/chat", {
-        method: "POST",
-        signal: STATE.chatController.signal,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          endpoint: SETTINGS.aiEndpoint,
-          model: SETTINGS.aiModel,
-          messages: apiMessages
-        })
-      });
-      clearTimeout(timeout);
-      STATE.chatController = null;
-      if (!resp.ok) {
-        var errBody = await resp.json().catch(function(){ return {error:"Failed to connect"}; });
-        var errMsg = typeof errBody.error === "object" && errBody.error ? errBody.error.message || errBody.error : errBody.error;
-        throw new Error(errMsg || "HTTP " + resp.status);
-      }
-      var data = await resp.json();
       var reply = "No response.";
-      if (SETTINGS.aiProvider === "openai" && data.choices && data.choices[0] && data.choices[0].message) {
-        reply = data.choices[0].message.content || reply;
-      } else if (data.message && data.message.content) {
-        reply = data.message.content;
+      if (SETTINGS.aiProvider === "gemini") {
+        var geminiKey = SETTINGS.apiKey || "";
+        if (!geminiKey) throw new Error("Gemini API key not configured. Set it in AI Settings.");
+        var geminiModel = SETTINGS.aiModel || "gemini-2.0-flash";
+        var geminiContents = [];
+        apiMessages.forEach(function(m) {
+          if (m.role === "system") {
+            geminiContents.push({ role: "user", parts: [{ text: "[System instruction]: " + m.content }] });
+            geminiContents.push({ role: "model", parts: [{ text: "Understood." }] });
+          } else {
+            geminiContents.push({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] });
+          }
+        });
+        var resp = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent?key=" + geminiKey, {
+          method: "POST",
+          signal: STATE.chatController.signal,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: geminiContents })
+        });
+        clearTimeout(timeout);
+        STATE.chatController = null;
+        if (!resp.ok) {
+          var errBody = await resp.json().catch(function(){ return {}; });
+          throw new Error((errBody.error && errBody.error.message) || "Gemini HTTP " + resp.status);
+        }
+        var data = await resp.json();
+        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+          reply = data.candidates[0].content.parts.map(function(p){return p.text}).join("\n") || reply;
+        }
+      } else {
+        var resp = await fetch("/api/chat", {
+          method: "POST",
+          signal: STATE.chatController.signal,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            endpoint: SETTINGS.aiEndpoint,
+            model: SETTINGS.aiModel,
+            messages: apiMessages
+          })
+        });
+        clearTimeout(timeout);
+        STATE.chatController = null;
+        if (!resp.ok) {
+          var errBody = await resp.json().catch(function(){ return {error:"Failed to connect"}; });
+          var errMsg = typeof errBody.error === "object" && errBody.error ? errBody.error.message || errBody.error : errBody.error;
+          throw new Error(errMsg || "HTTP " + resp.status);
+        }
+        var data = await resp.json();
+        if (SETTINGS.aiProvider === "openai" && data.choices && data.choices[0] && data.choices[0].message) {
+          reply = data.choices[0].message.content || reply;
+        } else if (data.message && data.message.content) {
+          reply = data.message.content;
+        }
       }
       reply = reply.replace(/!\[.*?\]\(.*?\)/g, "").replace(/\[image[^\]]*\]/gi, "");
       STATE.chatMessages.push({ role: "bot", content: reply });
