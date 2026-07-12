@@ -2164,21 +2164,25 @@
   function loadResponses() {
     STATE.loading = true;
     render();
-    supabaseClient.from("responses").select("*").order("submitted_at", { ascending: false }).then(function(res) {
-      if (res.error) {
-        STATE.loadError = res.error.message;
+    supabaseClient.from("responses")
+      .select("*")
+      .is("deleted_at", null)  /* Filter out soft-deleted responses */
+      .order("submitted_at", { ascending: false })
+      .then(function(res) {
+        if (res.error) {
+          STATE.loadError = res.error.message;
+          STATE.loading = false;
+          render();
+          return;
+        }
+        STATE.responses = res.data || [];
         STATE.loading = false;
+        STATE.loadError = null;
+        STATE.chatContextDirty = true;
+        applyFilters();
         render();
-        return;
-      }
-      STATE.responses = res.data || [];
-      STATE.loading = false;
-      STATE.loadError = null;
-      STATE.chatContextDirty = true;
-      applyFilters();
-      render();
-      if (STATE.filteredResponses.length && STATE.activeTab === "charts") initCharts(STATE.filteredResponses);
-    });
+        if (STATE.filteredResponses.length && STATE.activeTab === "charts") initCharts(STATE.filteredResponses);
+      });
   }
 
   function showToast(msg) {
