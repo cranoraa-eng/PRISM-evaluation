@@ -3768,18 +3768,46 @@
     }
     STATE.imgLoading = true;
     render();
-    try {
-      var imgModel = "gemini-3-pro-image";
-      var body = { contents: [{ parts: [{ text: text }] }] };
-      var resp = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + imgModel + ":generateContent?key=" + SETTINGS.apiKey, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-      if (!resp.ok) {
-        var errBody = await resp.json().catch(function(){ return {}; });
-        throw new Error((errBody.error && errBody.error.message) || "HTTP " + resp.status);
-      }
+    var imgModels = ["gemini-3-pro-image", "gemini-3-pro-image-preview"];
+    var lastErr = null;
+    for (var mi = 0; mi < imgModels.length; mi++) {
+      var imgModel = imgModels[mi];
+      try {
+        var body = { contents: [{ parts: [{ text: text }] }] };
+        var resp = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + imgModel + ":generateContent?key=" + SETTINGS.apiKey, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        if (!resp.ok) {
+          var errBody = await resp.json().catch(function(){ return {}; });
+          var errMsg = (errBody.error && errBody.error.message) || "HTTP " + resp.status;
+          lastErr = new Error(errMsg);
+          if (resp.status === 429 || resp.status === 403) break;
+          continue;
+        }
+        var data = await resp.json();
+        if (!STATE.generatedImages) STATE.generatedImages = [];
+        var found = false;
+        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+          data.candidates[0].content.parts.forEach(function(part) {
+            if (part.inlineData && part.inlineData.mimeType && part.inlineData.mimeType.indexOf("image/") === 0 && part.inlineData.data) {
+              STATE.generatedImages.push({ dataUrl: "data:" + part.inlineData.mimeType + ";base64," + part.inlineData.data, alt: text });
+              found = true;
+            }
+          });
+        }
+        if (found) {
+          prompt.value = "";
+          showToast("Image generated!");
+          STATE.imgLoading = false;
+          render();
+          return;
+        }
+        lastErr = new Error("No image data returned. Try a more detailed prompt.");
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error("All image models failed");
       var data = await resp.json();
       if (!STATE.generatedImages) STATE.generatedImages = [];
       if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
@@ -3798,7 +3826,12 @@
       }
     } catch (err) {
       console.error("Image gen error:", err);
-      showToast("Image generation failed: " + (err.message || "Unknown error"));
+      var em = err.message || "";
+      if (/quota|exceed|429|403/.test(em)) {
+        showToast("Quota exceeded for image generation. Try again later or enable billing at console.cloud.google.com");
+      } else {
+        showToast("Image generation failed: " + em);
+      }
     }
     STATE.imgLoading = false;
     render();
