@@ -726,7 +726,9 @@
       aiEndpoint: "https://api.groq.com/openai/v1/chat/completions",
       aiModel: "llama-3.3-70b-versatile",
       aiProvider: "openai",
-      systemPrompt: DEFAULT_SYSTEM_PROMPT
+      systemPrompt: DEFAULT_SYSTEM_PROMPT,
+      panelWidth: "380",
+      panelHeight: "520"
     };
   }
 
@@ -3168,6 +3170,8 @@
       + '<input type="text" id="chat-set-model" value="' + esc(s.aiModel) + '" />'
       + '<label for="chat-set-provider">Provider</label>'
       + '<select id="chat-set-provider"><option value="openai"' + (s.aiProvider === 'openai' ? ' selected' : '') + '>OpenAI-compatible</option><option value="ollama"' + (s.aiProvider === 'ollama' ? ' selected' : '') + '>Ollama</option></select>'
+      + '<div style="display:flex;gap:8px;"><div style="flex:1;"><label for="chat-set-width">Width (px)</label><input type="number" id="chat-set-width" value="' + (s.panelWidth || 380) + '" min="280" max="800" /></div>'
+      + '<div style="flex:1;"><label for="chat-set-height">Height (px)</label><input type="number" id="chat-set-height" value="' + (s.panelHeight || 520) + '" min="300" max="900" /></div></div>'
       + '<label for="chat-set-prompt">System Prompt</label>'
       + '<textarea id="chat-set-prompt">' + esc(s.systemPrompt) + '</textarea>'
       + '<div class="settings-actions">'
@@ -3181,7 +3185,9 @@
     var msgs = STATE.chatMessages;
     var html = '';
     html += '<button id="chat-btn" aria-label="Toggle AI chat assistant" onclick="void 0">&#128172;</button>';
-    html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '" role="dialog" aria-label="AI Research Assistant">';
+    var pw = Number(SETTINGS.panelWidth) || 380;
+    var ph = Number(SETTINGS.panelHeight) || 520;
+    html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '" role="dialog" aria-label="AI Research Assistant" style="width:' + pw + 'px;max-height:' + ph + 'px;">';
     html += '<div id="chat-header"><span>AI Research Assistant</span><div><button id="chat-settings-btn" title="AI Settings">&#9881;</button><button id="chat-clear" title="Clear conversation">&empty;</button><button id="chat-close">&times;</button></div></div>';
     html += '<div id="chat-msgs" role="log" aria-live="polite">';
     if (!msgs.length) {
@@ -3300,12 +3306,16 @@
       var ep = document.getElementById("chat-set-endpoint");
       var md = document.getElementById("chat-set-model");
       var pv = document.getElementById("chat-set-provider");
+      var wd = document.getElementById("chat-set-width");
+      var ht = document.getElementById("chat-set-height");
       var sp = document.getElementById("chat-set-prompt");
-      if (ep && md && pv && sp) {
+      if (ep && md && pv && wd && ht && sp) {
         SETTINGS.aiEndpoint = ep.value.trim();
         SETTINGS.aiModel = md.value.trim();
         SETTINGS.aiProvider = pv.value;
         SETTINGS.systemPrompt = sp.value;
+        SETTINGS.panelWidth = String(Math.min(800, Math.max(280, Number(wd.value) || 380)));
+        SETTINGS.panelHeight = String(Math.min(900, Math.max(300, Number(ht.value) || 520)));
         saveSettings();
         STATE.chatSettingsOpen = false;
         render();
