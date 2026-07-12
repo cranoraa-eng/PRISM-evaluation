@@ -594,6 +594,9 @@
     display: inline-block; background: var(--paper); color: var(--ink);
     padding: 8px 14px; border-radius: 4px 16px 16px 16px; max-width: 85%;
   }
+  #chat-msgs .msg.error span {
+    background: #FBEAE5; color: var(--error); border: 1px solid #EAC3B8;
+  }
   #chat-msgs .msg.bot p { margin: 4px 0; }
   #chat-input-area {
     display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line);
@@ -614,6 +617,8 @@
   .chat-suggestions { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 4px; }
   .chat-suggest { all: unset; cursor: pointer; font-size: 12px; color: var(--ink-2); background: var(--paper); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); transition: all 0.15s; text-align: left; }
   .chat-suggest:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chat-retry { all: unset; cursor: pointer; font-size: 12px; color: var(--error); background: #FBEAE5; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--error); transition: all 0.15s; text-align: center; display: block; width: 100%; }
+  .chat-retry:hover { background: var(--error); color: #fff; }
   @media (max-width: 480px) {
     #chat-panel { width: calc(100% - 32px); right: 16px; bottom: 80px; }
   }
@@ -647,20 +652,52 @@
     savedPages: {},
     chatOpen: false,
     chatMessages: [],
-    chatLoading: false
+    chatLoading: false,
+    chatController: null,
+    chatContextCache: null,
+    chatContextDirty: true,
+    chatInputChars: 0,
+    userId: null,
+    userEmail: null
   };
-  var CHAT_STORAGE_KEY = "prism_chat_messages";
+  var CHAT_MAX_CHARS = 1000;
+
+  function chatStorageKey() {
+    return "prism_chat_" + (STATE.userId || "anon");
+  }
 
   function loadChatMessages() {
-    try { var raw = localStorage.getItem(CHAT_STORAGE_KEY); if (raw) STATE.chatMessages = JSON.parse(raw); } catch(e) {}
+    try { var raw = sessionStorage.getItem(chatStorageKey()); if (raw) STATE.chatMessages = JSON.parse(raw); } catch(e) {}
   }
   function saveChatMessages() {
-    try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(STATE.chatMessages)); } catch(e) {}
+    try { sessionStorage.setItem(chatStorageKey(), JSON.stringify(STATE.chatMessages)); } catch(e) {}
   }
 
   var AI_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
   var AI_MODEL = "llama-3.3-70b-versatile";
   var AI_PROVIDER = "openai"; // "openai" or "ollama" — affects response parsing
+
+  var FOLLOWUP_SUGGESTIONS = [
+    "Summarize the overall survey results",
+    "Which section scored the lowest and what can we improve?",
+    "What are the key recommendations based on the data?",
+    "Show me the respondent demographics",
+    "Write a draft for Chapter 4 of the thesis using the data",
+    "Compare the scores between Students and Faculty"
+  ];
+  var followupIndex = 0;
+
+  function pickFollowups(used) {
+    var available = FOLLOWUP_SUGGESTIONS.filter(function(q) { return used.indexOf(q) === -1; });
+    if (available.length < 3) { followupIndex = 0; available = FOLLOWUP_SUGGESTIONS; }
+    var picked = [];
+    for (var i = 0; i < 3 && available.length > 0; i++) {
+      var idx = followupIndex % available.length;
+      picked.push(available[idx]);
+      followupIndex = (followupIndex + 1) % available.length;
+    }
+    return picked;
+  }
 
   var SECTIONS = [
     { key: "usability", title: "A. Usability", items: [
@@ -1022,6 +1059,7 @@
     }
     STATE.page = 1;
     STATE.filteredResponses = r;
+    STATE.chatContextDirty = true;
     saveFilters();
   }
 
@@ -2035,6 +2073,7 @@
       STATE.responses = res.data || [];
       STATE.loading = false;
       STATE.loadError = null;
+      STATE.chatContextDirty = true;
       applyFilters();
       render();
       if (STATE.filteredResponses.length && STATE.activeTab === "charts") initCharts(STATE.filteredResponses);
@@ -2083,8 +2122,11 @@
         /* Check admin role */
         supabaseClient.from("admin_roles").select("role").eq("user_id", res.data.user.id).maybeSingle().then(function(roleRes) {
           STATE.userRole = roleRes.data ? roleRes.data.role : "viewer";
+          STATE.userId = res.data.user.id;
+          STATE.userEmail = res.data.user.email;
           STATE.loggedIn = true;
           sessionStorage.setItem("prism_admin", "1");
+          loadChatMessages();
           resetIdleTimer();
           loadResponses();
         });
@@ -3036,30 +3078,53 @@
   }
 
   /* ---- AI Chat ---- */
+  function renderSuggestionChips() {
+    var used = STATE.chatMessages.filter(function(m) { return m.role === "user"; }).map(function(m) { return m.content; });
+    var picks = pickFollowups(used);
+    var html = '<div class="chat-suggestions">';
+    picks.forEach(function(q) {
+      html += '<button class="chat-suggest" data-q="' + esc(q) + '">&#9654; ' + esc(q.length > 60 ? q.slice(0, 57) + "..." : q) + '</button>';
+    });
+    html += '</div>';
+    return html;
+  }
+
   function renderChatUI() {
     var msgs = STATE.chatMessages;
     var html = '';
-    html += '<button id="chat-btn" onclick="void 0">&#128172;</button>';
-    html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '">';
+    html += '<button id="chat-btn" aria-label="Toggle AI chat assistant" onclick="void 0">&#128172;</button>';
+    html += '<div id="chat-panel" class="' + (STATE.chatOpen ? '' : 'closed') + '" role="dialog" aria-label="AI Research Assistant">';
     html += '<div id="chat-header"><span>AI Research Assistant</span><div><button id="chat-clear" title="Clear conversation">&empty;</button><button id="chat-close">&times;</button></div></div>';
-    html += '<div id="chat-msgs">';
+    html += '<div id="chat-msgs" role="log" aria-live="polite">';
     if (!msgs.length) {
       html += '<div class="msg bot"><span>Hello! I can help you analyze the survey data. Ask me anything about the results.</span></div>';
-      html += '<div class="chat-suggestions"><button class="chat-suggest" data-q="Summarize the overall survey results">&#9654; Overall summary</button><button class="chat-suggest" data-q="Which section scored the lowest and what can we improve?">&#9654; Lowest section + improvements</button><button class="chat-suggest" data-q="Show me the respondent demographics">&#9654; Demographics</button><button class="chat-suggest" data-q="What are the key recommendations based on the data?">&#9654; Recommendations</button></div>';
+      html += renderSuggestionChips();
     } else {
       msgs.forEach(function(m) {
         var content = m.role === "bot" ? renderMarkdown(m.content) : esc(m.content);
-        html += '<div class="msg ' + m.role + '"><span>' + content + '</span></div>';
+        html += '<div class="msg ' + m.role + (m.isError ? ' error' : '') + '"><span>' + content + '</span></div>';
+        if (m.role === "bot" && !m.isError) {
+          html += renderSuggestionChips();
+        }
+        if (m.role === "bot" && m.isError) {
+          html += '<button class="chat-suggest chat-retry" style="margin-top:4px;">&#x21bb; Retry</button>';
+        }
       });
     }
     if (STATE.chatLoading) {
       html += '<div class="msg bot typing"><span>Thinking&#8230;</span></div>';
     }
     html += '</div>';
+    var charCount = STATE.chatInputChars || 0;
+    var showCount = charCount > CHAT_MAX_CHARS * 0.7;
     html += '<div id="chat-input-area">';
-    html += '<textarea id="chat-input" rows="1" placeholder="Ask about the data&#8230;"></textarea>';
-    html += '<button id="chat-send" ' + (STATE.chatLoading ? 'disabled' : '') + '>Send</button>';
-    html += '</div></div>';
+    html += '<textarea id="chat-input" rows="1" placeholder="Ask about the data&#8230;" maxlength="' + CHAT_MAX_CHARS + '"></textarea>';
+    html += '<div style="display:flex;flex-direction:column;gap:4px;align-items:stretch;">';
+    html += '<button id="chat-send" ' + (STATE.chatLoading ? 'disabled' : '') + '>' + (STATE.chatLoading ? 'Stop' : 'Send') + '</button>';
+    if (showCount) {
+      html += '<span id="chat-char-count" style="font-size:10px;color:' + (charCount >= CHAT_MAX_CHARS ? 'var(--error)' : 'var(--muted)') + ';text-align:center;">' + charCount + '/' + CHAT_MAX_CHARS + '</span>';
+    }
+    html += '</div></div></div>';
     return html;
   }
 
@@ -3102,14 +3167,23 @@
     var send = document.getElementById("chat-send");
     var input = document.getElementById("chat-input");
     var panel = document.getElementById("chat-panel");
-    if (btn) btn.addEventListener("click", function() { STATE.chatOpen = !STATE.chatOpen; render(); setTimeout(scrollChat, 100); });
+    if (btn) btn.addEventListener("click", function() {
+      STATE.chatOpen = !STATE.chatOpen;
+      render();
+      if (STATE.chatOpen) setTimeout(focusChatInput, 150);
+      setTimeout(scrollChat, 100);
+    });
     if (close) close.addEventListener("click", function() { STATE.chatOpen = false; render(); });
-    if (send) send.addEventListener("click", function() { sendChatMessage(); });
+    if (send) send.addEventListener("click", function() {
+      if (STATE.chatLoading) { cancelChatRequest(); return; }
+      sendChatMessage();
+    });
     if (input) {
       input.addEventListener("keydown", function(e) {
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
       });
       input.addEventListener("input", function() {
+        STATE.chatInputChars = this.value.length;
         this.style.height = "auto";
         this.style.height = Math.min(this.scrollHeight, 120) + "px";
       });
@@ -3118,12 +3192,19 @@
     if (clearBtn) clearBtn.addEventListener("click", function() {
       if (confirm("Clear chat history?")) { STATE.chatMessages = []; saveChatMessages(); render(); }
     });
-    document.querySelectorAll(".chat-suggest").forEach(function(b) {
-      b.addEventListener("click", function() { sendChatMessage(b.getAttribute("data-q")); });
+    document.addEventListener("click", function(e) {
+      var suggest = e.target.closest(".chat-suggest");
+      if (suggest) {
+        var q = suggest.getAttribute("data-q");
+        if (q) sendChatMessage(q);
+      }
+      var retry = e.target.closest(".chat-retry");
+      if (retry) retryLastMessage();
     });
   }
 
   function buildDataContext() {
+    if (!STATE.chatContextDirty && STATE.chatContextCache) return STATE.chatContextCache;
     var r = STATE.filteredResponses;
     if (!r.length) return "No survey data available yet.";
     var n = r.length, lines = [];
@@ -3235,34 +3316,70 @@
       }
     }
 
-    return lines.join("\n");
+    STATE.chatContextCache = lines.join("\n");
+    STATE.chatContextDirty = false;
+    return STATE.chatContextCache;
   }
 
-  async function sendChatMessage(forcedText) {
-    var input = document.getElementById("chat-input");
-    var text;
-    if (forcedText) { text = forcedText; }
-    else {
-      if (!input || !input.value.trim() || STATE.chatLoading) return;
-      text = input.value.trim();
-      input.value = "";
-      input.style.height = "auto";
+  function focusChatInput() {
+    setTimeout(function() {
+      var el = document.getElementById("chat-input");
+      if (el) el.focus();
+    }, 50);
+  }
+
+  function cancelChatRequest() {
+    if (STATE.chatController) {
+      STATE.chatController.abort();
+      STATE.chatController = null;
     }
-    if (!text || STATE.chatLoading) return;
-    STATE.chatMessages.push({ role: "user", content: text });
+    STATE.chatLoading = false;
+    render();
+  }
+
+  function retryLastMessage() {
+    var lastBotIdx = -1;
+    for (var i = STATE.chatMessages.length - 1; i >= 0; i--) {
+      if (STATE.chatMessages[i].role === "bot") { lastBotIdx = i; break; }
+    }
+    if (lastBotIdx === -1 || STATE.chatLoading) return;
+    STATE.chatMessages.splice(lastBotIdx, 1);
     STATE.chatLoading = true;
     render();
     scrollChat();
+    callChatAPI();
+  }
+
+  async function callChatAPI() {
     var context = buildDataContext();
-    var systemPrompt = "You are a research analyst writing Chapter 4: Presentation, Analysis, and Interpretation of Data.\n\n"
-      + "Using the provided PRISM evaluation results, write a discussion containing:\n"
-      + "1. Introduction of the evaluation category\n"
-      + "2. Presented numerical findings\n"
-      + "3. Interpretation of the mean score\n"
-      + "4. Explanation of what the results indicate\n"
-      + "5. Connection to the purpose of PRISM\n"
-      + "6. Practical implications\n\n"
-      + "Use formal academic writing. Avoid bullet points. Write in paragraph form suitable for a thesis.\n\n"
+    var systemPrompt = "You are **PRISM AI Research Assistant**, an intelligent assistant designed for analyzing the evaluation results of the PRISM School Management Portal.\n\n"
+      + "**Your responsibilities:**\n"
+      + "1. Analyze survey data accurately.\n"
+      + "2. Explain statistical results.\n"
+      + "3. Generate research interpretations.\n"
+      + "4. Assist in Chapter 4 writing.\n"
+      + "5. Provide recommendations based on evidence.\n"
+      + "6. Explain system quality using ISO/IEC 25010.\n"
+      + "7. Help researchers prepare for thesis defense.\n\n"
+      + "**When explaining statistical data or answering user questions:**\n"
+      + "- Avoid dense walls of text.\n"
+      + "- Use **bold text** for key terms and numerical values.\n"
+      + "- Use bullet points and short paragraphs for readability.\n"
+      + "- When asked for Chapter 4 content, structure your response with the following sections:\n"
+      + "  1. Introduction of the evaluation category\n"
+      + "  2. Presented numerical findings\n"
+      + "  3. Interpretation of the mean score\n"
+      + "  4. Explanation of what the results indicate\n"
+      + "  5. Connection to the purpose of PRISM\n"
+      + "  6. Practical implications\n\n"
+      + "**Rules:**\n"
+      + "- Always use available PRISM data.\n"
+      + "- Never invent results.\n"
+      + "- Always mention numerical evidence.\n"
+      + "- Use academic but understandable language.\n"
+      + "- Prioritize accuracy over assumptions.\n"
+      + "- Clearly separate facts, interpretations, and recommendations.\n\n"
+      + "**Your goal** is to help researchers understand and improve PRISM.\n\n"
       + "You have access to the following data:\n"
       + "- Survey responses\n"
       + "- Mean scores\n"
@@ -3270,27 +3387,20 @@
       + "- Item-level ratings\n"
       + "- Cronbach's Alpha reliability results\n"
       + "- Demographic information\n\n"
-      + "Rules:\n"
-      + "1. Always base your answers on the provided PRISM evaluation data.\n"
-      + "2. Do not create unsupported information.\n"
-      + "3. Identify patterns, trends, strengths, and weaknesses.\n"
-      + "4. Include numerical values when available.\n"
-      + "5. If data is unavailable, clearly state that additional data is needed.\n\n"
       + "Here is the complete computed data:\n" + context;
     var apiMessages = [
       { role: "system", content: systemPrompt }
     ];
-    // Include recent conversation history (last 10 exchanges) for context
     var history = STATE.chatMessages.slice(-20);
     history.forEach(function(m) {
       apiMessages.push({ role: m.role === "bot" ? "assistant" : "user", content: m.content });
     });
     try {
-      var controller = new AbortController();
-      var timeout = setTimeout(function() { controller.abort(); }, 30000);
+      STATE.chatController = new AbortController();
+      var timeout = setTimeout(function() { if (STATE.chatController) STATE.chatController.abort(); }, 30000);
       var resp = await fetch("/api/chat", {
         method: "POST",
-        signal: controller.signal,
+        signal: STATE.chatController.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           endpoint: AI_ENDPOINT,
@@ -3299,6 +3409,7 @@
         })
       });
       clearTimeout(timeout);
+      STATE.chatController = null;
       if (!resp.ok) {
         var errBody = await resp.json().catch(function(){ return {error:"Failed to connect"}; });
         throw new Error(errBody.error || "HTTP " + resp.status);
@@ -3314,12 +3425,36 @@
       STATE.chatMessages.push({ role: "bot", content: reply });
     } catch (err) {
       console.error("Chat error:", err);
-      STATE.chatMessages.push({ role: "bot", content: "Error: " + (err.name === "AbortError" ? "Request timed out (30s)" : err.message) + " \u2014 Make sure AI_API_KEY is set in Vercel env vars." });
+      STATE.chatController = null;
+      var msg = (err.name === "AbortError" ? "Request cancelled." : "Sorry, I couldn't reach the assistant just now. Please try again.");
+      STATE.chatMessages.push({ role: "bot", content: msg, isError: true });
     }
     STATE.chatLoading = false;
     saveChatMessages();
     render();
     scrollChat();
+    focusChatInput();
+  }
+
+  async function sendChatMessage(forcedText) {
+    var input = document.getElementById("chat-input");
+    var text;
+    if (forcedText) { text = forcedText; }
+    else {
+      if (!input || !input.value.trim() || STATE.chatLoading) return;
+      text = input.value.trim();
+      if (text.length > CHAT_MAX_CHARS) { showToast("Message too long (" + text.length + " > " + CHAT_MAX_CHARS + " chars)"); return; }
+      input.value = "";
+      input.style.height = "auto";
+      STATE.chatInputChars = 0;
+    }
+    if (!text || STATE.chatLoading) return;
+    STATE.chatMessages.push({ role: "user", content: text });
+    STATE.chatLoading = true;
+    saveChatMessages();
+    render();
+    scrollChat();
+    await callChatAPI();
   }
 
   function scrollChat() {
@@ -3329,11 +3464,13 @@
     }, 50);
   }
 
-  loadChatMessages();
   supabaseClient.auth.getSession().then(function(res) {
     if (res.data && res.data.session) {
       STATE.loggedIn = true;
+      STATE.userId = res.data.session.user.id;
+      STATE.userEmail = res.data.session.user.email;
       sessionStorage.setItem("prism_admin", "1");
+      loadChatMessages();
       loadResponses();
     } else {
       render();
