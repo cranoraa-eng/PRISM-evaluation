@@ -3145,7 +3145,7 @@
       var reply = data.message && data.message.content ? data.message.content : "No response.";
       STATE.chatMessages.push({ role: "bot", content: reply });
     } catch (err) {
-      STATE.chatMessages.push({ role: "bot", content: "Error: " + (err.message || "Could not reach Ollama. Make sure it's running at " + OLLAMA_ENDPOINT) });
+      STATE.chatMessages.push({ role: "bot", content: "Error: " + (err.message || "Could not reach Ollama.") + ". Make sure Ollama is running (ollama serve) with CORS enabled (set OLLAMA_ORIGINS=*). Endpoint: " + OLLAMA_ENDPOINT + ", Model: " + OLLAMA_MODEL });
     }
     STATE.chatLoading = false;
     render();
