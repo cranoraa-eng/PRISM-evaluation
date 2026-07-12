@@ -3184,7 +3184,7 @@
       + '<input type="text" id="chat-set-model" value="' + esc(s.aiModel) + '" />'
       + '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 2px;">'
       + (s.aiProvider === 'gemini'
-        ? '<button class="chat-model-preset" data-model="gemini-3-flash" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemini 3 Flash</button><button class="chat-model-preset" data-model="gemini-2.5-pro" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemini 2.5 Pro</button><button class="chat-model-preset" data-model="gemini-2.5-flash-lite" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemini 2.5 Flash Lite</button>'
+        ? '<button class="chat-model-preset" data-model="gemini-3.5-flash" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemini 3.5 Flash</button><button class="chat-model-preset" data-model="gemini-3-flash-preview" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemini 3 Flash Preview</button><button class="chat-model-preset" data-model="gemini-3.1-flash-lite" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Gemini 3.1 Flash Lite</button>'
         : '<button class="chat-model-preset" data-model="llama-3.3-70b-versatile" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Llama 3.3 70B</button><button class="chat-model-preset" data-model="llama-3.1-8b-instant" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Llama 3.1 8B</button><button class="chat-model-preset" data-model="deepseek-r1-distill-llama-70b" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">DeepSeek R1 70B</button><button class="chat-model-preset" data-model="qwen-2.5-32b" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink-2);">Qwen 2.5 32B</button>')
       + '</div>'
       + '<label for="chat-set-provider">Provider</label>'
@@ -3245,9 +3245,9 @@
     html += '<span style="color:var(--muted);white-space:nowrap;">Model:</span>';
     html += '<select id="chat-model-select" style="flex:1;font-size:10px;padding:2px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink-2);">';
     if (SETTINGS.aiProvider === 'gemini') {
-      html += '<option value="gemini-3-flash"' + (SETTINGS.aiModel === 'gemini-3-flash' ? ' selected' : '') + '>Gemini 3 Flash</option>';
-      html += '<option value="gemini-2.5-pro"' + (SETTINGS.aiModel === 'gemini-2.5-pro' ? ' selected' : '') + '>Gemini 2.5 Pro</option>';
-      html += '<option value="gemini-2.5-flash-lite"' + (SETTINGS.aiModel === 'gemini-2.5-flash-lite' ? ' selected' : '') + '>Gemini 2.5 Flash Lite</option>';
+      html += '<option value="gemini-3.5-flash"' + (SETTINGS.aiModel === 'gemini-3.5-flash' ? ' selected' : '') + '>Gemini 3.5 Flash</option>';
+      html += '<option value="gemini-3-flash-preview"' + (SETTINGS.aiModel === 'gemini-3-flash-preview' ? ' selected' : '') + '>Gemini 3 Flash Preview</option>';
+      html += '<option value="gemini-3.1-flash-lite"' + (SETTINGS.aiModel === 'gemini-3.1-flash-lite' ? ' selected' : '') + '>Gemini 3.1 Flash Lite</option>';
     } else {
       html += '<option value="llama-3.3-70b-versatile"' + (SETTINGS.aiModel === 'llama-3.3-70b-versatile' ? ' selected' : '') + '>Llama 3.3 70B</option>';
       html += '<option value="llama-3.1-8b-instant"' + (SETTINGS.aiModel === 'llama-3.1-8b-instant' ? ' selected' : '') + '>Llama 3.1 8B</option>';
@@ -3598,7 +3598,7 @@
       if (SETTINGS.aiProvider === "gemini") {
         var geminiKey = SETTINGS.apiKey || "";
         if (!geminiKey) throw new Error("Gemini API key not configured. Set it in AI Settings.");
-        var geminiModel = SETTINGS.aiModel || "gemini-3-flash";
+        var geminiModel = SETTINGS.aiModel || "gemini-3.5-flash";
         var geminiContents = [];
         apiMessages.forEach(function(m) {
           if (m.role === "system") {
