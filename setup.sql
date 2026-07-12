@@ -223,3 +223,5 @@ begin
   return v_count;
 end;
 $$;
+
+grant execute on function soft_delete_responses to anon, authenticated;
