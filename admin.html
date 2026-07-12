@@ -3233,12 +3233,10 @@
     var showCount = charCount > CHAT_MAX_CHARS * 0.7;
     html += '<div id="chat-resize-handle" title="Drag to resize">&#9698;</div>';
     var tu = STATE.tokenUsage;
-    var usageHtml = '';
-    if (tu && tu.model === SETTINGS.aiModel) {
-      var barColor = tu.pct >= 90 ? 'var(--error)' : tu.pct >= 70 ? 'var(--gold)' : 'var(--success)';
-      usageHtml = '<span style="white-space:nowrap;color:var(--muted);">' + tu.pct + '%</span>'
-        + '<div style="width:40px;height:4px;background:var(--line);border-radius:2px;overflow:hidden;"><div style="width:' + tu.pct + '%;height:100%;background:' + barColor + ';border-radius:2px;"></div></div>';
-    }
+    var showUsage = tu && tu.model === SETTINGS.aiModel;
+    var barColor = showUsage ? (tu.pct >= 90 ? 'var(--error)' : tu.pct >= 70 ? 'var(--gold)' : 'var(--success)') : 'var(--line)';
+    var usageHtml = '<span style="white-space:nowrap;color:var(--muted);">' + (showUsage ? tu.pct + '%' : '--') + '</span>'
+      + '<div style="width:40px;height:4px;background:var(--line);border-radius:2px;overflow:hidden;"><div style="width:' + (showUsage ? tu.pct : 0) + '%;height:100%;background:' + barColor + ';border-radius:2px;"></div></div>';
     html += '<div style="display:flex;gap:4px;padding:2px 14px 0;border-top:1px solid var(--line);background:var(--paper);font-size:10px;align-items:center;">';
     html += '<span style="color:var(--muted);white-space:nowrap;">Model:</span>';
     html += '<select id="chat-model-select" style="flex:1;font-size:10px;padding:2px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink-2);">';
@@ -3410,6 +3408,7 @@
     if (modelSelect) modelSelect.addEventListener("change", function() {
       SETTINGS.aiModel = this.value;
       STATE.tokenUsage = null;
+      try { localStorage.removeItem("prism_token_usage"); } catch(e) {}
       saveSettings();
       showToast("Model switched to " + this.options[this.selectedIndex].text);
     });
@@ -3622,6 +3621,7 @@
         var usage = (m.match(/Limit\s+(\d+),\s*Used\s+(\d+),\s*Requested\s+(\d+)/) || []);
         var pct = usage ? Math.round(Number(usage[2]) / Number(usage[1]) * 100) : 0;
         STATE.tokenUsage = { model: model, limit: usage[1], used: usage[2], pct: pct, waitTime: waitTime };
+        try { localStorage.setItem("prism_token_usage", JSON.stringify(STATE.tokenUsage)); } catch(e) {}
         var link = (m.match(/https?:\/\/\S+/g) || [])[0] || "";
         msg = "**Rate limit exceeded**" + (model ? " for **" + model + "**" : "")
           + (waitTime ? "\n\nPlease try again in **" + waitTime + "**." : "")
@@ -3667,6 +3667,7 @@
     }, 50);
   }
 
+  try { var tu = localStorage.getItem("prism_token_usage"); if (tu) STATE.tokenUsage = JSON.parse(tu); } catch(e) {}
   supabaseClient.auth.getSession().then(function(res) {
     if (res.data && res.data.session) {
       STATE.loggedIn = true;
