@@ -1,4 +1,5 @@
--- Seed 80 test respondents with answers skewed toward Agree (4) / Strongly Agree (5)
+-- Seed 80 test respondents with answers skewed toward Agree (3) / Strongly Agree (4)
+-- 4-point Likert scale: 1=Strongly Disagree, 2=Disagree, 3=Agree, 4=Strongly Agree
 -- Run this in Supabase SQL Editor after setup.sql has been executed
 
 do $$
@@ -49,13 +50,14 @@ begin
     v_sex := case when random() < 0.5 then 'Male' else 'Female' end;
     v_user_type := v_types[1 + floor(random() * 5)::int];
 
-    -- Generate answers with ~70% probability of 4 or 5
+    -- Generate answers with ~70% probability of 3 (Agree) or 4 (Strongly Agree)
+    -- 4-point Likert: 1=Strongly Disagree, 2=Disagree, 3=Agree, 4=Strongly Agree
     v_items := '{}'::jsonb;
     for k in 1..30 loop
       v_answer_weights := case
-        when random() < 0.35 then array[5]      -- 35% Strongly Agree
-        when random() < 0.70 then array[4]      -- 35% Agree
-        else array[1,2,3,4,5]                   -- 30% spread across all
+        when random() < 0.35 then array[4]      -- 35% Strongly Agree
+        when random() < 0.70 then array[3]      -- 35% Agree
+        else array[1,2,3,4]                     -- 30% spread across all 4
       end;
       v_item_val := v_answer_weights[1 + floor(random() * array_length(v_answer_weights, 1))::int];
       v_items := jsonb_set(v_items, array[k::text], to_jsonb(v_item_val));
