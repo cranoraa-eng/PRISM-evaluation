@@ -1,1531 +1,477 @@
 <!DOCTYPE html>
-<html lang="en" id="prism-html">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PRISM Evaluation Questionnaire</title>
+<title>PRISM — Teacher Needs Analysis Questionnaire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
-  const SUPABASE_URL  = "https://qwkkpmxpmugkrlspbiri.supabase.co";
+  const SUPABASE_URL = "https://qwkkpmxpmugkrlspbiri.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3a2twbXhwbXVna3Jsc3BiaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NjQwMDEsImV4cCI6MjA5OTM0MDAwMX0.HT3V9wXTEm0ehxoqgChUEDrqetPKwnB1fanGwHWtDdI";
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 </script>
-</head>
-<body>
-<a href="#prism-content" class="skip-link" id="skip-link">Skip to content</a>
-<div id="prism-root"></div>
 <style>
-  #prism-root {
-    --ink: #16233D;
-    --ink-2: #2E4066;
-    --gold: #A9813E;
-    --gold-soft: #D9C08F;
-    --line: #C9D2E0;
-    --paper: #EEF1F6;
-    --surface: #FFFFFF;
-    --muted: #5B6B85;
-    --success: #3F7A5C;
-    --error: #B3432E;
-    --radius: 10px;
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#163A5F;--gold:#D6A331;--paper:#FAF7F0;--thread:#B9532F;
+  --ink:#163A5F;--ink2:#1f4d7a;--line:#d6d0c4;--surface:#fff;
+  --muted:#6b7280;--success:#2e7d32;--error:#c62828;--radius:10px;
+}
+body{font-family:'Public Sans',sans-serif;color:var(--ink);background:var(--paper);background-image:repeating-linear-gradient(to bottom,transparent 0px,transparent 27px,rgba(22,58,95,0.03) 28px);min-height:100vh;line-height:1.55;-webkit-font-smoothing:antialiased;padding-bottom:72px}
+.serif{font-family:'Lora',Georgia,serif}
 
-    all: initial;
-    *, *::before, *::after { box-sizing: border-box; }
-    display: block;
-    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: var(--ink);
-    background: var(--paper);
-    background-image:
-      repeating-linear-gradient(
-        to bottom,
-        transparent 0px, transparent 27px, rgba(22,35,61,0.045) 28px
-      );
-    min-height: 100%;
-    padding: 32px 16px 64px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
+.shell{max-width:780px;margin:24px auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 12px 36px -12px rgba(22,58,95,0.18);overflow:hidden;position:relative}
+.shell::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--navy) 0%,var(--navy) 55%,var(--gold) 100%)}
 
-  #prism-root .serif { font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; }
+.masthead{padding:28px 32px 18px;border-bottom:1px solid var(--line);text-align:center}
+.crest{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:12px;flex-wrap:wrap}
+.crest-img{width:64px;height:64px;border-radius:50%;background:var(--paper);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--navy);font-weight:700;font-family:'Lora',serif}
+.crest-text{text-align:left}
+.crest-text .deped{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold);font-weight:700}
+.crest-text .school{font-size:13px;color:var(--navy);font-weight:700;line-height:1.2}
+.crest-text .division{font-size:11px;color:var(--muted)}
 
-  #prism-root .shell {
-    max-width: 760px;
-    margin: 0 auto;
-    background: var(--surface);
-    border: 1px solid #DCE2EC;
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(22,35,61,0.04), 0 16px 40px -20px rgba(22,35,61,0.22);
-    overflow: hidden;
-    position: relative;
-  }
+.eyebrow{text-transform:uppercase;letter-spacing:0.12em;font-size:10.5px;font-weight:700;color:var(--gold);margin-bottom:6px}
+h1.title{font-size:24px;color:var(--navy);margin-bottom:4px}
+.subtitle{font-size:13.5px;color:var(--muted)}
 
-  #prism-root .shell::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 6px;
-    background: linear-gradient(90deg, var(--ink) 0%, var(--ink-2) 55%, var(--gold) 100%);
-  }
+.progress-wrap{padding:12px 32px 0}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);letter-spacing:0.04em;margin-bottom:5px;text-transform:uppercase;font-weight:600}
+.progress-label .pct{background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:1px 8px;border-radius:10px;letter-spacing:0}
+.progress-track{height:5px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--navy2,var(--navy)),var(--gold));transition:width .35s ease;border-radius:4px}
 
-  #prism-root .masthead {
-    padding: 34px 36px 22px;
-    border-bottom: 1px solid var(--line);
-  }
-  #prism-root .eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gold);
-    margin: 0 0 8px;
-  }
-  #prism-root h1.title {
-    font-size: 26px;
-    margin: 0 0 4px;
-    color: var(--ink);
-    font-weight: 700;
-  }
-  #prism-root .subtitle {
-    font-size: 14.5px;
-    color: var(--muted);
-    margin: 0;
-  }
+.sticky-rail{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding:0}
 
-  #prism-root .progress-wrap {
-    padding: 14px 36px 0;
-  }
-  #prism-root .progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11.5px;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-  #prism-root .progress-label .pct-badge {
-    background: var(--ink);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 1px 8px;
-    border-radius: 10px;
-    letter-spacing: 0;
-  }
-  #prism-root .progress-track {
-    height: 6px;
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 18px;
-  }
-  #prism-root .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--ink-2), var(--gold));
-    transition: width 0.35s ease;
-    border-radius: 4px;
-  }
+.content{padding:24px 32px 8px}
 
-  #prism-root .stamp {
-    position: absolute;
-    top: 26px;
-    right: 30px;
-    width: 68px;
-    height: 68px;
-    border: 2px dashed var(--gold);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: rotate(-8deg);
-    color: var(--gold);
-    font-family: Georgia, serif;
-    font-weight: 700;
-    font-size: 10px;
-    text-align: center;
-    line-height: 1.15;
-    letter-spacing: 0.02em;
-    opacity: 0.85;
-    pointer-events: none;
-  }
+.section-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:4px;padding-left:12px;border-left:4px solid var(--gold)}
+.section-note{font-size:12.5px;color:var(--muted);margin-bottom:18px;padding:10px 12px;background:var(--paper);border-radius:8px;border:1px solid var(--line)}
 
-  #prism-root .content {
-    padding: 26px 36px 8px;
-  }
+.field{margin-bottom:18px}
+.field label.flabel{display:block;font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.field .req{color:var(--error)}
+.field .hint{font-size:11px;color:var(--muted);display:block;margin-top:3px}
+input[type=text],input[type=number],textarea,select{width:100%;font-family:inherit;font-size:13.5px;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--navy2,var(--navy));outline-offset:1px;border-color:var(--navy2,var(--navy))}
+textarea{resize:vertical;min-height:80px}
 
-  #prism-root .section-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--ink);
-    margin: 0 0 4px;
-    padding-left: 14px;
-    border-left: 4px solid var(--gold);
-  }
-  #prism-root .section-note {
-    font-size: 13.5px;
-    color: var(--muted);
-    margin: 0 0 20px;
-    padding: 10px 14px;
-    background: #F4F6FA;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-  }
-  #prism-root .group-heading {
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--ink-2);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin: 26px 0 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--line);
-  }
-  #prism-root .group-heading:first-child { margin-top: 0; }
+.radio-grid,.check-grid{display:flex;flex-wrap:wrap;gap:7px}
+.pill{all:unset;cursor:pointer;font-size:12.5px;padding:7px 13px;border:1.5px solid var(--line);border-radius:20px;color:var(--ink2,#2a5080);background:var(--surface);transition:all .15s ease}
+.pill:hover{border-color:var(--navy)}
+.pill.selected{background:var(--navy);border-color:var(--navy);color:#fff}
+.pill:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
 
-  #prism-root .scale-key {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-    background: #F4F6FA;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin: 0 0 22px;
-    font-size: 12.5px;
-    color: var(--ink-2);
-    justify-content: center;
-  }
-  #prism-root .scale-key span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  #prism-root .scale-key b {
-    color: var(--ink);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--surface);
-    border: 1.5px solid var(--line);
-    font-size: 11px;
-  }
-  #prism-root .scale-key .scale-full { display: inline; }
-  @media (max-width: 560px) {
-    #prism-root .scale-key .scale-full { display: none; }
-  }
+.radio-row{display:flex;gap:8px;flex-wrap:wrap}
+.radio-btn{all:unset;cursor:pointer;padding:7px 13px;border:1.5px solid var(--line);border-radius:20px;font-size:12.5px;color:var(--ink2,#2a5080);background:var(--surface);transition:all .15s}
+.radio-btn:hover{border-color:var(--navy)}
+.radio-btn.selected{background:var(--navy);border-color:var(--navy);color:#fff}
 
-  #prism-root .item {
-    padding: 14px 0;
-    border-bottom: 1px solid var(--line);
-    transition: background 0.15s ease;
-    border-radius: 6px;
-  }
-  #prism-root .item:last-child { border-bottom: none; }
-  #prism-root .item:hover { background: #FAFBFC; }
-  #prism-root .item.invalid .item-text { color: var(--error); }
-  #prism-root .item.invalid .likert { outline: 1.5px solid var(--error); border-radius: 10px; }
+.likert-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;margin-bottom:18px}
+.likert-table th{background:var(--paper);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink2,#2a5080);padding:8px 6px;text-align:center;border-bottom:2px solid var(--gold);position:sticky;top:0}
+.likert-table th:first-child{text-align:left;min-width:200px}
+.likert-table td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
+.likert-table td:first-child{text-align:left;font-size:12.5px}
+.likert-table tr:hover td{background:rgba(22,58,95,0.02)}
+.likert-table input[type=radio]{width:16px;height:16px;accent-color:var(--navy);cursor:pointer}
+.likert-table .row-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--paper);border:1.5px solid var(--gold);font-weight:700;font-size:10.5px;color:var(--gold);margin-right:6px;flex-shrink:0}
 
-  #prism-root .item-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  @media (min-width: 561px) {
-    #prism-root .item-row { flex-wrap: nowrap; }
-  }
-  #prism-root .item-num {
-    flex: 0 0 auto;
-    font-family: Georgia, serif;
-    font-weight: 700;
-    font-size: 13px;
-    color: var(--gold);
-    background: var(--paper);
-    border: 1px solid var(--gold-soft);
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin-top: 1px;
-  }
-  #prism-root .item-text {
-    flex: 1 1 260px;
-    font-size: 14.5px;
-    color: var(--ink);
-    padding-top: 2px;
-  }
-  @media (min-width: 561px) {
-    #prism-root .item-text { flex: 1 1 0; min-width: 200px; }
-  }
-  #prism-root .likert {
-    display: flex;
-    gap: 8px;
-    flex: 0 0 auto;
-    margin-left: auto;
-  }
-  #prism-root .likert-btn {
-    all: unset;
-    cursor: pointer;
-    width: 56px;
-    height: 48px;
-    border: 1.5px solid var(--line);
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    color: var(--muted);
-    transition: all 0.15s ease;
-    background: var(--surface);
-  }
-  #prism-root .likert-btn b { font-size: 14px; line-height: 1.2; color: inherit; }
-  #prism-root .likert-btn:hover { border-color: var(--ink-2); color: var(--ink-2); background: #F8F9FB; }
-  #prism-root .likert-btn:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
-  #prism-root .likert-btn.selected {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: #fff;
-    transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(22,35,61,0.2);
-  }
-  /* Color-coded Likert: SA=green, A=blue, D=amber, SD=red */
-  #prism-root .likert-btn:nth-child(1):hover { border-color: #2E7D32; color: #2E7D32; background: #F1F8E9; }
-  #prism-root .likert-btn:nth-child(1).selected { background: #2E7D32; border-color: #2E7D32; transform: scale(1.05); box-shadow: 0 2px 8px rgba(46,125,50,0.25); }
-  #prism-root .likert-btn:nth-child(2):hover { border-color: #1565C0; color: #1565C0; background: #E3F2FD; }
-  #prism-root .likert-btn:nth-child(2).selected { background: #1565C0; border-color: #1565C0; transform: scale(1.05); box-shadow: 0 2px 8px rgba(21,101,192,0.25); }
-  #prism-root .likert-btn:nth-child(3):hover { border-color: #E65100; color: #E65100; background: #FFF3E0; }
-  #prism-root .likert-btn:nth-child(3).selected { background: #E65100; border-color: #E65100; transform: scale(1.05); box-shadow: 0 2px 8px rgba(230,81,0,0.25); }
-  #prism-root .likert-btn:nth-child(4):hover { border-color: #C62828; color: #C62828; background: #FFEBEE; }
-  #prism-root .likert-btn:nth-child(4).selected { background: #C62828; border-color: #C62828; transform: scale(1.05); box-shadow: 0 2px 8px rgba(198,40,40,0.25); }
+.top3-wrap{margin-top:14px;padding:14px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper)}
+.top3-title{font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.top3-counter{font-size:12px;color:var(--muted);margin-bottom:10px}
+.top3-counter b{color:var(--thread)}
+.check-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.check-row:last-child{border-bottom:none}
+.check-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--thread);cursor:pointer}
+.check-row label{cursor:pointer;flex:1}
 
-  #prism-root .field { margin-bottom: 20px; }
-  #prism-root .field label.field-label {
-    display: block;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 7px;
-  }
-  #prism-root .field .req { color: var(--error); font-weight: 700; }
-  #prism-root input[type=text], #prism-root input[type=number], #prism-root textarea {
-    width: 100%;
-    font-family: inherit;
-    font-size: 14px;
-    padding: 10px 12px;
-    border: 1.5px solid var(--line);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--ink);
-  }
-  #prism-root input:focus-visible, #prism-root textarea:focus-visible {
-    outline: 2px solid var(--ink-2);
-    outline-offset: 1px;
-    border-color: var(--ink-2);
-  }
-  #prism-root textarea { resize: vertical; min-height: 100px; }
+.banner{font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:16px;display:none}
+.banner.show{display:block}
+.banner.error{background:#fce4ec;color:var(--error);border:1px solid #f5c6cb}
 
-  #prism-root .choice-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  #prism-root .choice-pill {
-    all: unset;
-    cursor: pointer;
-    font-size: 13px;
-    padding: 8px 14px;
-    border: 1.5px solid var(--line);
-    border-radius: 20px;
-    color: var(--ink-2);
-    background: var(--surface);
-    transition: all 0.15s ease;
-  }
-  #prism-root .choice-pill:hover { border-color: var(--ink-2); }
-  #prism-root .choice-pill.selected {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: #fff;
-  }
-  #prism-root .choice-pill:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
+.footer-nav{display:flex;justify-content:space-between;align-items:center;padding:14px 32px 20px;gap:10px;background:var(--surface);border-top:1px solid var(--line);position:fixed;bottom:0;left:0;right:0;z-index:50}
+.btn{all:unset;cursor:pointer;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;text-align:center;transition:all .15s}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:var(--ink2,#1f4d7a)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed}
+.btn-ghost{color:var(--navy);border:1.5px solid var(--line);background:var(--surface)}
+.btn-ghost:hover{border-color:var(--navy)}
+.btn:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.spacer{flex:1}
 
-  #prism-root .banner {
-    font-size: 13px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin: 0 0 18px;
-    display: none;
-  }
-  #prism-root .banner.show { display: block; }
-  #prism-root .banner.error { background: #FBEAE5; color: var(--error); border: 1px solid #EAC3B8; }
+.done-wrap{padding:48px 32px;text-align:center}
+.done-wrap .seal{width:110px;height:110px;margin:0 auto 20px;border-radius:50%;border:3px double var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--navy);font-family:'Lora',serif;background:linear-gradient(135deg,rgba(214,163,49,0.08),transparent);box-shadow:0 4px 16px rgba(214,163,49,0.12)}
+.done-wrap .seal .sw{font-weight:700;font-size:14px;letter-spacing:0.08em}
+.done-wrap .seal .ss{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:0.05em}
+.done-wrap h2{font-size:20px;margin-bottom:6px}
+.done-wrap p{color:var(--muted);font-size:13px;margin:0 auto 18px;max-width:400px}
+.done-wrap .ref-id{display:inline-block;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11.5px;color:var(--ink2,#2a5080);background:var(--paper);border:1px solid var(--line);padding:5px 12px;border-radius:6px;margin-bottom:20px}
 
-  #prism-root .footer-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 36px 30px;
-    gap: 12px;
-    background: var(--surface);
-    border-top: 1px solid var(--line);
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-  }
-  #prism-root .btn {
-    all: unset;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 12px 22px;
-    border-radius: 8px;
-    text-align: center;
-    transition: all 0.15s ease;
-  }
-  #prism-root .btn-primary {
-    background: var(--ink);
-    color: #fff;
-  }
-  #prism-root .btn-primary:hover { background: var(--ink-2); }
-  #prism-root .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
-  #prism-root .btn-ghost {
-    color: var(--ink-2);
-    border: 1.5px solid var(--line);
-    background: var(--surface);
-  }
-  #prism-root .btn-ghost:hover { border-color: var(--ink-2); }
-  #prism-root .btn:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
-  #prism-root .spacer { flex: 1; }
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--error);color:#fff;font-size:12.5px;padding:10px 22px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:999;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
 
-  #prism-root .welcome { padding: 40px 36px 36px; text-align: left; }
-  #prism-root .welcome .rule {
-    height: 1px;
-    background: var(--line);
-    margin: 20px 0 22px;
-  }
-  #prism-root .welcome p { font-size: 14.5px; color: var(--ink-2); margin: 0 0 14px; }
-  #prism-root .welcome .meta {
-    display: flex;
-    gap: 22px;
-    flex-wrap: wrap;
-    font-size: 12.5px;
-    color: var(--muted);
-    margin: 18px 0 28px;
-  }
-  #prism-root .welcome .meta div b { display:block; color: var(--ink); font-size: 13px; }
-
-  #prism-root .done-wrap {
-    padding: 54px 36px 46px;
-    text-align: center;
-  }
-  #prism-root .seal {
-    width: 128px; height: 128px;
-    margin: 0 auto 22px;
-    border-radius: 50%;
-    border: 3px double var(--gold);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transform: rotate(-6deg);
-    color: var(--ink);
-    font-family: Georgia, serif;
-    background: linear-gradient(135deg, rgba(169,129,62,0.06), transparent);
-    box-shadow: 0 4px 16px rgba(169,129,62,0.12);
-  }
-  #prism-root .seal .seal-word { font-weight: 700; font-size: 15px; letter-spacing: 0.08em; }
-  #prism-root .seal .seal-sub { font-size: 9.5px; color: var(--muted); margin-top: 4px; letter-spacing: 0.06em; }
-  #prism-root .done-wrap h2 { font-size: 21px; margin: 0 0 8px; }
-  #prism-root .done-wrap p { color: var(--muted); font-size: 14px; margin: 0 auto 22px; max-width: 420px; }
-  #prism-root .response-id {
-    display: inline-block;
-    font-family: SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12px;
-    color: var(--ink-2);
-    background: var(--paper);
-    border: 1px solid var(--line);
-    padding: 6px 12px;
-    border-radius: 6px;
-    margin-bottom: 26px;
-  }
-
-  #prism-root .error-state { padding: 40px 36px; text-align: center; }
-  #prism-root .error-state p { color: var(--error); font-size: 14px; margin-bottom: 16px; }
-
-  #prism-root .offline-banner {
-    background: #FFF3CD;
-    border: 1px solid #FFEAA7;
-    color: #856404;
-    font-size: 13px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin: 0 0 18px;
-    display: none;
-  }
-  #prism-root .offline-banner.show { display: block; }
-
-  .skip-link {
-    position: absolute;
-    left: -9999px;
-    z-index: 999;
-    padding: 8px 16px;
-    background: var(--ink, #16233D);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    border-radius: 0 0 8px 0;
-  }
-  .skip-link:focus { left: 0; top: 0; }
-
-  #prism-root .turnstile-wrap {
-    margin: 18px 0;
-    display: flex;
-    justify-content: center;
-    min-height: 65px;
-  }
-
-  #prism-root .cf-turnstile { transform: scale(0.9); transform-origin: center; }
-
-  #prism-root .response-counter {
-    text-align: center;
-    font-size: 12.5px;
-    color: var(--muted);
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--line);
-  }
-  #prism-root .response-counter b { color: var(--ink); font-size: 15px; }
-
-  #prism-root .consent-box {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 18px 20px;
-    max-height: 340px;
-    overflow-y: auto;
-    font-size: 13.5px;
-    line-height: 1.7;
-    color: var(--ink-2);
-    box-shadow: inset 0 2px 6px rgba(22,35,61,0.04);
-  }
-  #prism-root .consent-box::-webkit-scrollbar { width: 5px; }
-  #prism-root .consent-box::-webkit-scrollbar-track { background: transparent; }
-  #prism-root .consent-box::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
-  #prism-root .consent-box p { margin: 0 0 12px; }
-  #prism-root .consent-box p:last-child { margin-bottom: 0; }
-  #prism-root .consent-label {
-    font-size: 14px !important;
-    display: flex !important;
-    align-items: flex-start;
-    gap: 10px;
-    cursor: pointer;
-    padding: 14px 18px;
-    background: var(--surface);
-    border: 1.5px solid var(--line);
-    border-radius: 8px;
-    transition: all 0.15s ease;
-  }
-  #prism-root .consent-label:hover { border-color: var(--ink-2); background: #FAFBFC; }
-  #prism-root .consent-label.checked { border-color: var(--success); background: #F1F8E9; }
-  #prism-root .consent-label input[type=checkbox] {
-    width: 20px;
-    height: 20px;
-    margin-top: 2px;
-    flex-shrink: 0;
-    accent-color: #2E7D32;
-    cursor: pointer;
-  }
-
-  #prism-root .saved-indicator {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--success);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 8px 14px;
-    border-radius: 8px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 100;
-    pointer-events: none;
-  }
-  #prism-root .saved-indicator.show { opacity: 1; }
-
-  @media (max-width: 560px) {
-    #prism-root { padding: 0 0 48px; }
-    #prism-root .masthead { padding: 20px 16px 16px; }
-    #prism-root .content { padding: 18px 16px 8px; }
-    #prism-root .footer-nav { padding: 14px 16px 20px; flex-wrap: wrap; gap: 10px; position: static; }
-    #prism-root .progress-wrap { padding: 10px 16px 0; }
-    #prism-root .shell { border-radius: 0; border-left: none; border-right: none; }
-
-    #prism-root .stamp { width: 44px; height: 44px; font-size: 7px; top: 14px; right: 10px; letter-spacing: 0; }
-    #prism-root h1.title { font-size: 18px; line-height: 1.3; }
-    #prism-root .subtitle { font-size: 12.5px; }
-    #prism-root .eyebrow { font-size: 9.5px; letter-spacing: 0.1em; margin-bottom: 6px; }
-
-    #prism-root .item { padding: 10px 0; }
-    #prism-root .item-row { display: flex; flex-direction: column; gap: 4px; }
-    #prism-root .item-num { width: 22px; height: 22px; font-size: 11px; }
-    #prism-root .item-text { font-size: 13.5px; line-height: 1.4; padding-top: 0; flex: none; }
-
-    #prism-root .likert {
-      margin-left: 0;
-      margin-top: 2px;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      width: 100%;
-    }
-    #prism-root .likert-btn {
-      width: 100%;
-      height: 44px;
-      font-size: 11px;
-      border-radius: 8px;
-    }
-    #prism-root .likert-btn b { font-size: 13px; }
-
-    #prism-root .scale-key {
-      font-size: 10.5px;
-      gap: 4px;
-      padding: 8px 10px;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    #prism-root .welcome { padding: 20px 16px 24px; }
-    #prism-root .welcome .meta { gap: 10px; flex-direction: column; }
-    #prism-root .welcome .meta div { font-size: 11px; }
-    #prism-root .welcome .meta div b { font-size: 12px; }
-
-    #prism-root .done-wrap { padding: 28px 16px 32px; }
-    #prism-root .seal { width: 90px; height: 90px; }
-    #prism-root .seal .seal-word { font-size: 12px; }
-    #prism-root .seal .seal-sub { font-size: 8px; }
-    #prism-root .done-wrap h2 { font-size: 17px; }
-    #prism-root .done-wrap p { font-size: 13px; }
-
-    #prism-root .btn { padding: 10px 16px; font-size: 13px; border-radius: 8px; }
-    #prism-root .btn-ghost { font-size: 12px; padding: 8px 12px; }
-
-    #prism-root .field { margin-bottom: 16px; }
-    #prism-root .field label.field-label { font-size: 12px; margin-bottom: 5px; }
-    #prism-root input[type=text], #prism-root input[type=number], #prism-root textarea {
-      font-size: 14px;
-      padding: 10px 12px;
-    }
-    #prism-root .choice-grid { gap: 6px; }
-    #prism-root .choice-pill { font-size: 12px; padding: 7px 12px; }
-
-    #prism-root .group-heading { font-size: 11px; margin: 20px 0 8px; }
-    #prism-root .section-title { font-size: 15px; }
-    #prism-root .section-note { font-size: 12px; margin-bottom: 16px; }
-
-    #prism-root .response-counter { font-size: 11.5px; }
-    #prism-root .response-counter b { font-size: 14px; }
-
-    #prism-root .response-id { font-size: 11px; padding: 5px 10px; }
-
-    #prism-root .saved-indicator { font-size: 10.5px; padding: 6px 10px; bottom: 12px; right: 12px; }
-    #prism-root .consent-box { max-height: 220px; padding: 12px 14px; font-size: 12.5px; }
-    #prism-root .consent-label { font-size: 12.5px !important; padding: 10px 12px; }
-  }
-
-  @media (min-width: 561px) and (max-width: 900px) {
-    #prism-root { padding: 24px 12px 56px; }
-    #prism-root .shell { max-width: 700px; }
-    #prism-root .masthead { padding: 28px 28px 18px; }
-    #prism-root .content { padding: 22px 28px 8px; }
-    #prism-root .footer-nav { padding: 16px 28px 24px; }
-    #prism-root .progress-wrap { padding: 12px 28px 0; }
-  }
-
-  @media (min-width: 901px) and (max-width: 1200px) {
-    #prism-root .shell { max-width: 780px; }
-  }
-
-  @media print {
-    #prism-root { background: #fff !important; background-image: none !important; padding: 0 !important; }
-    #prism-root .shell { box-shadow: none !important; border: none !important; border-radius: 0 !important; }
-    #prism-root .shell::before { display: none !important; }
-    #prism-root .footer-nav { display: none !important; }
-    #prism-root .stamp { display: none !important; }
-    #prism-root .progress-wrap { display: none !important; }
-    #prism-root .btn { display: none !important; }
-    #prism-root .likert-btn { border-color: #999 !important; background: #fff !important; color: #333 !important; }
-    #prism-root .likert-btn.selected { background: #333 !important; color: #fff !important; }
-    #prism-root .item { break-inside: avoid; }
-    #prism-root .group-heading { break-after: avoid; }
-    #prism-root .response-counter { display: none !important; }
-    #prism-root .saved-indicator { display: none !important; }
-  }
+@media(max-width:600px){
+  .masthead{padding:18px 16px 14px}
+  .content{padding:16px 16px 8px}
+  .progress-wrap{padding:10px 16px 0}
+  .shell{border-radius:0;border-left:none;border-right:none}
+  h1.title{font-size:18px}
+  .footer-nav{padding:10px 16px 14px;position:static;flex-wrap:wrap}
+  .likert-table{font-size:11px}
+  .likert-table th:first-child{min-width:120px}
+  .likert-table input[type=radio]{width:14px;height:14px}
+  .crest-img{width:50px;height:50px;font-size:22px}
+}
+@media print{.footer-nav,.progress-wrap{display:none!important}.shell{box-shadow:none;border:none}}
 </style>
 </head>
 <body>
-<div id="prism-root"></div>
-<div class="saved-indicator" id="saved-indicator">Progress saved</div>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
 <script>
-(function() {
-  "use strict";
+(function(){
+"use strict";
 
-  var STORAGE_KEY = "prism_form_progress";
-  var OFFLINE_QUEUE_KEY = "prism_offline_queue";
-  var CSRF_TOKEN_KEY = "prism_csrf";
-  var SURVEY_START_KEY = "prism_survey_start";
+var PARTS=[
+  {id:"profile",kind:"profile",num:"I",title:"Part I: Respondent Profile",note:"Provide basic information about yourself. All fields except grade/subject and years of experience are optional."},
+  {id:"practices",kind:"practices",num:"II",title:"Part II: Current Practices",note:"Indicate how you currently handle the following school-related tasks."},
+  {id:"challenges",kind:"likert",num:"III",title:"Part III: Challenges Encountered",note:"Rate the following challenges you face in your current work."},
+  {id:"features",kind:"features",num:"IV",title:"Part IV: Feature Priorities",note:"Rate the importance of each proposed feature and pick your top 3."},
+  {id:"feedback",kind:"feedback",num:"V",title:"Part V: Additional Feedback",note:"Share any additional thoughts about your needs and concerns."}
+];
 
-  var i18n = {
-    en: {
-      skip: "Skip to content",
-      step: "Step",
-      of: "of",
-      proceed: "Proceed to Consent",
-      next: "Next",
-      back: "Back",
-      submit: "Submit Questionnaire",
-      submitting: "Submitting\u2026",
-      exit: "Exit",
-      exitConfirm: "Are you sure you want to exit? Your progress will be saved.",
-      submitConfirm: "You are about to submit your evaluation. This action cannot be undone. Continue?",
-      rateLimit: "Please wait at least 30 seconds between submissions.",
-      submitError: "We couldn\u2019t save your response. Please check your connection and try again.",
-      consentRequired: "You must agree to participate before continuing.",
-      infoRequired: "Please complete the required fields marked with *.",
-      surveyRequired: "Please answer every statement before continuing.",
-      queued: "Response saved offline. It will be submitted when your connection is restored.",
-      lastSaved: "Last saved at",
-      queuedTitle: "Queued for submission",
-      /* Section titles & notes */
-      usabilityTitle: "A. Usability",
-      usabilityNote: "Ease of use, navigation, accessibility, and overall user experience.",
-      funcTitle: "B. Functional Suitability",
-      funcNote: "System features, records management, communication, and school operations.",
-      satisfactionTitle: "C. User Satisfaction",
-      satisfactionNote: "Content quality, accuracy, format, timeliness, and overall satisfaction.",
-      /* Scale labels */
-      scaleSA: "Strongly Agree",
-      scaleA: "Agree",
-      scaleD: "Disagree",
-      scaleSD: "Strongly Disagree"
-    },
-    fil: {
-      skip: "Laktawan ang nilalaman",
-      step: "Hakbang",
-      of: "ng",
-      proceed: "Tuloy sa Pahintulot",
-      next: "Susunod",
-      back: "Bumalik",
-      submit: "Isumite ang Talatanungan",
-      submitting: "Isinusumite\u2026",
-      exit: "Lumabas",
-      exitConfirm: "Sigurado ka bang gusto mong lumabas? Naka-save ang iyong progreso.",
-      submitConfirm: "Isusumite mo na ang iyong pagsusuri. Hindi ito maaaring ibalik. Magpatuloy?",
-      rateLimit: "Mangyaring maghintay ng 30 segundo bago muling magsumite.",
-      submitError: "Hindi na-save ang iyong sagot. Pakisuri ang iyong koneksyon at subukan muli.",
-      consentRequired: "Kailangan mong pumayag bago magpatuloy.",
-      infoRequired: "Pakikumpleto ang mga kinakailangang field na may *.",
-      surveyRequired: "Pakisagutan ang lahat ng pahayag bago magpatuloy.",
-      queued: "Ang sagot ay naka-save offline. Isusumite ito kapag bumalik ang iyong koneksyon.",
-      lastSaved: "Huling na-save noong",
-      queuedTitle: "Nakapila para isumite",
-      /* Section titles & notes */
-      usabilityTitle: "A. Usability",
-      usabilityNote: "Kaginhawaan sa paggamit, nabigasyon, accessibility, at karanasan ng user.",
-      funcTitle: "B. Functional Suitability",
-      funcNote: "Mga feature ng system, pamamahala ng records, komunikasyon, at operasyon ng paaralan.",
-      satisfactionTitle: "C. User Satisfaction",
-      satisfactionNote: "Kalidad ng nilalaman, accuracy, format, pagiging napapanahon, at pangkalahatang kasiyahan.",
-      /* Scale labels */
-      scaleSA: "Lubos na Sumasang-ayon",
-      scaleA: "Sumasang-ayon",
-      scaleD: "Hindi Sumasang-ayon",
-      scaleSD: "Lubos na Hindi Sumasang-ayon",
-      /* Survey item translations */
-      items: [
-        "Ang PRISM ay madaling gamitin para sa mga gawain ko sa paaralan.",
-        "Ang navigation system ng PRISM ay simple at madaling maintindihan.",
-        "Ang layout at interface design ng PRISM ay maayos at madaling sundan.",
-        "Ang mga menu, button, at icon sa PRISM ay malinaw at madaling gamitin.",
-        "Madali kong mahanap ang impormasyon at features na kailangan ko sa PRISM.",
-        "Ang impormasyon sa PRISM ay malinaw at nauunawaan.",
-        "Natutunan kong gamitin ang PRISM nang hindi nangangailangan ng maraming tulong.",
-        "Ang PRISM ay accessible at nagagamit sa device na madalas kong ginagamit.",
-        "Epektibo kong natatapos ang mga gawain ko sa PRISM.",
-        "Sa kabuuan, ang PRISM ay nagbibigay ng maginhawa at madaling gamitin na karanasan.",
-        "Ang mga features at functions ng PRISM ay gumagana nang maayos.",
-        "Ang PRISM ay nagbibigay ng mga kinakailangang function para sa mga gawain sa pamamahala ng paaralan.",
-        "Pinapayagan ng PRISM ang mga awtorisadong user na ma-access ang records ng paaralan nang mahusay.",
-        "Ang PRISM ay nagbibigay ng tumpak at maaasahang records at impormasyon tungkol sa paaralan.",
-        "Ang PRISM ay tumutulong sa pag-ayos at pamamahala ng impormasyon ng mga estudyante nang epektibo.",
-        "Sinusuportahan ng PRISM ang mga guro sa pamamahala ng mga gawaing akademiko tulad ng attendance at grades.",
-        "Pinapabuti ng PRISM ang pagpapalaganap ng mga anunsyo sa paaralan at mahahalagang impormasyon.",
-        "Ang messaging at notification features ng PRISM ay sumusuporta sa epektibong komunikasyon sa mga user.",
-        "Nagbibigay ang PRISM ng maginhawang access sa mga learning materials at academic resources.",
-        "Epektibong ginagawa ng PRISM ang mga inaasahang function nito bilang school management portal.",
-        "Nasisiya ako sa impormasyong ibinibigay ng PRISM para sa aking mga pangangailangan sa paaralan.",
-        "Nasisiya ako sa relevance at usefulness ng impormasyon sa PRISM.",
-        "Nasisiya ako sa accuracy ng records at impormasyong ibinibigay ng PRISM.",
-        "Nasisiya ako sa kung paano inaayos at ipinapakita ng PRISM ang impormasyon.",
-        "Nasisiya ako sa kalinawan at itsura ng impormasyon na ipinapakita sa PRISM.",
-        "Nasisiya ako sa bilis ng pag-update ng PRISM ng impormasyon.",
-        "Nasisiya ako sa pagiging napapanahon ng mga anunsyo, notifications, at updates ng PRISM.",
-        "Nasisiya ako sa kakayahan ng PRISM na suportahan ang aking mga gawain sa paaralan.",
-        "Nasisiya ako sa pangkalahatang performance ng PRISM.",
-        "Nasisiya ako sa PRISM bilang portal para sa records, impormasyon, at pamamahala ng paaralan."
-      ]
-    }
-  };
+var CHALLENGES=[
+  "Manual attendance tracking is time-consuming and prone to errors.",
+  "Manual grade computation and recording takes significant time.",
+  "Paper-based record keeping makes retrieval slow and difficult.",
+  "School announcements often do not reach all intended recipients.",
+  "Student and teacher information is scattered across multiple tools.",
+  "No system tracks whether announcements or materials have been read.",
+  "Preparing report cards is a lengthy and repetitive process.",
+  "Parent communication is inconsistent and lacks a centralized channel."
+];
 
-  function t(key) {
-    var lang = document.documentElement.lang || "en";
-    var langMap = i18n[lang] || i18n.en;
-    return langMap[key] || i18n.en[key] || key;
-  }
+var FEATURES=[
+  "Digital attendance tracking with summary reports",
+  "Automated grade computation and recording",
+  "Report card generation from stored grades",
+  "Centralized learning materials repository",
+  "Online assignment submission and checking",
+  "Internal messaging system for teachers and students",
+  "Categorized announcement posting system",
+  "Automatic notifications for updates and deadlines",
+  "Teacher dashboard with class summaries and analytics",
+  "Audit logging for accountability and tracking"
+];
 
-  function itemText(item) {
-    var lang = document.documentElement.lang || "en";
-    if (lang === "fil") {
-      var filItems = i18n.fil.items;
-      var idx = item.num - 1;
-      if (filItems && filItems[idx]) return filItems[idx];
-    }
-    return item.text;
-  }
+var EXP_OPTIONS=["1-3 years","4-6 years","7-10 years","11-15 years","16+ years"];
+var COMFORT_OPTIONS=["Not comfortable","Slightly comfortable","Comfortable","Very comfortable"];
+var DEVICE_OPTIONS=["Desktop/Laptop","Tablet","Smartphone","Projector/Smart TV"];
 
-  function getDeviceInfo() {
-    var info = { screen: screen.width + "x" + screen.height, touch: "ontouchstart" in window };
-    try { info.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) {}
-    try { info.platform = navigator.platform; } catch(e) {}
-    return info;
-  }
+var state={step:0,profile:{name:"",grade_subject:"",years:"",comfort:"",devices:[]},practices:{},challenges:{},features:{},top3:[],biggest:"",missing:"",concerns:"",submitting:false};
 
-  function getUserAgent() {
-    try { return navigator.userAgent; } catch(e) { return ""; }
-  }
+function genId(){if(window.crypto&&window.crypto.randomUUID)return window.crypto.randomUUID();return"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(c){var r=Math.random()*16|0;return(c==="x"?r:(r&0x3|0x8)).toString(16)})}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+function $(s){return document.querySelector(s)}
+function $$(s){return document.querySelectorAll(s)}
 
-  function getCsrfToken() {
-    var token = sessionStorage.getItem(CSRF_TOKEN_KEY);
-    if (!token) {
-      var arr = new Uint8Array(16);
-      crypto.getRandomValues(arr);
-      token = Array.from(arr, function(b) { return b.toString(16).padStart(2, "0"); }).join("");
-      sessionStorage.setItem(CSRF_TOKEN_KEY, token);
-    }
-    return token;
-  }
+function toast(msg){var el=document.getElementById("toast");if(!el)return;el.textContent=msg;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show")},3000)}
 
-  function setLang(l) {
-    document.documentElement.lang = l;
-    try { localStorage.setItem("prism_lang", l); } catch(e) {}
-    render();
-  }
+function pct(){var total=PARTS.length;return Math.round(((state.step+1)/total)*100)}
 
-  /* ---- offline queue ---- */
-  function queueSubmission(payload) {
-    var queue = [];
-    try {
-      var raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
-      if (raw) queue = JSON.parse(raw);
-    } catch(e) {}
-    queue.push(payload);
-    try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue)); } catch(e) {}
-  }
+function renderHeader(){
+  return '<div class="crest"><div class="crest-img">KNHS</div><div class="crest-text"><div class="deped">Department of Education</div><div class="school">Division of Iligan City</div><div class="school">Kiwalan National High School</div></div></div>'
+    +'<p class="eyebrow">Needs Assessment Tool</p>'
+    +'<h1 class="title serif">PRISM — Teacher Needs Analysis Questionnaire</h1>'
+    +'<p class="subtitle">Identifying ICT Integration Needs for School Management</p>';
+}
 
-  async function flushOfflineQueue() {
-    var queue = [];
-    try {
-      var raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
-      if (!raw) return;
-      queue = JSON.parse(raw);
-    } catch(e) { return; }
-    if (!queue.length) return;
-    var remaining = [];
-    for (var i = 0; i < queue.length; i++) {
-      try {
-        var { error } = await supabaseClient.rpc("submit_response", {
-          p_id: queue[i].id,
-          p_submitted_at: queue[i].submitted_at,
-          p_respondent_name: queue[i].respondent_name,
-          p_respondent_age: queue[i].respondent_age,
-          p_respondent_sex: queue[i].respondent_sex,
-          p_respondent_user_type: queue[i].respondent_user_type,
-          p_consent_given: queue[i].consent_given,
-          p_consent_date: queue[i].consent_date,
-          p_answers: queue[i].answers,
-          p_comments: queue[i].comments
-        });
-        if (error) { remaining.push(queue[i]); }
-      } catch(e) { remaining.push(queue[i]); }
-    }
-    try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(remaining)); } catch(e) {}
-  }
+function renderProgress(){
+  var p=pct();
+  return '<div class="progress-wrap"><div class="progress-label"><span>Part '+(state.step+1)+' of '+PARTS.length+' — '+esc(PARTS[state.step].num+'. '+PARTS[state.step].title.split(": ")[1])+'</span><span class="pct">'+p+'%</span></div><div class="progress-track"><div class="progress-fill" style="width:'+p+'%"></div></div></div>';
+}
 
-  window.addEventListener("online", flushOfflineQueue);
+function renderProfile(){
+  var h='<div class="content" id="content">';
+  h+='<h2 class="section-title serif">Part I: Respondent Profile</h2>';
+  h+='<p class="section-note">Provide basic information about yourself. All fields except grade/subject and years of experience are optional.</p>';
+  h+='<div class="field"><label class="flabel">Name <span style="font-weight:400;color:var(--muted)">(optional)</span></label><input type="text" id="f-name" value="'+esc(state.profile.name)+'" placeholder="Your name" /></div>';
+  h+='<div class="field"><label class="flabel">Grade Level & Subject <span class="req">*</span></label><input type="text" id="f-grade" value="'+esc(state.profile.grade_subject)+'" placeholder="e.g. Grade 7 — Mathematics" /></div>';
+  h+='<div class="field"><label class="flabel">Years of Teaching Experience <span class="req">*</span></label><div class="radio-grid" id="exp-grid">';
+  EXP_OPTIONS.forEach(function(o){h+='<button type="button" class="radio-btn'+(state.profile.years===o?" selected":"")+'" data-field="years" data-val="'+esc(o)+'">'+esc(o)+'</button>'});
+  h+='</div></div>';
+  h+='<div class="field"><label class="flabel">Comfort Level with ICT <span class="req">*</span></label><div class="radio-grid" id="comfort-grid">';
+  COMFORT_OPTIONS.forEach(function(o){h+='<button type="button" class="radio-btn'+(state.profile.comfort===o?" selected":"")+'" data-field="comfort" data-val="'+esc(o)+'">'+esc(o)+'</button>'});
+  h+='</div></div>';
+  h+='<div class="field"><label class="flabel">Available Devices <span style="font-weight:400;color:var(--muted)">(optional)</span></label><div class="check-grid" id="device-grid">';
+  DEVICE_OPTIONS.forEach(function(o){h+='<button type="button" class="pill'+(state.profile.devices.indexOf(o)!==-1?" selected":"")+'" data-val="'+esc(o)+'">'+esc(o)+'</button>'});
+  h+='</div></div>';
+  h+='</div>';
+  return h;
+}
 
-  var usabilityItems = [
-    "PRISM is easy to access and use for my school-related activities.",
-    "The navigation system of PRISM is simple and easy to understand.",
-    "The layout and interface design of PRISM are organized and easy to follow.",
-    "The menus, buttons, and icons in PRISM are clearly labeled and easy to use.",
-    "I can easily locate the information and features I need in PRISM.",
-    "The information presented in PRISM is clear and understandable.",
-    "I can learn how to use PRISM without requiring extensive assistance.",
-    "PRISM is accessible and usable on the device I commonly use.",
-    "I can complete my intended tasks in PRISM efficiently.",
-    "Overall, PRISM provides a convenient and user-friendly experience."
+function renderPractices(){
+  var methods=["attendance","grading","materials","comms"];
+  var labels=["Attendance","Grading/Recording","Learning Materials","Communication"];
+  var opts=[
+    ["Paper-based","Spreadsheet (Excel/Google Sheets)","Existing software/app","Other"],
+    ["Manual computation","Spreadsheet formulas","Existing software/app","Other"],
+    ["Printed handouts","USB/Google Drive","LMS (Google Classroom etc.)","Other"],
+    ["Face-to-face","Text messages/SMS","Social media groups","Other"]
   ];
-  var funcItems = [
-    "The features and functions of PRISM operate properly.",
-    "PRISM provides the necessary functions needed for school management activities.",
-    "PRISM allows authorized users to access school records and information efficiently.",
-    "PRISM provides accurate and reliable school-related records and information.",
-    "PRISM helps organize and manage student information effectively.",
-    "PRISM supports teachers in managing academic activities such as attendance and grades.",
-    "PRISM improves the distribution of school announcements and important information.",
-    "PRISM's messaging and notification features support effective communication among users.",
-    "PRISM provides convenient access to learning materials and academic resources.",
-    "PRISM performs its intended functions effectively as a school management portal."
-  ];
-  var satisfactionItems = [
-    "I am satisfied with the information provided by PRISM for my school-related needs.",
-    "I am satisfied with the relevance and usefulness of the information available in PRISM.",
-    "I am satisfied with the accuracy of the records and information provided by PRISM.",
-    "I am satisfied with how PRISM organizes and presents information.",
-    "I am satisfied with the clarity and appearance of information displayed in PRISM.",
-    "I am satisfied with how quickly PRISM provides updated information.",
-    "I am satisfied with the timeliness of announcements, notifications, and updates provided by PRISM.",
-    "I am satisfied with PRISM's ability to support my school-related activities.",
-    "I am satisfied with the overall performance of PRISM.",
-    "I am satisfied with PRISM as a portal for records, information, and school management."
-  ];
-
-  var counter = 0;
-  function grp(heading, arr) {
-    var items = arr.map(function(text) {
-      counter += 1;
-      return { num: counter, text: text };
-    });
-    return { heading: heading, items: items };
+  var h='<div class="content" id="content">';
+  h+='<h2 class="section-title serif">Part II: Current Practices</h2>';
+  h+='<p class="section-note">Indicate how you currently handle the following school-related tasks.</p>';
+  for(var i=0;i<methods.length;i++){
+    h+='<div class="field"><label class="flabel">'+(i+1)+'. '+labels[i]+' <span class="req">*</span></label><div class="radio-grid" data-practice="'+methods[i]+'">';
+    opts[i].forEach(function(o){h+='<button type="button" class="radio-btn'+(state.practices[methods[i]]===o?" selected":"")+'" data-practice="'+methods[i]+'" data-val="'+esc(o)+'">'+esc(o)+'</button>'});
+    h+='</div></div>';
   }
+  h+='</div>';
+  return h;
+}
 
-  var STEPS = [
-    { id: "welcome", kind: "welcome" },
-    { id: "consent", kind: "consent", label: "Consent" },
-    { id: "info", kind: "info", label: "Your Info" },
-    {
-      id: "usability", kind: "survey", label: "Usability",
-      title: "A. Usability",
-      note: "Ease of use, navigation, accessibility, and user experience.",
-      titleKey: "usabilityTitle",
-      noteKey: "usabilityNote",
-      groups: [grp(null, usabilityItems)]
-    },
-    {
-      id: "func", kind: "survey", label: "Functionality",
-      title: "B. Functional Suitability",
-      note: "System features, records management, communication, and school operations.",
-      titleKey: "funcTitle",
-      noteKey: "funcNote",
-      groups: [grp(null, funcItems)]
-    },
-    {
-      id: "satisfaction", kind: "survey", label: "Satisfaction",
-      title: "C. User Satisfaction",
-      note: "Content quality, accuracy, format, timeliness, and overall satisfaction.",
-      titleKey: "satisfactionTitle",
-      noteKey: "satisfactionNote",
-      groups: [grp(null, satisfactionItems)]
-    },
-    { id: "comments", kind: "comments", label: "Comments" },
-    { id: "done", kind: "done" }
-  ];
-
-  var TOTAL_ITEMS = counter;
-  var NAV_STEPS = STEPS.filter(function(s) { return s.kind !== "welcome" && s.kind !== "done"; });
-
-  var state = {
-    stepIndex: 0,
-    answers: {},
-        respondent: { name: "", age: "", sex: "", userType: "" },
-    comments: "",
-    consentGiven: false,
-    consentDate: null,
-    consentVersion: "v1.0",
-    submitting: false,
-    submitError: null,
-    responseId: null,
-    responseCount: null,
-    sessionId: null,
-    surveyStartTime: null,
-    lang: "en"
-  };
-
-  var SEX_OPTIONS = ["Male", "Female"];
-  var USER_TYPE_OPTIONS = ["Student", "Faculty / Teacher", "Parent / Guardian", "School Administrator / Staff", "IT Expert"];
-
-  var root = document.getElementById("prism-root");
-
-  /* ---- localStorage save/load ---- */
-  function loadProgress() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        var saved = JSON.parse(raw);
-        state.stepIndex = saved.stepIndex || 0;
-        state.answers = saved.answers || {};
-        state.respondent = saved.respondent || state.respondent;
-        state.comments = saved.comments || "";
-        state.consentGiven = saved.consentGiven || false;
-        state.consentDate = saved.consentDate || null;
-        state.consentVersion = saved.consentVersion || "v1.0";
-        state.surveyStartTime = saved.surveyStartTime || null;
-        state.sessionId = saved.sessionId || null;
-        state.lang = saved.lang || "en";
-      }
-      try { var lang = localStorage.getItem("prism_lang"); if (lang) state.lang = lang; document.documentElement.lang = state.lang; } catch(e) {}
-      if (!state.sessionId) { state.sessionId = genId(); }
-    } catch (e) {}
-  }
-
-  function clearProgress() {
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-    try { localStorage.removeItem(SURVEY_START_KEY); } catch (e) {}
-  }
-
-  var savedTimer = null;
-  var saveDebounceTimer = null;
-  function saveProgress() {
-    if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
-    saveDebounceTimer = setTimeout(function() {
-      var toSave = {
-        stepIndex: state.stepIndex,
-        answers: state.answers,
-        respondent: state.respondent,
-        comments: state.comments,
-        consentGiven: state.consentGiven,
-        consentDate: state.consentDate,
-        consentVersion: state.consentVersion,
-        surveyStartTime: state.surveyStartTime,
-        sessionId: state.sessionId,
-        lang: state.lang
-      };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-        showSavedIndicator();
-      } catch (e) {}
-    }, 400);
-  }
-
-  function showSavedIndicator() {
-    var el = document.getElementById("saved-indicator");
-    if (!el) return;
-    var now = new Date();
-    var time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    el.textContent = "Last saved at " + time;
-    el.classList.add("show");
-    clearTimeout(savedTimer);
-    savedTimer = setTimeout(function() { el.classList.remove("show"); }, 2000);
-  }
-
-  /* ---- response counter ---- */
-  async function fetchResponseCount() {
-    try {
-      var { count, error } = await supabaseClient
-        .from("responses")
-        .select("*", { count: "exact", head: true });
-      if (!error) state.responseCount = count;
-    } catch (e) {}
-  }
-
-  /* ---- helpers ---- */
-  function esc(s) {
-    return String(s).replace(/[&<>"']/g, function(c) {
-      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
-    });
-  }
-
-  function currentStep() { return STEPS[state.stepIndex]; }
-
-  function stepMissingItems(step) {
-    var missing = [];
-    if (step.kind === "survey") {
-      step.groups.forEach(function(g) {
-        g.items.forEach(function(it) {
-          if (!state.answers[it.num]) missing.push(it.num);
-        });
-      });
+function renderLikert(items,stateKey){
+  var h='<div class="content" id="content">';
+  var part=PARTS[state.step];
+  h+='<h2 class="section-title serif">'+esc(part.title)+'</h2>';
+  h+='<p class="section-note">'+esc(part.note)+'</p>';
+  h+='<table class="likert-table"><thead><tr><th>Statement</th><th>1<br><span style="font-weight:400;text-transform:none">Strongly Disagree</span></th><th>2<br><span style="font-weight:400;text-transform:none">Disagree</span></th><th>3<br><span style="font-weight:400;text-transform:none">Agree</span></th><th>4<br><span style="font-weight:400;text-transform:none">Strongly Agree</span></th></tr></thead><tbody>';
+  for(var i=0;i<items.length;i++){
+    var val=state[stateKey][i]||"";
+    h+='<tr><td><span class="row-num">'+(i+1)+'</span>'+esc(items[i])+'</td>';
+    for(var v=1;v<=4;v++){
+      h+='<td><input type="radio" name="'+stateKey+'-'+i+'" value="'+v+'"'+(val==v?" checked":"")+' data-group="'+stateKey+'" data-idx="'+i+'" /></td>';
     }
-    return missing;
+    h+='</tr>';
   }
+  h+='</tbody></table>';
+  h+='</div>';
+  return h;
+}
 
-  function infoMissing() {
-    var m = [];
-    if (!state.respondent.userType) m.push("userType");
-    if (state.respondent.age && (isNaN(state.respondent.age) || +state.respondent.age < 5 || +state.respondent.age > 100)) m.push("age");
-    return m;
+function renderFeatures(){
+  var h=renderLikert(FEATURES,"features");
+  h=h.replace('</div>','');
+  var count=state.top3.length;
+  h+='<div class="top3-wrap"><div class="top3-title">Select Your Top 3 Most Desired Features</div>';
+  h+='<div class="top3-counter">Selected: <b>'+count+'</b> of 3</div>';
+  h+='<div class="banner error'+(state._featuresTouched&&count!==3?" show":"")+'" role="alert">Please select exactly 3 features.</div>';
+  for(var i=0;i<FEATURES.length;i++){
+    var checked=state.top3.indexOf(i)!==-1;
+    h+='<div class="check-row"><input type="checkbox" id="top3-'+i+'"'+(checked?" checked":"")+(count>=3&&!checked?" disabled":"")+' /><label for="top3-'+i+'">'+(i+1)+'. '+esc(FEATURES[i])+'</label></div>';
   }
+  h+='</div></div>';
+  return h;
+}
 
-  function renderProgress() {
-    var step = currentStep();
-    if (step.kind === "welcome" || step.kind === "done") return "";
-    var idx = NAV_STEPS.indexOf(step) + 1;
-    var total = NAV_STEPS.length;
-    var pct = Math.round((idx / total) * 100);
-    return (
-      '<div class="progress-wrap">' +
-        '<div class="progress-label"><span>' + t("step") + ' ' + idx + ' ' + t("of") + ' ' + total + ' — ' + esc(step.label) + '</span><span class="pct-badge">' + pct + '%</span></div>' +
-        '<div class="progress-track" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100" aria-label="' + t("step") + ' ' + idx + ' ' + t("of") + ' ' + total + '">' +
-          '<div class="progress-fill" style="width:' + pct + '%"></div>' +
-        '</div>' +
-      '</div>'
-    );
-  }
+function renderFeedback(){
+  var h='<div class="content" id="content">';
+  h+='<h2 class="section-title serif">Part V: Additional Feedback</h2>';
+  h+='<p class="section-note">Share any additional thoughts about your needs and concerns.</p>';
+  h+='<div class="field"><label class="flabel">What is your biggest challenge in school management today?</label><textarea id="f-biggest" placeholder="Describe your biggest challenge...">'+esc(state.biggest)+'</textarea></div>';
+  h+='<div class="field"><label class="flabel">What features do you wish existed but currently don\'t?</label><textarea id="f-missing" placeholder="Describe missing features...">'+esc(state.missing)+'</textarea></div>';
+  h+='<div class="field"><label class="flabel">Any concerns or additional remarks?</label><textarea id="f-concerns" placeholder="Share your concerns...">'+esc(state.concerns)+'</textarea></div>';
+  h+='</div>';
+  return h;
+}
 
-  function renderStamp() {
-    var step = currentStep();
-    if (step.kind === "welcome" || step.kind === "done") return "";
-    var idx = NAV_STEPS.indexOf(step) + 1;
-    return '<div class="stamp">FORM<br>' + idx + ' / ' + NAV_STEPS.length + '</div>';
-  }
+function renderDone(){
+  return '<div class="done-wrap">'
+    +'<div class="seal"><span class="sw">SUBMITTED</span><span class="ss">PRISM NEEDS ANALYSIS</span></div>'
+    +'<h2 class="serif">Thank you for your response</h2>'
+    +'<p>Your needs analysis has been recorded. This will help shape the PRISM school management system.</p>'
+    +'<div class="ref-id">Reference: '+esc(state._responseId||"")+'</div>'
+    +'<p style="font-size:12px;color:var(--muted)">Save your reference ID if you wish to withdraw your response later.</p>'
+    +'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn btn-ghost" id="restart-btn">Submit Another Response</button>'
+    +'<a href="admin.html" class="btn btn-ghost" style="text-decoration:none">View Dashboard</a></div>'
+    +'</div>';
+}
 
-  function likertRow(item, invalid) {
-    var val = state.answers[item.num];
-    var opts = [
-      { v: 4, l: "SA" }, { v: 3, l: "A" }, { v: 2, l: "D" }, { v: 1, l: "SD" }
-    ];
-    var btns = opts.map(function(o) {
-      var sel = val === o.v ? " selected" : "";
-      return '<button type="button" class="likert-btn' + sel + '" data-num="' + item.num + '" data-val="' + o.v + '" role="radio" aria-checked="' + (val === o.v) + '" aria-label="' + o.v + ' - ' + o.l + '"><b>' + o.v + '</b>' + o.l + '</button>';
-    }).join("");
-    return (
-      '<div class="item' + (invalid ? " invalid" : "") + '" data-item="' + item.num + '"' + (invalid ? ' aria-invalid="true"' : '') + '>' +
-        '<div class="item-row">' +
-          '<div class="item-num" aria-hidden="true">' + item.num + '</div>' +
-          '<div class="item-text" id="item-label-' + item.num + '">' + esc(itemText(item)) + '</div>' +
-          '<div class="likert" role="radiogroup" aria-labelledby="item-label-' + item.num + '">' + btns + '</div>' +
-        '</div>' +
-      '</div>'
-    );
-  }
+function renderFooter(){
+  var step=PARTS[state.step];
+  var isFirst=state.step===0;
+  var isLast=state.step===PARTS.length-1;
+  var nextLabel=isLast?(state.submitting?"Submitting...":"Submit"):("Next →");
+  return '<div class="footer-nav">'
+    +(isFirst?'<span></span>':'<button type="button" class="btn btn-ghost" id="back-btn">← Back</button>')
+    +'<div class="spacer"></div>'
+    +'<button type="button" class="btn btn-primary" id="next-btn"'+(state.submitting?" disabled":"")+'>'+nextLabel+'</button>'
+    +'</div>';
+}
 
-  function renderSurveyStep(step, missing) {
-    var html = '<div class="content" id="prism-content">';
-    var stepTitle = step.titleKey ? t(step.titleKey) : step.title;
-    var stepNote = step.noteKey ? t(step.noteKey) : step.note;
-    html += '<h2 class="section-title serif">' + esc(stepTitle) + '</h2>';
-    if (stepNote) html += '<p class="section-note">' + esc(stepNote) + '</p>';
-    html += '<div class="scale-key" role="group" aria-label="Response scale"><span><b>4</b> <span class="scale-full">' + t("scaleSA") + ' </span>SA</span><span><b>3</b> <span class="scale-full">' + t("scaleA") + ' </span>A</span><span><b>2</b> <span class="scale-full">' + t("scaleD") + ' </span>D</span><span><b>1</b> <span class="scale-full">' + t("scaleSD") + ' </span>SD</span></div>';
-    html += '<div class="banner error' + (missing.length ? " show" : "") + '" role="alert">' + t("surveyRequired") + '</div>';
-    step.groups.forEach(function(g) {
-      if (g.heading) html += '<div class="group-heading">' + esc(g.heading) + '</div>';
-      g.items.forEach(function(it) {
-        html += likertRow(it, missing.indexOf(it.num) !== -1);
-      });
-    });
-    html += '</div>';
-    return html;
-  }
+function render(){
+  var app=document.getElementById("app");
+  var step=PARTS[state.step];
+  var html='<div class="shell">';
+  html+='<div class="sticky-rail">'+renderHeader()+'</div>';
+  html+=renderProgress();
+  if(step.kind==="profile") html+=renderProfile();
+  else if(step.kind==="practices") html+=renderPractices();
+  else if(step.kind==="likert") html+=renderLikert(step.id==="challenges"?CHALLENGES:FEATURES,step.id==="challenges"?"challenges":"features");
+  else if(step.kind==="features") html+=renderFeatures();
+  else if(step.kind==="feedback") html+=renderFooter()?renderFeedback():renderFeedback();
+  html+='</div>';
+  if(step.kind!=="done") html+=renderFooter();
+  app.innerHTML=html;
+  attachHandlers();
+}
 
-  function renderWelcome() {
-    var counterHtml = '';
-    if (state.responseCount !== null) {
-      counterHtml = '<div class="response-counter"><b>' + state.responseCount + '</b> responses collected so far</div>';
-    }
-    return (
-      '<div class="welcome" id="prism-content">' +
-        '<p class="eyebrow">Research Instrument</p>' +
-        '<h1 class="title serif">PRISM Evaluation Questionnaire</h1>' +
-        '<p class="subtitle">Portal for Records, Information, and School Management</p>' +
-        '<div class="rule"></div>' +
-        '<p>This questionnaire gathers your honest assessment of <a href="https://cranoraa-eng-cranoraa-knhs-website.vercel.app/" target="_blank" rel="noopener" style="color:var(--ink-2);font-weight:600;">the PRISM school management portal</a>. Your responses help evaluate the system\u2019s usability, functional suitability, and overall user satisfaction.</p>' +
-        '<p style="margin:14px 0 0;"><a href="https://cranoraa-eng-cranoraa-knhs-website.vercel.app/" target="_blank" rel="noopener" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">&#128279; Visit the Website</a></p>' +
-        '<p>Your participation is <b>voluntary</b> and your responses are <b>confidential</b>. You must be at least <b>18 years of age</b> (or have parental consent) to participate. You may withdraw at any time before submission by closing the form.</p>' +
-        '<div class="meta">' +
-          '<div><b>' + TOTAL_ITEMS + ' statements</b>3 sections</div>' +
-          '<div><b>~6\u20138 min</b>estimated time</div>' +
-          '<div><b>4-point scale</b>Strongly Disagree \u2192 Strongly Agree</div>' +
-        '</div>' +
-        '<button type="button" class="btn btn-primary" id="start-btn">' + t("proceed") + '</button>' +
-        counterHtml +
-      '</div>'
-    );
-  }
+function attachHandlers(){
+  var step=PARTS[state.step];
 
-  function renderConsent() {
-    var html = '<div class="content" id="prism-content">';
-    html += '<h2 class="section-title serif">Informed Consent</h2>';
-    html += '<p class="section-note">Please read the following information carefully before proceeding.</p>';
-    html += '<div class="banner error' + (state._consentTouched && !state.consentGiven ? " show" : "") + '" role="alert">' + t("consentRequired") + '</div>';
-    html += '<div class="consent-box" tabindex="0">';
-    html += '<p><b>Study Title:</b> Evaluation of PRISM (Portal for Records, Information, and School Management)</p>';
-    html += '<p><b>Purpose:</b> This survey gathers your honest assessment of PRISM\u2019s usability, functional suitability, and overall user satisfaction. Results will be used for research and improvement of the system.</p>';
-    html += '<p><b>Voluntary Participation:</b> Your participation is completely voluntary. You may withdraw at any time before submitting by closing the form. Your progress will be saved automatically if you wish to continue later.</p>';
-    html += '<p><b>Confidentiality:</b> All responses are treated as confidential. Any information you provide (name, age, sex, user type) will be used solely for research purposes and will not be shared in identifiable form. Names are optional and disassociated from analysis.</p>';
-    html += '<p><b>Data Storage:</b> Responses are stored securely in a cloud database (Supabase) with restricted access. Only the researcher has access to the raw data. Data will be retained for the duration of the research study and may be retained for up to 3 years for archival purposes.</p>';
-    html += '<p><b>Age Requirement:</b> By participating, you confirm that you are at least 18 years of age or have obtained parental or guardian consent.</p>';
-    html += '<p><b>Risks and Benefits:</b> There are no known risks associated with this survey. Your responses will help improve the PRISM system for the benefit of the school community.</p>';
-    html += '<p><b>Contact:</b> For questions or concerns about this study, or to request withdrawal of your response after submission, please contact the researcher. Your response reference ID (provided after submission) will be required for withdrawal requests.</p>';
-    html += '<p><b>Ethics Clearance:</b> This study has been reviewed in accordance with established research ethics guidelines.</p>';
-    html += '<p><b>Consent Version:</b> ' + esc(state.consentVersion) + '</p>';
-    html += '</div>';
-    html += '<div class="field" style="margin-top:18px;">';
-    html += '<label class="field-label consent-label' + (state.consentGiven ? ' checked' : '') + '" for="f-consent">';
-    html += '<input type="checkbox" id="f-consent"' + (state.consentGiven ? ' checked' : '') + ' aria-required="true" /> ';
-    html += 'I have read and understood the information above. I voluntarily agree to participate in this study.</label>';
-    html += '</div>';
-    html += '</div>';
-    return html;
-  }
+  var backBtn=document.getElementById("back-btn");
+  if(backBtn) backBtn.addEventListener("click",function(){state.step=Math.max(0,state.step-1);render();window.scrollTo(0,0)});
 
-  function renderInfo() {
-    var r = state.respondent;
-    var missing = infoMissing();
-    var showBanner = state._infoTouched && missing.length;
-    var html = '<div class="content" id="prism-content">';
-    html += '<h2 class="section-title serif">Respondent Information</h2>';
-    html += '<p class="section-note">A few quick details before you begin.</p>';
-    html += '<div class="banner error' + (showBanner ? " show" : "") + '" role="alert">' + t("infoRequired") + '</div>';
+  var nextBtn=document.getElementById("next-btn");
+  if(nextBtn) nextBtn.addEventListener("click",function(){handleNext()});
 
-    html += '<div class="field"><label class="field-label" for="f-name">Name <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
-      '<input type="text" id="f-name" value="' + esc(r.name) + '" placeholder="Your name" autocomplete="name" /></div>';
+  var restartBtn=document.getElementById("restart-btn");
+  if(restartBtn) restartBtn.addEventListener("click",function(){state={step:0,profile:{name:"",grade_subject:"",years:"",comfort:"",devices:[]},practices:{},challenges:{},features:{},top3:[],biggest:"",missing:"",concerns:"",submitting:false};render();window.scrollTo(0,0)});
 
-    html += '<div class="field"><label class="field-label" for="f-age">Age <span style="font-weight:400;color:var(--muted)">(optional)</span></label>' +
-      '<input type="number" id="f-age" value="' + esc(r.age) + '" placeholder="e.g. 24" min="5" max="100" autocomplete="age" aria-describedby="age-hint" />' +
-      '<span id="age-hint" style="font-size:11.5px;color:var(--muted);display:block;margin-top:4px;">Must be between 5 and 100</span></div>';
-
-    html += '<div class="field"><span class="field-label" id="sex-label">Sex <span style="font-weight:400;color:var(--muted)">(optional)</span></span><div class="choice-grid" role="radiogroup" aria-labelledby="sex-label">' +
-      SEX_OPTIONS.concat(["Prefer not to say"]).map(function(o) {
-        return '<button type="button" class="choice-pill' + (r.sex === o ? " selected" : "") + '" data-field="sex" data-val="' + esc(o) + '" role="radio" aria-checked="' + (r.sex === o) + '">' + esc(o) + '</button>';
-      }).join("") + '</div></div>';
-
-    html += '<div class="field"><span class="field-label" id="usertype-label">User Type <span class="req">*</span> <span aria-hidden="true" style="color:var(--error)">*</span></span><div class="choice-grid" role="radiogroup" aria-labelledby="usertype-label">' +
-      USER_TYPE_OPTIONS.map(function(o) {
-        return '<button type="button" class="choice-pill' + (r.userType === o ? " selected" : "") + '" data-field="userType" data-val="' + esc(o) + '" role="radio" aria-checked="' + (r.userType === o) + '">' + esc(o) + '</button>';
-      }).join("") + '</div></div>';
-
-    /* Language selector */
-    html += '<div class="field" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line);">';
-    html += '<span class="field-label" id="lang-label">Language / Wika</span>';
-    html += '<div class="choice-grid" role="radiogroup" aria-labelledby="lang-label">';
-    html += '<button type="button" class="choice-pill' + (state.lang === "en" ? " selected" : "") + '" data-action="setlang" data-val="en" role="radio" aria-checked="' + (state.lang === "en") + '">English</button>';
-    html += '<button type="button" class="choice-pill' + (state.lang === "fil" ? " selected" : "") + '" data-action="setlang" data-val="fil" role="radio" aria-checked="' + (state.lang === "fil") + '">Filipino</button>';
-    html += '</div></div>';
-
-    html += '</div>';
-    return html;
-  }
-
-  function renderComments() {
-    var html = '<div class="content" id="prism-content">';
-    html += '<h2 class="section-title serif">Additional Comments</h2>';
-    html += '<p class="section-note">Optional \u2014 share any comments, concerns, or suggestions for improving PRISM.</p>';
-    html += '<div class="offline-banner' + (state._isOffline ? " show" : "") + '" role="status">' + t("queued") + '</div>';
-    html += '<div class="field"><label class="field-label" for="f-comments">Comments</label><textarea id="f-comments" placeholder="Type your feedback here...">' + esc(state.comments) + '</textarea></div>';
-    if (state.submitError) {
-      html += '<div class="banner error show" role="alert">' + esc(state.submitError) + '</div>';
-    }
-    html += '</div>';
-    return html;
-  }
-
-  function renderDone() {
-    return (
-      '<div class="done-wrap">' +
-        '<div class="seal"><span class="seal-word">RECORDED</span><span class="seal-sub">PRISM SURVEY</span></div>' +
-        '<h2 class="serif">Thank you for your response</h2>' +
-        '<p>Your evaluation has been recorded and will help improve the PRISM school management portal.</p>' +
-        '<div class="response-id">Reference: ' + esc(state.responseId || "") + '</div>' +
-        '<p style="font-size:12.5px;color:var(--muted);">Save your reference ID if you wish to withdraw your response later. Contact the researcher and provide this ID to request deletion.</p>' +
-        '<div><button type="button" class="btn btn-ghost" id="restart-btn">Submit Another Response</button></div>' +
-      '</div>'
-    );
-  }
-
-  function renderFooterNav(step) {
-    var isFirstNav = NAV_STEPS.indexOf(step) === 0;
-    var isLastNav = NAV_STEPS.indexOf(step) === NAV_STEPS.length - 1;
-    var nextLabel = isLastNav ? (state.submitting ? t("submitting") : t("submit")) : t("next");
-    return (
-      '<div class="footer-nav">' +
-        '<a href="admin.html" class="btn btn-ghost" style="font-size:12px;padding:8px 14px;text-decoration:none;">&#128274; Admin</a>' +
-        '<button type="button" class="btn btn-ghost" id="exit-btn" style="font-size:12px;padding:8px 14px;" aria-label="' + t("exit") + '">&#10005; ' + t("exit") + '</button>' +
-        '<div class="spacer"></div>' +
-        (isFirstNav
-          ? '<span></span>'
-          : '<button type="button" class="btn btn-ghost" id="back-btn">' + t("back") + '</button>') +
-        '<button type="button" class="btn btn-primary" id="next-btn"' + (state.submitting ? " disabled" : "") + '>' + nextLabel + '</button>' +
-      '</div>'
-    );
-  }
-
-  function render() {
-    var step = currentStep();
-    var missing = step.kind === "survey" ? (state._surveyTouched && state._surveyTouched[step.id] ? stepMissingItems(step) : []) : [];
-
-    var inner = '<div class="shell">' + renderStamp() + '<div class="masthead">' +
-      '<p class="eyebrow">PRISM \u00b7 Portal for Records, Information, and School Management</p>' +
-      '<h1 class="title serif">Evaluation Questionnaire</h1>' +
-      '<p class="subtitle">Usability \u00b7 Functional Suitability \u00b7 User Satisfaction' +
-      (step.kind !== "welcome" ? ' \u00b7 <a href="https://cranoraa-eng-cranoraa-knhs-website.vercel.app/" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;font-weight:600;">cranoraa-eng-cranoraa-knhs-website.vercel.app</a>' : '') +
-      '</p>' +
-      '</div>';
-
-    inner += renderProgress();
-
-    if (step.kind === "welcome") inner += renderWelcome();
-    else if (step.kind === "consent") inner += renderConsent();
-    else if (step.kind === "info") inner += renderInfo();
-    else if (step.kind === "survey") inner += renderSurveyStep(step, missing);
-    else if (step.kind === "comments") inner += renderComments();
-    else if (step.kind === "done") inner += renderDone();
-
-    if (step.kind !== "welcome" && step.kind !== "done") inner += renderFooterNav(step);
-
-    inner += '</div>';
-    root.innerHTML = inner;
-    attachHandlers(step);
-  }
-
-  function attachHandlers(step) {
-    var startBtn = root.querySelector("#start-btn");
-    if (startBtn) startBtn.addEventListener("click", function() {
-      state.stepIndex += 1;
-      state.surveyStartTime = state.surveyStartTime || Date.now();
-      saveProgress();
+  $$(".radio-btn[data-field]").forEach(function(b){
+    b.addEventListener("click",function(){
+      var f=b.getAttribute("data-field");
+      var v=b.getAttribute("data-val");
+      state.profile[f]=state.profile[f]===v?"":v;
       render();
     });
-
-    var restartBtn = root.querySelector("#restart-btn");
-    if (restartBtn) restartBtn.addEventListener("click", function() {
-      state = {
-        stepIndex: 0, answers: {},
-    respondent: { name: "", age: "", sex: "", userType: "" },
-        comments: "", consentGiven: false, consentDate: null, consentVersion: "v1.0",
-        submitting: false, submitError: null, responseId: null,
-        responseCount: state.responseCount,
-        sessionId: genId(), surveyStartTime: null, lang: state.lang
-      };
-      clearProgress();
-      render();
-    });
-
-    root.querySelectorAll(".likert-btn").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        var num = btn.getAttribute("data-num");
-        var val = +btn.getAttribute("data-val");
-        state.answers[num] = val;
-        saveProgress();
-        render();
-      });
-    });
-
-    root.querySelectorAll(".choice-pill").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        var field = btn.getAttribute("data-field");
-        var action = btn.getAttribute("data-action");
-        var val = btn.getAttribute("data-val");
-        if (action === "setlang") {
-          state.lang = state.lang === val ? state.lang : val;
-          document.documentElement.lang = state.lang;
-          saveProgress();
-          render();
-          return;
-        }
-        state.respondent[field] = state.respondent[field] === val ? "" : val;
-        if (field === "userType") { state.respondent.userType = val; }
-        saveProgress();
-        render();
-      });
-    });
-
-    var consentCheck = root.querySelector("#f-consent");
-    if (consentCheck) consentCheck.addEventListener("change", function(e) {
-      state.consentGiven = e.target.checked;
-      state.consentDate = state.consentGiven ? new Date().toISOString() : null;
-      var lbl = consentCheck.closest(".consent-label");
-      if (lbl) lbl.classList.toggle("checked", state.consentGiven);
-      saveProgress();
-    });
-
-    var nameInput = root.querySelector("#f-name");
-    if (nameInput) nameInput.addEventListener("input", function(e) { state.respondent.name = e.target.value; saveProgress(); });
-    var ageInput = root.querySelector("#f-age");
-    if (ageInput) ageInput.addEventListener("input", function(e) { state.respondent.age = e.target.value; saveProgress(); });
-    var commentsInput = root.querySelector("#f-comments");
-    if (commentsInput) commentsInput.addEventListener("input", function(e) { state.comments = e.target.value; saveProgress(); });
-
-    var exitBtn = root.querySelector("#exit-btn");
-    if (exitBtn) exitBtn.addEventListener("click", function() {
-      if (confirm(t("exitConfirm"))) {
-        state.stepIndex = 0;
-        saveProgress();
-        render();
-        root.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    });
-
-    var backBtn = root.querySelector("#back-btn");
-    if (backBtn) backBtn.addEventListener("click", function() {
-      state.stepIndex -= 1;
-      saveProgress();
-      render();
-    });
-
-    var nextBtn = root.querySelector("#next-btn");
-    if (nextBtn) nextBtn.addEventListener("click", function() { handleNext(step); });
-  }
-
-  function handleNext(step) {
-    if (step.kind === "consent") {
-      state._consentTouched = true;
-      if (!state.consentGiven) { render(); focusFirstError(); return; }
-    }
-    if (step.kind === "info") {
-      state._infoTouched = true;
-      var missing = infoMissing();
-      if (missing.length) { render(); focusFirstError(); return; }
-    }
-    if (step.kind === "survey") {
-      state._surveyTouched = state._surveyTouched || {};
-      state._surveyTouched[step.id] = true;
-      var m = stepMissingItems(step);
-      if (m.length) { render(); focusFirstError(); return; }
-    }
-    if (step.kind === "comments") {
-      submitResponse();
-      return;
-    }
-    state.stepIndex += 1;
-    saveProgress();
-    render();
-    root.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function focusFirstError() {
-    var bad = root.querySelector(".item.invalid, .banner.error.show, [aria-invalid=true]");
-    if (bad) {
-      bad.scrollIntoView({ behavior: "smooth", block: "center" });
-      var firstInput = bad.querySelector("button, input, textarea, [tabindex]");
-      if (firstInput) firstInput.focus({ preventScroll: true });
-    }
-  }
-
-  function genId() {
-    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
-    /* Fallback UUID v4 for browsers without crypto.randomUUID */
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0;
-      return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
-    });
-  }
-
-  var RATE_LIMIT_MS = 30000;
-
-  async function submitResponse() {
-    if (state.submitting) return;
-    if (!confirm(t("submitConfirm"))) return;
-
-    var lastSub = parseInt(localStorage.getItem("prism_last_submit") || "0");
-    if (Date.now() - lastSub < RATE_LIMIT_MS) {
-      state.submitError = t("rateLimit");
-      state.submitting = false;
-      render();
-      return;
-    }
-
-    state.submitting = true;
-    state.submitError = null;
-    render();
-
-    var id = genId();
-
-    var payload = {
-      id: id,
-      submitted_at: new Date().toISOString(),
-      respondent_name: state.respondent.name ? state.respondent.name.replace(/<[^>]*>/g, "").trim() : null,
-      respondent_age: state.respondent.age ? Number(state.respondent.age) : null,
-      respondent_sex: state.respondent.sex,
-      respondent_user_type: state.respondent.userType,
-      consent_given: state.consentGiven,
-      consent_date: state.consentDate,
-      answers: state.answers,
-      comments: state.comments ? state.comments.replace(/<[^>]*>/g, "").trim() : null
-    };
-
-    /* Offline queue */
-    if (!navigator.onLine) {
-      queueSubmission(payload);
-      state.submitting = false;
-      state._isOffline = true;
-      try { localStorage.setItem("prism_last_submit", String(Date.now())); } catch(e) {}
-      state.responseId = id.slice(0, 8).toUpperCase();
-      state.stepIndex = STEPS.length - 1;
-      clearProgress();
-      render();
-      return;
-    }
-
-    try {
-      var { error } = await supabaseClient.rpc("submit_response", {
-        p_id: id,
-        p_submitted_at: payload.submitted_at,
-        p_respondent_name: payload.respondent_name,
-        p_respondent_age: payload.respondent_age,
-        p_respondent_sex: payload.respondent_sex,
-        p_respondent_user_type: payload.respondent_user_type,
-        p_consent_given: payload.consent_given,
-        p_consent_date: payload.consent_date,
-        p_answers: payload.answers,
-        p_comments: payload.comments
-      });
-
-      if (error) throw error;
-
-      try { localStorage.setItem("prism_last_submit", String(Date.now())); } catch(e) {}
-      state.submitting = false;
-      state.responseId = id.slice(0, 8).toUpperCase();
-      state.stepIndex = STEPS.length - 1;
-      clearProgress();
-      render();
-    } catch (err) {
-      console.error("Submit error:", err);
-      /* Try offline queue if network error */
-      if (!navigator.onLine || err.message === "Failed to fetch") {
-        queueSubmission(payload);
-        state.submitting = false;
-        state._isOffline = true;
-        try { localStorage.setItem("prism_last_submit", String(Date.now())); } catch(e) {}
-        state.responseId = id.slice(0, 8).toUpperCase();
-        state.stepIndex = STEPS.length - 1;
-        clearProgress();
-        render();
-        return;
-      }
-      state.submitting = false;
-      state.submitError = t("submitError") + " (" + (err.message || "Unknown error") + ")";
-      render();
-    }
-  }
-
-  /* unsaved changes warning */
-  window.addEventListener("beforeunload", function(e) {
-    if (state.stepIndex > 0 && state.stepIndex < STEPS.length - 1) {
-      e.preventDefault();
-      e.returnValue = "";
-    }
   });
 
-  /* init */
-  loadProgress();
-  fetchResponseCount().then(function() { render(); });
+  $$(".pill[data-val]").forEach(function(b){
+    b.addEventListener("click",function(){
+      var v=b.getAttribute("data-val");
+      var idx=state.profile.devices.indexOf(v);
+      if(idx===-1) state.profile.devices.push(v); else state.profile.devices.splice(idx,1);
+      render();
+    });
+  });
+
+  $$("input[type=radio][data-group]").forEach(function(r){
+    r.addEventListener("change",function(){
+      var g=r.getAttribute("data-group");
+      var i=+r.getAttribute("data-idx");
+      state[g][i]=+r.value;
+    });
+  });
+
+  $$("button.radio-btn[data-practice]").forEach(function(b){
+    b.addEventListener("click",function(){
+      var p=b.getAttribute("data-practice");
+      var v=b.getAttribute("data-val");
+      state.practices[p]=state.practices[p]===v?"":v;
+      render();
+    });
+  });
+
+  if(step.kind==="features"){
+    for(var i=0;i<FEATURES.length;i++){
+      var cb=document.getElementById("top3-"+i);
+      if(cb) cb.addEventListener("change",(function(idx){
+        return function(e){
+          if(e.target.checked){if(state.top3.length<3)state.top3.push(idx)}
+          else{var p=state.top3.indexOf(idx);if(p!==-1)state.top3.splice(p,1)}
+          render();
+        };
+      })(i));
+    }
+  }
+
+  var nameEl=document.getElementById("f-name");
+  if(nameEl) nameEl.addEventListener("input",function(e){state.profile.name=e.target.value});
+  var gradeEl=document.getElementById("f-grade");
+  if(gradeEl) gradeEl.addEventListener("input",function(e){state.profile.grade_subject=e.target.value});
+  var biggestEl=document.getElementById("f-biggest");
+  if(biggestEl) biggestEl.addEventListener("input",function(e){state.biggest=e.target.value});
+  var missingEl=document.getElementById("f-missing");
+  if(missingEl) missingEl.addEventListener("input",function(e){state.missing=e.target.value});
+  var concernsEl=document.getElementById("f-concerns");
+  if(concernsEl) concernsEl.addEventListener("input",function(e){state.concerns=e.target.value});
+}
+
+function validate(){
+  var step=PARTS[state.step];
+  var errors=[];
+  if(step.kind==="profile"){
+    if(!state.profile.grade_subject.trim()) errors.push("Grade Level & Subject is required.");
+    if(!state.profile.years) errors.push("Years of experience is required.");
+    if(!state.profile.comfort) errors.push("Comfort level is required.");
+  }
+  if(step.kind==="practices"){
+    ["attendance","grading","materials","comms"].forEach(function(k){
+      if(!state.practices[k]) errors.push("Please select a method for all practice items.");
+    });
+  }
+  if(step.kind==="likert"){
+    var items=step.id==="challenges"?CHALLENGES:FEATURES;
+    var st=step.id==="challenges"?state.challenges:state.features;
+    for(var i=0;i<items.length;i++){if(!st[i]) errors.push("Please answer statement "+(i+1)+".")}
+  }
+  if(step.kind==="features"){
+    for(var i=0;i<FEATURES.length;i++){if(!state.features[i]) errors.push("Please rate feature "+(i+1)+".")}
+    if(state.top3.length!==3) errors.push("Please select exactly 3 top features.");
+  }
+  return errors;
+}
+
+function handleNext(){
+  var errors=validate();
+  if(errors.length){toast(errors[0]);return}
+  if(state.step===PARTS.length-1){submitResponse();return}
+  state.step++;
   render();
-  flushOfflineQueue();
+  window.scrollTo(0,0);
+}
+
+async function submitResponse(){
+  if(state.submitting) return;
+  if(!confirm("Submit your needs analysis? This action cannot be undone.")) return;
+  state.submitting=true;
+  render();
+  var id=genId();
+  var payload={
+    id:id,
+    submitted_at:new Date().toISOString(),
+    respondent_name:state.profile.name||null,
+    grade_subject:state.profile.grade_subject,
+    years_experience:state.profile.years,
+    comfort_level:state.profile.comfort,
+    devices:state.profile.devices,
+    attendance_method:state.practices.attendance||null,
+    grading_method:state.practices.grading||null,
+    materials_method:state.practices.materials||null,
+    comms_method:state.practices.comms||null,
+    challenge_answers:state.challenges,
+    feature_answers:state.features,
+    top3_picks:state.top3.map(function(i){return FEATURES[i]}),
+    biggest_challenge:state.biggest||null,
+    missing_features:state.missing||null,
+    concerns:state.concerns||null
+  };
+  try{
+    var result=await supabaseClient.from("needs_analysis_responses").insert(payload);
+    if(result.error) throw result.error;
+    state._responseId=id.slice(0,8).toUpperCase();
+    state.step=PARTS.length;
+    state.submitting=false;
+    render();
+    window.scrollTo(0,0);
+  }catch(err){
+    console.error("Submit error:",err);
+    state.submitting=false;
+    render();
+    toast("Submission failed: "+(err.message||"Unknown error")+". Please try again.");
+  }
+}
+
+window.addEventListener("beforeunload",function(e){
+  if(state.step>0&&state.step<PARTS.length){e.preventDefault();e.returnValue=""}
+});
+
+render();
 })();
 </script>
 </body>
