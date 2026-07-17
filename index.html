@@ -1,477 +1,778 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PRISM — Teacher Needs Analysis Questionnaire</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-  const SUPABASE_URL = "https://qwkkpmxpmugkrlspbiri.supabase.co";
+  const SUPABASE_URL  = "https://qwkkpmxpmugkrlspbiri.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3a2twbXhwbXVna3Jsc3BiaXJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NjQwMDEsImV4cCI6MjA5OTM0MDAwMX0.HT3V9wXTEm0ehxoqgChUEDrqetPKwnB1fanGwHWtDdI";
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 </script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#163A5F;--gold:#D6A331;--paper:#FAF7F0;--thread:#B9532F;
-  --ink:#163A5F;--ink2:#1f4d7a;--line:#d6d0c4;--surface:#fff;
-  --muted:#6b7280;--success:#2e7d32;--error:#c62828;--radius:10px;
-}
-body{font-family:'Public Sans',sans-serif;color:var(--ink);background:var(--paper);background-image:repeating-linear-gradient(to bottom,transparent 0px,transparent 27px,rgba(22,58,95,0.03) 28px);min-height:100vh;line-height:1.55;-webkit-font-smoothing:antialiased;padding-bottom:72px}
-.serif{font-family:'Lora',Georgia,serif}
+  :root{
+    --navy: #163A5F;
+    --navy-deep: #0E2740;
+    --gold: #D6A331;
+    --gold-soft: #F1D488;
+    --paper: #FAF7F0;
+    --paper-line: #E4DCC8;
+    --ink: #23303F;
+    --ink-soft: #5C6B7A;
+    --thread: #B9532F;
+    --ok: #2E6B4F;
+    --card: #FFFFFF;
+    --radius: 10px;
+    --shadow: 0 2px 10px rgba(14,39,64,0.07), 0 1px 2px rgba(14,39,64,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image: linear-gradient(var(--paper-line) 1px, transparent 1px);
+    background-size: 100% 2.1em;
+    color:var(--ink);
+    font-family:'Public Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{font-family:'Lora', serif;}
+  a{color:var(--navy);}
 
-.shell{max-width:780px;margin:24px auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 12px 36px -12px rgba(22,58,95,0.18);overflow:hidden;position:relative}
-.shell::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--navy) 0%,var(--navy) 55%,var(--gold) 100%)}
+  .letterhead{
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color:#fff;
+    padding:2.2rem 1.5rem 1.6rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .letterhead::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:0; height:5px;
+    background: repeating-linear-gradient(90deg, var(--gold) 0 14px, transparent 14px 20px);
+    opacity:.85;
+  }
+  .letterhead-inner{max-width:760px; margin:0 auto; text-align:center;}
+  .crest{
+    width:52px; height:52px; margin:0 auto .7rem;
+    border:2px solid var(--gold-soft);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Lora',serif; font-weight:700; font-size:1.1rem;
+    color:var(--gold-soft);
+    letter-spacing:.5px;
+  }
+  .eyebrow{
+    font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gold-soft); font-weight:600; margin-bottom:.35rem;
+  }
+  .school-name{font-size:1.05rem; font-weight:600; opacity:.92; margin:0 0 .15rem;}
+  .division{font-size:.82rem; opacity:.72; margin:0 0 1.1rem;}
+  .prism-word{
+    font-size:2.6rem; font-weight:700; letter-spacing:.03em; margin:0;
+    line-height:1;
+  }
+  .prism-tag{font-size:.86rem; opacity:.82; margin:.4rem 0 1.3rem; font-style:italic;}
+  .qtitle{font-size:1.3rem; font-weight:600; margin:0 0 .3rem;}
+  .qmeta{font-size:.82rem; opacity:.75;}
 
-.masthead{padding:28px 32px 18px;border-bottom:1px solid var(--line);text-align:center}
-.crest{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:12px;flex-wrap:wrap}
-.crest-img{width:64px;height:64px;border-radius:50%;background:var(--paper);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--navy);font-weight:700;font-family:'Lora',serif}
-.crest-text{text-align:left}
-.crest-text .deped{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--gold);font-weight:700}
-.crest-text .school{font-size:13px;color:var(--navy);font-weight:700;line-height:1.2}
-.crest-text .division{font-size:11px;color:var(--muted)}
+  .wrap{max-width:760px; margin:0 auto; padding:0 1.25rem;}
 
-.eyebrow{text-transform:uppercase;letter-spacing:0.12em;font-size:10.5px;font-weight:700;color:var(--gold);margin-bottom:6px}
-h1.title{font-size:24px;color:var(--navy);margin-bottom:4px}
-.subtitle{font-size:13.5px;color:var(--muted)}
+  .purpose{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-left:4px solid var(--gold);
+    border-radius:var(--radius);
+    padding:1.1rem 1.3rem;
+    margin:1.6rem auto;
+    box-shadow:var(--shadow);
+    font-size:.92rem;
+    color:var(--ink-soft);
+  }
+  .purpose strong{color:var(--ink); font-family:'Lora',serif;}
 
-.progress-wrap{padding:12px 32px 0}
-.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);letter-spacing:0.04em;margin-bottom:5px;text-transform:uppercase;font-weight:600}
-.progress-label .pct{background:var(--navy);color:#fff;font-size:10px;font-weight:700;padding:1px 8px;border-radius:10px;letter-spacing:0}
-.progress-track{height:5px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:16px}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--navy2,var(--navy)),var(--gold));transition:width .35s ease;border-radius:4px}
+  .rail-outer{
+    position:sticky; top:0; z-index:20;
+    background:rgba(250,247,240,.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--paper-line);
+    padding:.75rem 0;
+  }
+  .rail{
+    max-width:760px; margin:0 auto; padding:0 1.25rem;
+    display:flex; align-items:center; justify-content:space-between;
+    position:relative;
+  }
+  .rail::before{
+    content:"";
+    position:absolute; left:1.6rem; right:1.6rem; top:14px; height:0;
+    border-top:2px dashed #CBBF9E;
+    z-index:0;
+  }
+  .rail-step{
+    position:relative; z-index:1;
+    display:flex; flex-direction:column; align-items:center;
+    gap:.3rem; cursor:pointer; background:transparent; border:none;
+    font-family:'Public Sans',sans-serif;
+    flex:1;
+  }
+  .rail-dot{
+    width:28px; height:28px; border-radius:50%;
+    background:var(--paper); border:2px solid #CBBF9E;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Lora',serif; font-weight:700; font-size:.8rem; color:var(--ink-soft);
+    transition:.2s;
+  }
+  .rail-step.active .rail-dot{background:var(--navy); border-color:var(--navy); color:#fff;}
+  .rail-step.done .rail-dot{background:var(--thread); border-color:var(--thread); color:#fff;}
+  .rail-label{font-size:.62rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); text-align:center;}
+  .rail-step.active .rail-label{color:var(--navy); font-weight:700;}
 
-.sticky-rail{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding:0}
+  main{padding-bottom:5rem;}
+  .step{display:none; animation:fade .35s ease;}
+  .step.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
 
-.content{padding:24px 32px 8px}
+  .part-head{margin:2rem 0 1.1rem;}
+  .part-eyebrow{font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--thread); font-weight:700;}
+  .part-title{font-size:1.35rem; margin:.25rem 0 .3rem;}
+  .part-sub{color:var(--ink-soft); font-size:.9rem; margin:0;}
 
-.section-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:4px;padding-left:12px;border-left:4px solid var(--gold)}
-.section-note{font-size:12.5px;color:var(--muted);margin-bottom:18px;padding:10px 12px;background:var(--paper);border-radius:8px;border:1px solid var(--line)}
+  .card{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:1.2rem 1.3rem;
+    margin-bottom:1rem;
+  }
+  .field{margin-bottom:1.3rem;}
+  .field:last-child{margin-bottom:0;}
+  .q-label{
+    font-weight:600; font-size:.96rem; margin-bottom:.6rem; display:block;
+    color:var(--ink);
+  }
+  .q-num{color:var(--thread); font-family:'Lora',serif; font-style:italic; margin-right:.35rem;}
+  .hint{font-size:.78rem; color:var(--ink-soft); margin:-.35rem 0 .6rem;}
 
-.field{margin-bottom:18px}
-.field label.flabel{display:block;font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:6px}
-.field .req{color:var(--error)}
-.field .hint{font-size:11px;color:var(--muted);display:block;margin-top:3px}
-input[type=text],input[type=number],textarea,select{width:100%;font-family:inherit;font-size:13.5px;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
-input:focus,textarea:focus,select:focus{outline:2px solid var(--navy2,var(--navy));outline-offset:1px;border-color:var(--navy2,var(--navy))}
-textarea{resize:vertical;min-height:80px}
+  input[type=text], textarea{
+    width:100%;
+    border:1px solid #D9D2BE;
+    background:#FFFDF9;
+    border-radius:7px;
+    padding:.6rem .7rem;
+    font-family:inherit;
+    font-size:.92rem;
+    color:var(--ink);
+  }
+  input[type=text]:focus, textarea:focus{
+    outline:2px solid var(--navy); outline-offset:1px; border-color:var(--navy);
+  }
+  textarea{min-height:5.2rem; resize:vertical;}
 
-.radio-grid,.check-grid{display:flex;flex-wrap:wrap;gap:7px}
-.pill{all:unset;cursor:pointer;font-size:12.5px;padding:7px 13px;border:1.5px solid var(--line);border-radius:20px;color:var(--ink2,#2a5080);background:var(--surface);transition:all .15s ease}
-.pill:hover{border-color:var(--navy)}
-.pill.selected{background:var(--navy);border-color:var(--navy);color:#fff}
-.pill:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+  .options{display:flex; flex-direction:column; gap:.5rem;}
+  .opt{
+    display:flex; align-items:center; gap:.6rem;
+    border:1px solid #E4DCC8; border-radius:7px; padding:.55rem .7rem;
+    cursor:pointer; font-size:.9rem; transition:.15s; background:#FFFDF9;
+  }
+  .opt:hover{border-color:var(--navy);}
+  .opt input{accent-color:var(--navy); width:16px; height:16px; flex:none;}
+  .opt.checked{border-color:var(--navy); background:#EEF3F8;}
+  .opt .other-input{flex:1; margin-left:.3rem; display:none;}
+  .opt.other.checked .other-input{display:block;}
 
-.radio-row{display:flex;gap:8px;flex-wrap:wrap}
-.radio-btn{all:unset;cursor:pointer;padding:7px 13px;border:1.5px solid var(--line);border-radius:20px;font-size:12.5px;color:var(--ink2,#2a5080);background:var(--surface);transition:all .15s}
-.radio-btn:hover{border-color:var(--navy)}
-.radio-btn.selected{background:var(--navy);border-color:var(--navy);color:#fff}
+  .likert{width:100%; border-collapse:collapse; font-size:.85rem;}
+  .likert th{
+    font-weight:600; font-size:.68rem; text-transform:uppercase; letter-spacing:.03em;
+    color:var(--ink-soft); text-align:center; padding:.3rem .2rem .6rem; vertical-align:bottom;
+  }
+  .likert th:first-child{text-align:left;}
+  .likert td{padding:.55rem .2rem; text-align:center; border-top:1px solid var(--paper-line);}
+  .likert td:first-child{text-align:left; font-size:.86rem; padding-right:.6rem;}
+  .likert tr:first-child td{border-top:none;}
+  .likert input{accent-color:var(--navy); width:17px; height:17px;}
 
-.likert-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;margin-bottom:18px}
-.likert-table th{background:var(--paper);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink2,#2a5080);padding:8px 6px;text-align:center;border-bottom:2px solid var(--gold);position:sticky;top:0}
-.likert-table th:first-child{text-align:left;min-width:200px}
-.likert-table td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
-.likert-table td:first-child{text-align:left;font-size:12.5px}
-.likert-table tr:hover td{background:rgba(22,58,95,0.02)}
-.likert-table input[type=radio]{width:16px;height:16px;accent-color:var(--navy);cursor:pointer}
-.likert-table .row-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--paper);border:1.5px solid var(--gold);font-weight:700;font-size:10.5px;color:var(--gold);margin-right:6px;flex-shrink:0}
+  .counter{
+    display:inline-block; font-size:.75rem; font-weight:700; color:var(--navy);
+    background:#EEF3F8; border-radius:20px; padding:.2rem .7rem; margin-bottom:.7rem;
+  }
+  .counter.full{color:var(--thread); background:#FBEAE3;}
 
-.top3-wrap{margin-top:14px;padding:14px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper)}
-.top3-title{font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:4px}
-.top3-counter{font-size:12px;color:var(--muted);margin-bottom:10px}
-.top3-counter b{color:var(--thread)}
-.check-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px}
-.check-row:last-child{border-bottom:none}
-.check-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--thread);cursor:pointer}
-.check-row label{cursor:pointer;flex:1}
+  .field-error{
+    font-size:.78rem; color:var(--thread); margin-top:.3rem; display:none;
+  }
+  .field.has-error input[type=text],
+  .field.has-error textarea{border-color:var(--thread);}
+  .field.has-error .field-error{display:block;}
 
-.banner{font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:16px;display:none}
-.banner.show{display:block}
-.banner.error{background:#fce4ec;color:var(--error);border:1px solid #f5c6cb}
+  .nav-footer{
+    position:fixed; left:0; right:0; bottom:0; z-index:30;
+    background:#fff; border-top:1px solid var(--paper-line);
+    box-shadow:0 -2px 10px rgba(14,39,64,.06);
+  }
+  .nav-inner{
+    max-width:760px; margin:0 auto; padding:.75rem 1.25rem;
+    display:flex; justify-content:space-between; align-items:center; gap:.8rem;
+  }
+  .btn{
+    font-family:inherit; font-size:.9rem; font-weight:600;
+    padding:.65rem 1.25rem; border-radius:7px; cursor:pointer;
+    border:1px solid transparent; transition:.15s;
+  }
+  .btn-primary{background:var(--navy); color:#fff;}
+  .btn-primary:hover{background:var(--navy-deep);}
+  .btn-ghost{background:transparent; color:var(--navy); border-color:#CBBF9E;}
+  .btn-ghost:hover{background:#F1ECDD;}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+  .step-count{font-size:.76rem; color:var(--ink-soft); font-weight:600;}
 
-.footer-nav{display:flex;justify-content:space-between;align-items:center;padding:14px 32px 20px;gap:10px;background:var(--surface);border-top:1px solid var(--line);position:fixed;bottom:0;left:0;right:0;z-index:50}
-.btn{all:unset;cursor:pointer;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;text-align:center;transition:all .15s}
-.btn-primary{background:var(--navy);color:#fff}
-.btn-primary:hover{background:var(--ink2,#1f4d7a)}
-.btn-primary:disabled{opacity:.55;cursor:not-allowed}
-.btn-ghost{color:var(--navy);border:1.5px solid var(--line);background:var(--surface)}
-.btn-ghost:hover{border-color:var(--navy)}
-.btn:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
-.spacer{flex:1}
+  .toast{
+    position:fixed; top:1rem; left:50%; transform:translateX(-50%);
+    background:var(--thread); color:#fff; padding:.7rem 1.2rem;
+    border-radius:7px; font-size:.85rem; font-weight:600;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+    z-index:100; opacity:0; transition:.3s;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;}
 
-.done-wrap{padding:48px 32px;text-align:center}
-.done-wrap .seal{width:110px;height:110px;margin:0 auto 20px;border-radius:50%;border:3px double var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--navy);font-family:'Lora',serif;background:linear-gradient(135deg,rgba(214,163,49,0.08),transparent);box-shadow:0 4px 16px rgba(214,163,49,0.12)}
-.done-wrap .seal .sw{font-weight:700;font-size:14px;letter-spacing:0.08em}
-.done-wrap .seal .ss{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:0.05em}
-.done-wrap h2{font-size:20px;margin-bottom:6px}
-.done-wrap p{color:var(--muted);font-size:13px;margin:0 auto 18px;max-width:400px}
-.done-wrap .ref-id{display:inline-block;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11.5px;color:var(--ink2,#2a5080);background:var(--paper);border:1px solid var(--line);padding:5px 12px;border-radius:6px;margin-bottom:20px}
+  .thanks{
+    max-width:560px; margin:3rem auto 6rem; text-align:center;
+    padding:0 1.25rem;
+  }
+  .thanks .crest{width:64px;height:64px;font-size:1.4rem;color:var(--gold); border-color:var(--gold);}
+  .thanks h2{margin-top:1rem;}
+  .thanks p{color:var(--ink-soft);}
+  .thanks-actions{display:flex; gap:.7rem; justify-content:center; margin-top:1.6rem; flex-wrap:wrap;}
 
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--error);color:#fff;font-size:12.5px;padding:10px 22px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:999;opacity:0;transition:opacity .25s;pointer-events:none}
-.toast.show{opacity:1}
+  .admin-link{
+    display:block; text-align:center; font-size:.75rem; color:var(--ink-soft);
+    margin-top:2rem; text-decoration:underline; cursor:pointer; background:none; border:none;
+    width:100%; padding:.4rem;
+  }
 
-@media(max-width:600px){
-  .masthead{padding:18px 16px 14px}
-  .content{padding:16px 16px 8px}
-  .progress-wrap{padding:10px 16px 0}
-  .shell{border-radius:0;border-left:none;border-right:none}
-  h1.title{font-size:18px}
-  .footer-nav{padding:10px 16px 14px;position:static;flex-wrap:wrap}
-  .likert-table{font-size:11px}
-  .likert-table th:first-child{min-width:120px}
-  .likert-table input[type=radio]{width:14px;height:14px}
-  .crest-img{width:50px;height:50px;font-size:22px}
-}
-@media print{.footer-nav,.progress-wrap{display:none!important}.shell{box-shadow:none;border:none}}
+  @media (max-width:520px){
+    .prism-word{font-size:2.1rem;}
+    .rail-label{display:none;}
+    .likert{font-size:.72rem;}
+  }
+  @media print{
+    .nav-footer, .rail-outer, .admin-link, .toast{display:none !important;}
+  }
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div class="toast" id="toast"></div>
+
+<header class="letterhead">
+  <div class="letterhead-inner">
+    <div class="crest">KNHS</div>
+    <div class="eyebrow">Department of Education · Division of Iligan City</div>
+    <p class="school-name">Kiwalan National High School</p>
+    <p class="division">School Records &amp; Communication Needs Analysis</p>
+    <p class="prism-word">PRISM</p>
+    <p class="prism-tag">Portal for Records, Information, and School Management</p>
+    <p class="qtitle">Teacher Needs Analysis Questionnaire</p>
+    <p class="qmeta">Estimated completion time: 8–10 minutes</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="purpose" id="purposeCard">
+    <strong>Purpose of this questionnaire.</strong>
+    This questionnaire is part of a needs analysis for PRISM, a proposed web-based school management system for Kiwalan National High School. Your day-to-day experience recording attendance, computing grades, distributing learning materials, and communicating with students and parents is essential to designing a system that genuinely supports your work.
+    <br><br>
+    Responses are used solely for research purposes and treated with confidentiality in line with the Data Privacy Act of 2012 (RA 10173). Participation is voluntary — you may skip any item you prefer not to answer.
+  </div>
+
+  <div class="rail-outer" id="railOuter">
+    <div class="rail" id="rail"></div>
+  </div>
+
+  <form id="prismForm" novalidate>
+    <!-- PART I -->
+    <section class="step" data-step="0" role="group" aria-label="Part I: Respondent Profile">
+      <div class="part-head">
+        <div class="part-eyebrow">Part I</div>
+        <h2 class="part-title">Respondent Profile</h2>
+        <p class="part-sub">Please provide the following information. Your name is optional.</p>
+      </div>
+      <div class="card">
+        <div class="field">
+          <label class="q-label" for="f-name">Name <span style="font-weight:400;color:var(--ink-soft)">(optional)</span></label>
+          <input type="text" id="f-name" name="name" placeholder="Juan Dela Cruz" autocomplete="name">
+        </div>
+        <div class="field">
+          <label class="q-label" for="f-gradeSubject">Grade level(s) / subject area(s) taught</label>
+          <input type="text" id="f-gradeSubject" name="gradeSubject" placeholder="e.g., Grade 9 – Mathematics">
+        </div>
+        <div class="field">
+          <label class="q-label">Years of teaching experience at KNHS</label>
+          <div class="options" role="radiogroup" aria-label="Years of teaching experience">
+            <label class="opt"><input type="radio" name="yearsExperience" value="Less than 1 year">Less than 1 year</label>
+            <label class="opt"><input type="radio" name="yearsExperience" value="1–3 years">1–3 years</label>
+            <label class="opt"><input type="radio" name="yearsExperience" value="4–7 years">4–7 years</label>
+            <label class="opt"><input type="radio" name="yearsExperience" value="8 years or more">8 years or more</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="q-label">Comfort level using computers, smartphones, or web-based applications</label>
+          <div class="options" role="radiogroup" aria-label="Comfort level with technology">
+            <label class="opt"><input type="radio" name="comfortLevel" value="Not comfortable">Not comfortable</label>
+            <label class="opt"><input type="radio" name="comfortLevel" value="Slightly comfortable">Slightly comfortable</label>
+            <label class="opt"><input type="radio" name="comfortLevel" value="Comfortable">Comfortable</label>
+            <label class="opt"><input type="radio" name="comfortLevel" value="Very comfortable">Very comfortable</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="q-label">Device(s) most often used for school-related work <span style="font-weight:400;color:var(--ink-soft)">(check all that apply)</span></label>
+          <div class="options" role="group" aria-label="Devices used for school work">
+            <label class="opt"><input type="checkbox" name="devices" value="Desktop / laptop computer">Desktop / laptop computer</label>
+            <label class="opt"><input type="checkbox" name="devices" value="Smartphone">Smartphone</label>
+            <label class="opt"><input type="checkbox" name="devices" value="Tablet">Tablet</label>
+            <label class="opt other"><input type="checkbox" name="devices" value="Other" data-other-toggle>Other
+              <input type="text" class="other-input" name="devicesOther" placeholder="Please specify" aria-label="Specify other device">
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PART II -->
+    <section class="step" data-step="1" role="group" aria-label="Part II: Current Practices">
+      <div class="part-head">
+        <div class="part-eyebrow">Part II</div>
+        <h2 class="part-title">Current Practices</h2>
+        <p class="part-sub">These items ask about how you currently handle records and communication tasks.</p>
+      </div>
+      <div class="card">
+        <div class="field">
+          <label class="q-label"><span class="q-num">1.</span>How do you currently record student attendance?</label>
+          <div class="options" role="radiogroup" aria-label="Attendance recording method">
+            <label class="opt"><input type="radio" name="attendanceMethod" value="Paper-based attendance sheet / logbook">Paper-based attendance sheet / logbook</label>
+            <label class="opt"><input type="radio" name="attendanceMethod" value="Spreadsheet (e.g., Excel, Google Sheets)">Spreadsheet (e.g., Excel, Google Sheets)</label>
+            <label class="opt"><input type="radio" name="attendanceMethod" value="Mobile app or existing digital tool">Mobile app or existing digital tool</label>
+            <label class="opt other"><input type="radio" name="attendanceMethod" value="Other" data-other-toggle>Other
+              <input type="text" class="other-input" name="attendanceMethodOther" placeholder="Please specify" aria-label="Specify other attendance method">
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="q-label"><span class="q-num">2.</span>How do you currently compute and record student grades?</label>
+          <div class="options" role="radiogroup" aria-label="Grading method">
+            <label class="opt"><input type="radio" name="gradingMethod" value="Manually, using the DepEd transmutation table">Manually, using the DepEd transmutation table</label>
+            <label class="opt"><input type="radio" name="gradingMethod" value="Spreadsheet with built-in formulas">Spreadsheet with built-in formulas</label>
+            <label class="opt"><input type="radio" name="gradingMethod" value="Existing digital grading tool/system">Existing digital grading tool/system</label>
+            <label class="opt other"><input type="radio" name="gradingMethod" value="Other" data-other-toggle>Other
+              <input type="text" class="other-input" name="gradingMethodOther" placeholder="Please specify" aria-label="Specify other grading method">
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="q-label"><span class="q-num">3.</span>How do you currently share learning materials (DLPs, DLLs, modules, activity sheets) with students?</label>
+          <div class="options" role="radiogroup" aria-label="Materials sharing method">
+            <label class="opt"><input type="radio" name="materialsMethod" value="Printed handouts">Printed handouts</label>
+            <label class="opt"><input type="radio" name="materialsMethod" value="Messenger / group chat">Messenger / group chat</label>
+            <label class="opt"><input type="radio" name="materialsMethod" value="Email or cloud storage link (e.g., Google Drive)">Email or cloud storage link (e.g., Google Drive)</label>
+            <label class="opt other"><input type="radio" name="materialsMethod" value="Other" data-other-toggle>Other
+              <input type="text" class="other-input" name="materialsMethodOther" placeholder="Please specify" aria-label="Specify other materials method">
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="q-label"><span class="q-num">4.</span>How do you currently communicate announcements or updates to students and parents?</label>
+          <div class="options" role="radiogroup" aria-label="Communication method">
+            <label class="opt"><input type="radio" name="commsMethod" value="Verbal / in-person announcement">Verbal / in-person announcement</label>
+            <label class="opt"><input type="radio" name="commsMethod" value="Group chat (e.g., Messenger, GC)">Group chat (e.g., Messenger, GC)</label>
+            <label class="opt"><input type="radio" name="commsMethod" value="School or class Facebook page">School or class Facebook page</label>
+            <label class="opt other"><input type="radio" name="commsMethod" value="Other" data-other-toggle>Other
+              <input type="text" class="other-input" name="commsMethodOther" placeholder="Please specify" aria-label="Specify other communication method">
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PART III -->
+    <section class="step" data-step="2" role="group" aria-label="Part III: Challenges Encountered">
+      <div class="part-head">
+        <div class="part-eyebrow">Part III</div>
+        <h2 class="part-title">Challenges Encountered</h2>
+        <p class="part-sub">Indicate how much you agree with each statement. 1 = Strongly Disagree, 5 = Strongly Agree.</p>
+      </div>
+      <div class="card" style="overflow-x:auto;">
+        <table class="likert" id="challengesTable">
+          <thead><tr><th scope="col">Statement</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PART IV -->
+    <section class="step" data-step="3" role="group" aria-label="Part IV: Feature Priorities">
+      <div class="part-head">
+        <div class="part-eyebrow">Part IV</div>
+        <h2 class="part-title">Needs &amp; Feature Priorities for PRISM</h2>
+        <p class="part-sub">For each proposed feature, rate its importance to your work. 1 = Not Important, 5 = Very Important.</p>
+      </div>
+      <div class="card" style="overflow-x:auto;">
+        <table class="likert" id="featuresTable">
+          <thead><tr><th scope="col">Feature</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="field" style="margin-bottom:0;">
+          <label class="q-label">Which THREE features would benefit you the most?</label>
+          <span class="counter" id="top3Counter" aria-live="polite">0 / 3 selected</span>
+          <div class="options" id="top3Options" role="group" aria-label="Top 3 feature selections"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PART V -->
+    <section class="step" data-step="4" role="group" aria-label="Part V: Additional Feedback">
+      <div class="part-head">
+        <div class="part-eyebrow">Part V</div>
+        <h2 class="part-title">Additional Feedback</h2>
+        <p class="part-sub">A few open questions in your own words.</p>
+      </div>
+      <div class="card">
+        <div class="field">
+          <label class="q-label" for="f-biggestChallenge"><span class="q-num">1.</span>What is the single biggest challenge you currently face in managing records, grades, or communication with students and parents?</label>
+          <textarea id="f-biggestChallenge" name="biggestChallenge"></textarea>
+        </div>
+        <div class="field">
+          <label class="q-label" for="f-missingFeatures"><span class="q-num">2.</span>Are there any features not listed above that you would like to see in PRISM?</label>
+          <textarea id="f-missingFeatures" name="missingFeatures"></textarea>
+        </div>
+        <div class="field">
+          <label class="q-label" for="f-concerns"><span class="q-num">3.</span>Do you have any concerns about adopting a web-based system for your teaching-related tasks (e.g., training, internet access, time)?</label>
+          <textarea id="f-concerns" name="concerns"></textarea>
+        </div>
+      </div>
+    </section>
+  </form>
+
+  <!-- Thank you -->
+  <div class="thanks" id="thanksView" style="display:none;">
+    <div class="crest" aria-hidden="true">&#10003;</div>
+    <h2 class="serif">Thank you for your time and valuable input.</h2>
+    <p>Your responses will directly inform the design and development of PRISM.</p>
+    <div class="thanks-actions">
+      <button class="btn btn-primary" id="downloadBtn">Download my responses</button>
+      <button class="btn btn-ghost" id="anotherBtn">Submit another response</button>
+    </div>
+    <a href="admin.html" class="admin-link" id="toAdminBtn">View collected results (admin)</a>
+  </div>
+</main>
+
+<div class="nav-footer" id="navFooter">
+  <div class="nav-inner">
+    <button type="button" class="btn btn-ghost" id="backBtn">Back</button>
+    <span class="step-count" id="stepCount" aria-live="polite">Part I of V</span>
+    <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
 <script>
 (function(){
-"use strict";
-
-var PARTS=[
-  {id:"profile",kind:"profile",num:"I",title:"Part I: Respondent Profile",note:"Provide basic information about yourself. All fields except grade/subject and years of experience are optional."},
-  {id:"practices",kind:"practices",num:"II",title:"Part II: Current Practices",note:"Indicate how you currently handle the following school-related tasks."},
-  {id:"challenges",kind:"likert",num:"III",title:"Part III: Challenges Encountered",note:"Rate the following challenges you face in your current work."},
-  {id:"features",kind:"features",num:"IV",title:"Part IV: Feature Priorities",note:"Rate the importance of each proposed feature and pick your top 3."},
-  {id:"feedback",kind:"feedback",num:"V",title:"Part V: Additional Feedback",note:"Share any additional thoughts about your needs and concerns."}
-];
-
-var CHALLENGES=[
-  "Manual attendance tracking is time-consuming and prone to errors.",
-  "Manual grade computation and recording takes significant time.",
-  "Paper-based record keeping makes retrieval slow and difficult.",
-  "School announcements often do not reach all intended recipients.",
-  "Student and teacher information is scattered across multiple tools.",
-  "No system tracks whether announcements or materials have been read.",
-  "Preparing report cards is a lengthy and repetitive process.",
-  "Parent communication is inconsistent and lacks a centralized channel."
-];
-
-var FEATURES=[
-  "Digital attendance tracking with summary reports",
-  "Automated grade computation and recording",
-  "Report card generation from stored grades",
-  "Centralized learning materials repository",
-  "Online assignment submission and checking",
-  "Internal messaging system for teachers and students",
-  "Categorized announcement posting system",
-  "Automatic notifications for updates and deadlines",
-  "Teacher dashboard with class summaries and analytics",
-  "Audit logging for accountability and tracking"
-];
-
-var EXP_OPTIONS=["1-3 years","4-6 years","7-10 years","11-15 years","16+ years"];
-var COMFORT_OPTIONS=["Not comfortable","Slightly comfortable","Comfortable","Very comfortable"];
-var DEVICE_OPTIONS=["Desktop/Laptop","Tablet","Smartphone","Projector/Smart TV"];
-
-var state={step:0,profile:{name:"",grade_subject:"",years:"",comfort:"",devices:[]},practices:{},challenges:{},features:{},top3:[],biggest:"",missing:"",concerns:"",submitting:false};
-
-function genId(){if(window.crypto&&window.crypto.randomUUID)return window.crypto.randomUUID();return"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(c){var r=Math.random()*16|0;return(c==="x"?r:(r&0x3|0x8)).toString(16)})}
-function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
-function $(s){return document.querySelector(s)}
-function $$(s){return document.querySelectorAll(s)}
-
-function toast(msg){var el=document.getElementById("toast");if(!el)return;el.textContent=msg;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show")},3000)}
-
-function pct(){var total=PARTS.length;return Math.round(((state.step+1)/total)*100)}
-
-function renderHeader(){
-  return '<div class="crest"><div class="crest-img">KNHS</div><div class="crest-text"><div class="deped">Department of Education</div><div class="school">Division of Iligan City</div><div class="school">Kiwalan National High School</div></div></div>'
-    +'<p class="eyebrow">Needs Assessment Tool</p>'
-    +'<h1 class="title serif">PRISM — Teacher Needs Analysis Questionnaire</h1>'
-    +'<p class="subtitle">Identifying ICT Integration Needs for School Management</p>';
-}
-
-function renderProgress(){
-  var p=pct();
-  return '<div class="progress-wrap"><div class="progress-label"><span>Part '+(state.step+1)+' of '+PARTS.length+' — '+esc(PARTS[state.step].num+'. '+PARTS[state.step].title.split(": ")[1])+'</span><span class="pct">'+p+'%</span></div><div class="progress-track"><div class="progress-fill" style="width:'+p+'%"></div></div></div>';
-}
-
-function renderProfile(){
-  var h='<div class="content" id="content">';
-  h+='<h2 class="section-title serif">Part I: Respondent Profile</h2>';
-  h+='<p class="section-note">Provide basic information about yourself. All fields except grade/subject and years of experience are optional.</p>';
-  h+='<div class="field"><label class="flabel">Name <span style="font-weight:400;color:var(--muted)">(optional)</span></label><input type="text" id="f-name" value="'+esc(state.profile.name)+'" placeholder="Your name" /></div>';
-  h+='<div class="field"><label class="flabel">Grade Level & Subject <span class="req">*</span></label><input type="text" id="f-grade" value="'+esc(state.profile.grade_subject)+'" placeholder="e.g. Grade 7 — Mathematics" /></div>';
-  h+='<div class="field"><label class="flabel">Years of Teaching Experience <span class="req">*</span></label><div class="radio-grid" id="exp-grid">';
-  EXP_OPTIONS.forEach(function(o){h+='<button type="button" class="radio-btn'+(state.profile.years===o?" selected":"")+'" data-field="years" data-val="'+esc(o)+'">'+esc(o)+'</button>'});
-  h+='</div></div>';
-  h+='<div class="field"><label class="flabel">Comfort Level with ICT <span class="req">*</span></label><div class="radio-grid" id="comfort-grid">';
-  COMFORT_OPTIONS.forEach(function(o){h+='<button type="button" class="radio-btn'+(state.profile.comfort===o?" selected":"")+'" data-field="comfort" data-val="'+esc(o)+'">'+esc(o)+'</button>'});
-  h+='</div></div>';
-  h+='<div class="field"><label class="flabel">Available Devices <span style="font-weight:400;color:var(--muted)">(optional)</span></label><div class="check-grid" id="device-grid">';
-  DEVICE_OPTIONS.forEach(function(o){h+='<button type="button" class="pill'+(state.profile.devices.indexOf(o)!==-1?" selected":"")+'" data-val="'+esc(o)+'">'+esc(o)+'</button>'});
-  h+='</div></div>';
-  h+='</div>';
-  return h;
-}
-
-function renderPractices(){
-  var methods=["attendance","grading","materials","comms"];
-  var labels=["Attendance","Grading/Recording","Learning Materials","Communication"];
-  var opts=[
-    ["Paper-based","Spreadsheet (Excel/Google Sheets)","Existing software/app","Other"],
-    ["Manual computation","Spreadsheet formulas","Existing software/app","Other"],
-    ["Printed handouts","USB/Google Drive","LMS (Google Classroom etc.)","Other"],
-    ["Face-to-face","Text messages/SMS","Social media groups","Other"]
+  var PARTS = ["Profile","Practices","Challenges","Priorities","Feedback"];
+  var CHALLENGES = [
+    "Recording attendance manually is time-consuming.",
+    "Computing grades manually is prone to errors.",
+    "Storing and retrieving paper-based student records is difficult.",
+    "Important announcements often fail to reach all students or parents.",
+    "Information about students is scattered across different platforms or tools.",
+    "I lack a reliable way to track whether students or parents have seen an announcement or assignment.",
+    "Preparing report cards takes a significant amount of time each grading period.",
+    "I have difficulty communicating directly and efficiently with parents about a student's progress."
   ];
-  var h='<div class="content" id="content">';
-  h+='<h2 class="section-title serif">Part II: Current Practices</h2>';
-  h+='<p class="section-note">Indicate how you currently handle the following school-related tasks.</p>';
-  for(var i=0;i<methods.length;i++){
-    h+='<div class="field"><label class="flabel">'+(i+1)+'. '+labels[i]+' <span class="req">*</span></label><div class="radio-grid" data-practice="'+methods[i]+'">';
-    opts[i].forEach(function(o){h+='<button type="button" class="radio-btn'+(state.practices[methods[i]]===o?" selected":"")+'" data-practice="'+methods[i]+'" data-val="'+esc(o)+'">'+esc(o)+'</button>'});
-    h+='</div></div>';
-  }
-  h+='</div>';
-  return h;
-}
+  var FEATURES = [
+    "Digital attendance tracking with historical records",
+    "Automated grade computation using the DepEd transmutation table",
+    "Automated, DepEd-compliant report card generation",
+    "A learning materials repository for uploading DLPs, DLLs, modules, and activity sheets",
+    "Digital assignment posting and submission tracking",
+    "A messaging system to communicate with students and parents",
+    "A categorized announcement system (general, academic, emergency, event, holiday)",
+    "Automatic notifications for assignments, grades, and attendance-related updates",
+    "A dashboard summarizing my classes, attendance status, and recent announcements",
+    "Audit logging that records and time-stamps important actions for accountability"
+  ];
+  var FEATURE_SHORT = [
+    "Digital attendance tracking","Automated grade computation","Automated report card generation",
+    "Learning materials repository","Digital assignment submission","Messaging with students/parents",
+    "Categorized announcements","Automatic notifications","Teacher dashboard","Audit logging"
+  ];
 
-function renderLikert(items,stateKey){
-  var h='<div class="content" id="content">';
-  var part=PARTS[state.step];
-  h+='<h2 class="section-title serif">'+esc(part.title)+'</h2>';
-  h+='<p class="section-note">'+esc(part.note)+'</p>';
-  h+='<table class="likert-table"><thead><tr><th>Statement</th><th>1<br><span style="font-weight:400;text-transform:none">Strongly Disagree</span></th><th>2<br><span style="font-weight:400;text-transform:none">Disagree</span></th><th>3<br><span style="font-weight:400;text-transform:none">Agree</span></th><th>4<br><span style="font-weight:400;text-transform:none">Strongly Agree</span></th></tr></thead><tbody>';
-  for(var i=0;i<items.length;i++){
-    var val=state[stateKey][i]||"";
-    h+='<tr><td><span class="row-num">'+(i+1)+'</span>'+esc(items[i])+'</td>';
-    for(var v=1;v<=4;v++){
-      h+='<td><input type="radio" name="'+stateKey+'-'+i+'" value="'+v+'"'+(val==v?" checked":"")+' data-group="'+stateKey+'" data-idx="'+i+'" /></td>';
+  var form = document.getElementById('prismForm');
+  var rail = document.getElementById('rail');
+  var backBtn = document.getElementById('backBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var stepCount = document.getElementById('stepCount');
+  var navFooter = document.getElementById('navFooter');
+  var thanksView = document.getElementById('thanksView');
+  var purposeCard = document.getElementById('purposeCard');
+  var toastEl = document.getElementById('toast');
+  var current = 0;
+  var submitting = false;
+  var lastData = null;
+
+  function showToast(msg, ms){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    setTimeout(function(){ toastEl.classList.remove('show'); }, ms||3000);
+  }
+
+  function toRoman(n){return ["I","II","III","IV","V"][n-1]||n;}
+
+  PARTS.forEach(function(label,i){
+    var btn = document.createElement('button');
+    btn.type='button'; btn.className='rail-step'; btn.dataset.i=i;
+    btn.setAttribute('aria-label', 'Go to Part ' + toRoman(i+1) + ': ' + label);
+    btn.innerHTML = '<span class="rail-dot">'+toRoman(i+1)+'</span><span class="rail-label">'+label+'</span>';
+    btn.addEventListener('click',function(){goTo(i);});
+    rail.appendChild(btn);
+  });
+
+  function buildLikert(tbodyId, items, namePrefix){
+    var tbody = document.querySelector('#'+tbodyId+' tbody');
+    items.forEach(function(text, idx){
+      var tr = document.createElement('tr');
+      var cells = '<td>'+text+'</td>';
+      for(var v=1; v<=5; v++){
+        cells += '<td><input type="radio" name="'+namePrefix+'_'+idx+'" value="'+v+'" aria-label="'+text+' – rating '+v+'"></td>';
+      }
+      tr.innerHTML = cells;
+      tbody.appendChild(tr);
+    });
+  }
+  buildLikert('challengesTable', CHALLENGES, 'challenge');
+  buildLikert('featuresTable', FEATURES, 'feature');
+
+  var top3Wrap = document.getElementById('top3Options');
+  FEATURE_SHORT.forEach(function(label){
+    var opt = document.createElement('label');
+    opt.className='opt';
+    opt.innerHTML = '<input type="checkbox" name="top3" value="'+label+'">'+label;
+    top3Wrap.appendChild(opt);
+  });
+  var top3Counter = document.getElementById('top3Counter');
+  top3Wrap.addEventListener('change', function(){
+    var checked = top3Wrap.querySelectorAll('input:checked');
+    top3Counter.textContent = checked.length + ' / 3 selected';
+    top3Counter.classList.toggle('full', checked.length>=3);
+    top3Wrap.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+      cb.disabled = checked.length>=3 && !cb.checked;
+      cb.closest('.opt').classList.toggle('checked', cb.checked);
+    });
+  });
+
+  form.addEventListener('change', function(e){
+    var t = e.target;
+    if(t.matches('input[type=radio], input[type=checkbox]')){
+      var group = t.closest('.options');
+      if(group){
+        group.querySelectorAll('.opt').forEach(function(o){
+          var input = o.querySelector('input');
+          o.classList.toggle('checked', input.checked);
+        });
+      }
     }
-    h+='</tr>';
+  });
+
+  var steps = Array.from(document.querySelectorAll('.step'));
+  function render(){
+    steps.forEach(function(s){ s.classList.toggle('active', +s.dataset.step===current); });
+    rail.querySelectorAll('.rail-step').forEach(function(b,i){
+      b.classList.toggle('active', i===current);
+      b.classList.toggle('done', i<current);
+      b.setAttribute('aria-current', i===current ? 'step' : 'false');
+    });
+    stepCount.textContent = 'Part '+toRoman(current+1)+' of V';
+    backBtn.disabled = current===0;
+    nextBtn.textContent = current===steps.length-1 ? 'Submit' : 'Next';
+    purposeCard.style.display = current===0 ? 'block' : 'none';
+    window.scrollTo({top:0, behavior:'smooth'});
   }
-  h+='</tbody></table>';
-  h+='</div>';
-  return h;
-}
+  function goTo(i){ current = Math.max(0, Math.min(steps.length-1, i)); render(); }
 
-function renderFeatures(){
-  var h=renderLikert(FEATURES,"features");
-  h=h.replace('</div>','');
-  var count=state.top3.length;
-  h+='<div class="top3-wrap"><div class="top3-title">Select Your Top 3 Most Desired Features</div>';
-  h+='<div class="top3-counter">Selected: <b>'+count+'</b> of 3</div>';
-  h+='<div class="banner error'+(state._featuresTouched&&count!==3?" show":"")+'" role="alert">Please select exactly 3 features.</div>';
-  for(var i=0;i<FEATURES.length;i++){
-    var checked=state.top3.indexOf(i)!==-1;
-    h+='<div class="check-row"><input type="checkbox" id="top3-'+i+'"'+(checked?" checked":"")+(count>=3&&!checked?" disabled":"")+' /><label for="top3-'+i+'">'+(i+1)+'. '+esc(FEATURES[i])+'</label></div>';
+  backBtn.addEventListener('click', function(){ goTo(current-1); });
+  nextBtn.addEventListener('click', function(){
+    if(current === steps.length-1){ submitForm(); }
+    else { goTo(current+1); }
+  });
+
+  render();
+
+  function collect(){
+    var data = {};
+    new FormData(form).forEach(function(val,key){
+      if(data[key] !== undefined){
+        data[key] = Array.isArray(data[key]) ? data[key].concat(val) : [data[key], val];
+      } else {
+        data[key] = val;
+      }
+    });
+    return data;
   }
-  h+='</div></div>';
-  return h;
-}
 
-function renderFeedback(){
-  var h='<div class="content" id="content">';
-  h+='<h2 class="section-title serif">Part V: Additional Feedback</h2>';
-  h+='<p class="section-note">Share any additional thoughts about your needs and concerns.</p>';
-  h+='<div class="field"><label class="flabel">What is your biggest challenge in school management today?</label><textarea id="f-biggest" placeholder="Describe your biggest challenge...">'+esc(state.biggest)+'</textarea></div>';
-  h+='<div class="field"><label class="flabel">What features do you wish existed but currently don\'t?</label><textarea id="f-missing" placeholder="Describe missing features...">'+esc(state.missing)+'</textarea></div>';
-  h+='<div class="field"><label class="flabel">Any concerns or additional remarks?</label><textarea id="f-concerns" placeholder="Share your concerns...">'+esc(state.concerns)+'</textarea></div>';
-  h+='</div>';
-  return h;
-}
-
-function renderDone(){
-  return '<div class="done-wrap">'
-    +'<div class="seal"><span class="sw">SUBMITTED</span><span class="ss">PRISM NEEDS ANALYSIS</span></div>'
-    +'<h2 class="serif">Thank you for your response</h2>'
-    +'<p>Your needs analysis has been recorded. This will help shape the PRISM school management system.</p>'
-    +'<div class="ref-id">Reference: '+esc(state._responseId||"")+'</div>'
-    +'<p style="font-size:12px;color:var(--muted)">Save your reference ID if you wish to withdraw your response later.</p>'
-    +'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn btn-ghost" id="restart-btn">Submit Another Response</button>'
-    +'<a href="admin.html" class="btn btn-ghost" style="text-decoration:none">View Dashboard</a></div>'
-    +'</div>';
-}
-
-function renderFooter(){
-  var step=PARTS[state.step];
-  var isFirst=state.step===0;
-  var isLast=state.step===PARTS.length-1;
-  var nextLabel=isLast?(state.submitting?"Submitting...":"Submit"):("Next →");
-  return '<div class="footer-nav">'
-    +(isFirst?'<span></span>':'<button type="button" class="btn btn-ghost" id="back-btn">← Back</button>')
-    +'<div class="spacer"></div>'
-    +'<button type="button" class="btn btn-primary" id="next-btn"'+(state.submitting?" disabled":"")+'>'+nextLabel+'</button>'
-    +'</div>';
-}
-
-function render(){
-  var app=document.getElementById("app");
-  var step=PARTS[state.step];
-  var html='<div class="shell">';
-  html+='<div class="sticky-rail">'+renderHeader()+'</div>';
-  html+=renderProgress();
-  if(step.kind==="profile") html+=renderProfile();
-  else if(step.kind==="practices") html+=renderPractices();
-  else if(step.kind==="likert") html+=renderLikert(step.id==="challenges"?CHALLENGES:FEATURES,step.id==="challenges"?"challenges":"features");
-  else if(step.kind==="features") html+=renderFeatures();
-  else if(step.kind==="feedback") html+=renderFooter()?renderFeedback():renderFeedback();
-  html+='</div>';
-  if(step.kind!=="done") html+=renderFooter();
-  app.innerHTML=html;
-  attachHandlers();
-}
-
-function attachHandlers(){
-  var step=PARTS[state.step];
-
-  var backBtn=document.getElementById("back-btn");
-  if(backBtn) backBtn.addEventListener("click",function(){state.step=Math.max(0,state.step-1);render();window.scrollTo(0,0)});
-
-  var nextBtn=document.getElementById("next-btn");
-  if(nextBtn) nextBtn.addEventListener("click",function(){handleNext()});
-
-  var restartBtn=document.getElementById("restart-btn");
-  if(restartBtn) restartBtn.addEventListener("click",function(){state={step:0,profile:{name:"",grade_subject:"",years:"",comfort:"",devices:[]},practices:{},challenges:{},features:{},top3:[],biggest:"",missing:"",concerns:"",submitting:false};render();window.scrollTo(0,0)});
-
-  $$(".radio-btn[data-field]").forEach(function(b){
-    b.addEventListener("click",function(){
-      var f=b.getAttribute("data-field");
-      var v=b.getAttribute("data-val");
-      state.profile[f]=state.profile[f]===v?"":v;
-      render();
+  function genId() {
+    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0;
+      return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
     });
-  });
+  }
 
-  $$(".pill[data-val]").forEach(function(b){
-    b.addEventListener("click",function(){
-      var v=b.getAttribute("data-val");
-      var idx=state.profile.devices.indexOf(v);
-      if(idx===-1) state.profile.devices.push(v); else state.profile.devices.splice(idx,1);
-      render();
+  async function submitForm(){
+    if(submitting) return;
+    submitting = true;
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Submitting…';
+
+    var data = collect();
+    var id = genId();
+
+    var payload = {
+      id: id,
+      submitted_at: new Date().toISOString(),
+      respondent_name: data.name || null,
+      grade_subject: data.gradeSubject || null,
+      years_experience: data.yearsExperience || null,
+      comfort_level: data.comfortLevel || null,
+      devices: Array.isArray(data.devices) ? data.devices : (data.devices ? [data.devices] : []),
+      attendance_method: data.attendanceMethod || null,
+      grading_method: data.gradingMethod || null,
+      materials_method: data.materialsMethod || null,
+      comms_method: data.commsMethod || null,
+      challenge_answers: {},
+      feature_answers: {},
+      top3_picks: Array.isArray(data.top3) ? data.top3 : (data.top3 ? [data.top3] : []),
+      biggest_challenge: data.biggestChallenge || null,
+      missing_features: data.missingFeatures || null,
+      concerns: data.concerns || null
+    };
+
+    CHALLENGES.forEach(function(_, i){
+      var v = data['challenge_'+i];
+      if(v) payload.challenge_answers['challenge_'+i] = Number(v);
     });
-  });
-
-  $$("input[type=radio][data-group]").forEach(function(r){
-    r.addEventListener("change",function(){
-      var g=r.getAttribute("data-group");
-      var i=+r.getAttribute("data-idx");
-      state[g][i]=+r.value;
+    FEATURES.forEach(function(_, i){
+      var v = data['feature_'+i];
+      if(v) payload.feature_answers['feature_'+i] = Number(v);
     });
-  });
 
-  $$("button.radio-btn[data-practice]").forEach(function(b){
-    b.addEventListener("click",function(){
-      var p=b.getAttribute("data-practice");
-      var v=b.getAttribute("data-val");
-      state.practices[p]=state.practices[p]===v?"":v;
-      render();
-    });
-  });
-
-  if(step.kind==="features"){
-    for(var i=0;i<FEATURES.length;i++){
-      var cb=document.getElementById("top3-"+i);
-      if(cb) cb.addEventListener("change",(function(idx){
-        return function(e){
-          if(e.target.checked){if(state.top3.length<3)state.top3.push(idx)}
-          else{var p=state.top3.indexOf(idx);if(p!==-1)state.top3.splice(p,1)}
-          render();
-        };
-      })(i));
+    try{
+      var { error } = await supabaseClient
+        .from('needs_analysis_responses')
+        .insert({
+          id: payload.id,
+          submitted_at: payload.submitted_at,
+          respondent_name: payload.respondent_name,
+          grade_subject: payload.grade_subject,
+          years_experience: payload.years_experience,
+          comfort_level: payload.comfort_level,
+          devices: payload.devices,
+          attendance_method: payload.attendance_method,
+          grading_method: payload.grading_method,
+          materials_method: payload.materials_method,
+          comms_method: payload.comms_method,
+          challenge_answers: payload.challenge_answers,
+          feature_answers: payload.feature_answers,
+          top3_picks: payload.top3_picks,
+          biggest_challenge: payload.biggest_challenge,
+          missing_features: payload.missing_features,
+          concerns: payload.concerns
+        });
+      if(error) throw error;
+    }catch(err){
+      console.error('Submit error:', err);
+      showToast('Submission failed — please try again. (' + (err.message || 'Unknown error') + ')', 5000);
+      submitting = false;
+      nextBtn.disabled = false;
+      nextBtn.textContent = 'Submit';
+      return;
     }
+
+    lastData = data;
+    form.style.display='none';
+    purposeCard.style.display='none';
+    document.querySelector('.rail-outer').style.display='none';
+    navFooter.style.display='none';
+    thanksView.style.display='block';
+    submitting = false;
   }
 
-  var nameEl=document.getElementById("f-name");
-  if(nameEl) nameEl.addEventListener("input",function(e){state.profile.name=e.target.value});
-  var gradeEl=document.getElementById("f-grade");
-  if(gradeEl) gradeEl.addEventListener("input",function(e){state.profile.grade_subject=e.target.value});
-  var biggestEl=document.getElementById("f-biggest");
-  if(biggestEl) biggestEl.addEventListener("input",function(e){state.biggest=e.target.value});
-  var missingEl=document.getElementById("f-missing");
-  if(missingEl) missingEl.addEventListener("input",function(e){state.missing=e.target.value});
-  var concernsEl=document.getElementById("f-concerns");
-  if(concernsEl) concernsEl.addEventListener("input",function(e){state.concerns=e.target.value});
-}
+  function summaryText(data){
+    var lines = [];
+    lines.push('PRISM — Teacher Needs Analysis Questionnaire');
+    lines.push('Kiwalan National High School · '+new Date().toLocaleString());
+    lines.push('');
+    lines.push('PART I — Respondent Profile');
+    lines.push('Name: '+(data.name||'(not provided)'));
+    lines.push('Grade/Subject: '+(data.gradeSubject||''));
+    lines.push('Years at KNHS: '+(data.yearsExperience||''));
+    lines.push('Comfort level: '+(data.comfortLevel||''));
+    var devices = data.devices ? (Array.isArray(data.devices)?data.devices:[data.devices]) : [];
+    lines.push('Devices used: '+devices.join(', ')+(data.devicesOther?(' ('+data.devicesOther+')'):''));
+    lines.push('');
+    lines.push('PART II — Current Practices');
+    lines.push('Attendance: '+(data.attendanceMethod||'')+(data.attendanceMethodOther?(' ('+data.attendanceMethodOther+')'):''));
+    lines.push('Grading: '+(data.gradingMethod||'')+(data.gradingMethodOther?(' ('+data.gradingMethodOther+')'):''));
+    lines.push('Materials sharing: '+(data.materialsMethod||'')+(data.materialsMethodOther?(' ('+data.materialsMethodOther+')'):''));
+    lines.push('Communication: '+(data.commsMethod||'')+(data.commsMethodOther?(' ('+data.commsMethodOther+')'):''));
+    lines.push('');
+    lines.push('PART III — Challenges (1=Strongly Disagree .. 5=Strongly Agree)');
+    CHALLENGES.forEach(function(c,i){ lines.push('- '+c+' → '+(data['challenge_'+i]||'(skipped)')); });
+    lines.push('');
+    lines.push('PART IV — Feature Priorities (1=Not Important .. 5=Very Important)');
+    FEATURES.forEach(function(f,i){ lines.push('- '+f+' → '+(data['feature_'+i]||'(skipped)')); });
+    var top3 = data.top3 ? (Array.isArray(data.top3)?data.top3:[data.top3]) : [];
+    lines.push('Top 3 picks: '+top3.join(', '));
+    lines.push('');
+    lines.push('PART V — Additional Feedback');
+    lines.push('Biggest challenge: '+(data.biggestChallenge||''));
+    lines.push('Missing features: '+(data.missingFeatures||''));
+    lines.push('Concerns: '+(data.concerns||''));
+    return lines.join('\n');
+  }
 
-function validate(){
-  var step=PARTS[state.step];
-  var errors=[];
-  if(step.kind==="profile"){
-    if(!state.profile.grade_subject.trim()) errors.push("Grade Level & Subject is required.");
-    if(!state.profile.years) errors.push("Years of experience is required.");
-    if(!state.profile.comfort) errors.push("Comfort level is required.");
-  }
-  if(step.kind==="practices"){
-    ["attendance","grading","materials","comms"].forEach(function(k){
-      if(!state.practices[k]) errors.push("Please select a method for all practice items.");
-    });
-  }
-  if(step.kind==="likert"){
-    var items=step.id==="challenges"?CHALLENGES:FEATURES;
-    var st=step.id==="challenges"?state.challenges:state.features;
-    for(var i=0;i<items.length;i++){if(!st[i]) errors.push("Please answer statement "+(i+1)+".")}
-  }
-  if(step.kind==="features"){
-    for(var i=0;i<FEATURES.length;i++){if(!state.features[i]) errors.push("Please rate feature "+(i+1)+".")}
-    if(state.top3.length!==3) errors.push("Please select exactly 3 top features.");
-  }
-  return errors;
-}
+  document.getElementById('downloadBtn').addEventListener('click', function(){
+    if(!lastData) return;
+    var blob = new Blob([summaryText(lastData)], {type:'text/plain'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'PRISM_needs_analysis_'+Date.now()+'.txt';
+    a.click();
+  });
 
-function handleNext(){
-  var errors=validate();
-  if(errors.length){toast(errors[0]);return}
-  if(state.step===PARTS.length-1){submitResponse();return}
-  state.step++;
-  render();
-  window.scrollTo(0,0);
-}
-
-async function submitResponse(){
-  if(state.submitting) return;
-  if(!confirm("Submit your needs analysis? This action cannot be undone.")) return;
-  state.submitting=true;
-  render();
-  var id=genId();
-  var payload={
-    id:id,
-    submitted_at:new Date().toISOString(),
-    respondent_name:state.profile.name||null,
-    grade_subject:state.profile.grade_subject,
-    years_experience:state.profile.years,
-    comfort_level:state.profile.comfort,
-    devices:state.profile.devices,
-    attendance_method:state.practices.attendance||null,
-    grading_method:state.practices.grading||null,
-    materials_method:state.practices.materials||null,
-    comms_method:state.practices.comms||null,
-    challenge_answers:state.challenges,
-    feature_answers:state.features,
-    top3_picks:state.top3.map(function(i){return FEATURES[i]}),
-    biggest_challenge:state.biggest||null,
-    missing_features:state.missing||null,
-    concerns:state.concerns||null
-  };
-  try{
-    var result=await supabaseClient.from("needs_analysis_responses").insert(payload);
-    if(result.error) throw result.error;
-    state._responseId=id.slice(0,8).toUpperCase();
-    state.step=PARTS.length;
-    state.submitting=false;
+  document.getElementById('anotherBtn').addEventListener('click', function(){
+    form.reset();
+    form.querySelectorAll('.opt.checked').forEach(function(o){o.classList.remove('checked');});
+    top3Counter.textContent='0 / 3 selected';
+    top3Counter.classList.remove('full');
+    top3Wrap.querySelectorAll('input').forEach(function(cb){cb.disabled=false; cb.closest('.opt').classList.remove('checked');});
+    current = 0;
+    thanksView.style.display='none';
+    form.style.display='block';
+    document.querySelector('.rail-outer').style.display='block';
+    navFooter.style.display='block';
     render();
-    window.scrollTo(0,0);
-  }catch(err){
-    console.error("Submit error:",err);
-    state.submitting=false;
-    render();
-    toast("Submission failed: "+(err.message||"Unknown error")+". Please try again.");
-  }
-}
+  });
 
-window.addEventListener("beforeunload",function(e){
-  if(state.step>0&&state.step<PARTS.length){e.preventDefault();e.returnValue=""}
-});
-
-render();
+  window.addEventListener("beforeunload", function(e) {
+    if (current > 0 && current < steps.length - 1) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
 })();
 </script>
 </body>
