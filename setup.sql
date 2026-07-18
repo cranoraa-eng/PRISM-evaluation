@@ -113,3 +113,60 @@ create policy "Allow authenticated deletes"
   for delete
   to authenticated
   using (true);
+
+-- ============================================================
+-- STUDENT RESPONSES TABLE
+-- ============================================================
+
+-- 7. CREATE TABLE (Student)
+create table if not exists needs_analysis_student_responses (
+  id                uuid primary key default gen_random_uuid(),
+  submitted_at      timestamptz not null default now(),
+  respondent_name   text,
+  grade_subject     text not null default '',
+  years_experience  text not null default '',
+  comfort_level     text not null default '',
+  devices           jsonb default '[]'::jsonb,
+  attendance_method text,
+  grading_method    text,
+  materials_method  text,
+  comms_method      text,
+  challenge_answers jsonb default '{}'::jsonb,
+  feature_answers   jsonb default '{}'::jsonb,
+  top3_picks        jsonb default '[]'::jsonb,
+  biggest_challenge text,
+  missing_features  text,
+  concerns          text
+);
+
+-- 8. INDEXES (Student)
+create index if not exists idx_nar_student_submitted_at on needs_analysis_student_responses (submitted_at);
+create index if not exists idx_nar_student_grade_subject on needs_analysis_student_responses (grade_subject);
+create index if not exists idx_nar_student_comfort_level on needs_analysis_student_responses (comfort_level);
+
+-- 9. ROW-LEVEL SECURITY (Student)
+alter table needs_analysis_student_responses enable row level security;
+
+-- Allow anonymous inserts (form submissions)
+drop policy if exists "Allow anonymous inserts" on needs_analysis_student_responses;
+create policy "Allow anonymous inserts"
+  on needs_analysis_student_responses
+  for insert
+  to anon
+  with check (true);
+
+-- Allow authenticated reads (dashboard access)
+drop policy if exists "Allow authenticated reads" on needs_analysis_student_responses;
+create policy "Allow authenticated reads"
+  on needs_analysis_student_responses
+  for select
+  to authenticated
+  using (true);
+
+-- Allow authenticated deletes (dashboard management)
+drop policy if exists "Allow authenticated deletes" on needs_analysis_student_responses;
+create policy "Allow authenticated deletes"
+  on needs_analysis_student_responses
+  for delete
+  to authenticated
+  using (true);

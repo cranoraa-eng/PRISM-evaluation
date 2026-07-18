@@ -139,7 +139,7 @@ tr:hover td{background:rgba(22,58,95,0.02)}
 (function(){
 "use strict";
 
-var STATE={loggedIn:false,loading:true,teacherResponses:[],adminResponses:[],filtered:[],source:"teacher",activeTab:"overview",filters:{search:"",experience:"all",comfort:"all"},charts:{},page:1,pageSize:25};
+var STATE={loggedIn:false,loading:true,teacherResponses:[],adminResponses:[],studentResponses:[],filtered:[],source:"teacher",activeTab:"overview",filters:{search:"",experience:"all",comfort:"all"},charts:{},page:1,pageSize:25};
 
 var CHALLENGES_TEACHER=[
   "Recording attendance manually is time-consuming.",
@@ -189,8 +189,30 @@ var FEATURES_ADMIN=[
   "A messaging system to communicate directly with teachers, students, or parents"
 ];
 
-function getChallenges(){return STATE.source==="admin"?CHALLENGES_ADMIN:CHALLENGES_TEACHER}
-function getFeatures(){return STATE.source==="admin"?FEATURES_ADMIN:FEATURES_TEACHER}
+var CHALLENGES_STUDENT=[
+  "I often don't find out about my grades until report cards are given.",
+  "It's hard to keep track of my assignments and their deadlines.",
+  "I sometimes miss important announcements from my teachers or the school.",
+  "Learning materials (modules, handouts) get lost, damaged, or are hard to keep organized.",
+  "I don't have an easy way to ask my teacher questions outside of class hours.",
+  "I'm not always sure whether my teacher received my submitted assignment.",
+  "Keeping track of my own attendance record is difficult.",
+  "Communicating with the school when I'm absent is inconvenient."
+];
+
+var FEATURES_STUDENT=[
+  "View my grades online, anytime",
+  "View my own attendance record",
+  "Access learning materials (modules, activity sheets) online",
+  "Submit assignments online and confirm they were received",
+  "Receive notifications about new assignments, grades, and announcements",
+  "Message my teachers directly with questions",
+  "View categorized school announcements (general, academic, emergency, event, holiday)",
+  "A personal dashboard summarizing my grades, attendance, and recent updates"
+];
+
+function getChallenges(){return STATE.source==="admin"?CHALLENGES_ADMIN:STATE.source==="student"?CHALLENGES_STUDENT:CHALLENGES_TEACHER}
+function getFeatures(){return STATE.source==="admin"?FEATURES_ADMIN:STATE.source==="student"?FEATURES_STUDENT:FEATURES_TEACHER}
 
 var COLORS=["#163A5F","#D6A331","#2e7d32","#B9532F","#6b7280","#1f4d7a","#1565c0","#f57f17","#7b1fa2","#00838f"];
 
@@ -208,7 +230,8 @@ function renderLogin(){
     +'<input type="password" id="login-pass" placeholder="Password" autocomplete="current-password" />'
     +'<button id="login-btn">Sign In</button>'
     +'<a href="index.html">\u2190 Back to Teacher Questionnaire</a>'
-    +'<a href="admin-questionnaire.html">\u2190 Back to Administrator Questionnaire</a></div>';
+    +'<a href="admin-questionnaire.html">\u2190 Back to Administrator Questionnaire</a>'
+    +'<a href="student-questionnaire.html">\u2190 Back to Student Questionnaire</a></div>';
 }
 
 function renderFilters(){
@@ -228,7 +251,7 @@ function renderFilters(){
     +'<div class="filter-group" style="flex:2;min-width:130px"><label>Search</label><input type="text" id="f-search" value="'+esc(STATE.filters.search)+'" placeholder="Name, role, comments..." /></div>'
     +'<div class="filter-group"><label>Experience</label><select id="f-exp">'+eOpts+'</select></div>'
     +'<div class="filter-group"><label>Comfort</label><select id="f-comf">'+cOpts+'</select></div>'
-    +'<div class="filter-count">Showing <b>'+STATE.filtered.length+'</b> of '+(STATE.source==="admin"?STATE.adminResponses.length:STATE.teacherResponses.length)+' responses</div>'
+    +'<div class="filter-count">Showing <b>'+STATE.filtered.length+'</b> of '+(STATE.source==="admin"?STATE.adminResponses.length:STATE.source==="student"?STATE.studentResponses.length:STATE.teacherResponses.length)+' responses</div>'
     +'</div>';
 }
 
@@ -239,11 +262,13 @@ function renderDashboard(){
   ];
   var teacherCount=STATE.teacherResponses.length;
   var adminCount=STATE.adminResponses.length;
-  var sourceLabel=STATE.source==="admin"?"Administrator":"Teacher";
+  var studentCount=STATE.studentResponses.length;
+  var sourceLabel=STATE.source==="admin"?"Administrator":STATE.source==="student"?"Student":"Teacher";
 
   var html='<div class="shell"><div class="masthead"><div><h1 class="serif">PRISM Needs Analysis Dashboard</h1><p class="sub">Kiwalan National High School \u2014 '+sourceLabel+' Responses</p></div><div class="actions">';
   html+='<a href="index.html" class="btn btn-ghost">Teacher Form</a>';
   html+='<a href="admin-questionnaire.html" class="btn btn-ghost">Admin Form</a>';
+  html+='<a href="student-questionnaire.html" class="btn btn-ghost">Student Form</a>';
   html+='<button class="btn btn-ghost" id="refresh-btn">&#8635; Refresh</button>';
   html+='<button class="btn btn-ghost" id="export-csv">Export CSV</button>';
   html+='</div></div>';
@@ -251,6 +276,7 @@ function renderDashboard(){
   html+='<div class="source-bar">';
   html+='<button class="source-btn'+(STATE.source==="teacher"?" active":"")+'" data-source="teacher">Teachers<span class="count">'+teacherCount+'</span></button>';
   html+='<button class="source-btn'+(STATE.source==="admin"?" active":"")+'" data-source="admin">Administrators<span class="count">'+adminCount+'</span></button>';
+  html+='<button class="source-btn'+(STATE.source==="student"?" active":"")+'" data-source="student">Students<span class="count">'+studentCount+'</span></button>';
   html+='</div>';
 
   html+='<div class="tabs" role="tablist">';
@@ -336,8 +362,8 @@ function renderCharts(r){
   html+='<div class="chart-card"><h3>Top 3 Picks Tally</h3><p class="sub">Most desired features</p><canvas id="chart-top3"></canvas></div>';
 
   var pracFields=["attendance_method","grading_method","materials_method","comms_method"];
-  var pracLabels=STATE.source==="admin"?["Report Generation","Compliance Tracking","Enrollment Mgmt","Communication"]:["Attendance","Grading","Materials","Communication"];
-  html+='<div class="chart-card"><h3>Current Practices Distribution</h3><p class="sub">How '+(STATE.source==="admin"?"administrators":"teachers")+' currently handle tasks</p><canvas id="chart-practices"></canvas></div>';
+  var pracLabels=STATE.source==="admin"?["Report Generation","Compliance Tracking","Enrollment Mgmt","Communication"]:STATE.source==="student"?["Grade Checking","Materials Receiving","Announcements","Communication"]:["Attendance","Grading","Materials","Communication"];
+  html+='<div class="chart-card"><h3>Current Practices Distribution</h3><p class="sub">How '+(STATE.source==="admin"?"administrators":STATE.source==="student"?"students":"teachers")+' currently handle tasks</p><canvas id="chart-practices"></canvas></div>';
   html+='</div></div>';
 
   setTimeout(function(){
@@ -380,8 +406,10 @@ function renderCharts(r){
 function renderProfiles(r){
   var html='<div class="panel active">';
   var isAdmin=STATE.source==="admin";
+  var isStudent=STATE.source==="student";
+  var profileHeader=isAdmin?"Position/Role":isStudent?"Grade/Section":"Grade/Subject";
   html+='<div class="section-heading">Respondent Profiles</div>';
-  html+='<div class="table-wrap"><table><thead><tr><th>#</th><th>Reference</th><th>Date</th><th>Name</th>'+(isAdmin?'<th>Position/Role</th>':'<th>Grade/Subject</th>')+'<th>Experience</th><th>Comfort</th><th>Devices</th></tr></thead><tbody>';
+  html+='<div class="table-wrap"><table><thead><tr><th>#</th><th>Reference</th><th>Date</th><th>Name</th><th>'+profileHeader+'</th><th>Experience</th><th>Comfort</th><th>Devices</th></tr></thead><tbody>';
   r.forEach(function(res,i){
     var dt=res.submitted_at?new Date(res.submitted_at).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"}):"\u2014";
     html+='<tr><td>'+(i+1)+'</td><td style="font-family:monospace;font-size:11px">'+(res.id?res.id.slice(0,8).toUpperCase():"\u2014")+'</td><td>'+dt+'</td><td>'+esc(res.respondent_name||"\u2014")+'</td><td>'+esc(isAdmin?(res.admin_role||"\u2014"):(res.grade_subject||"\u2014"))+'</td><td>'+esc(res.years_experience||"\u2014")+'</td><td>'+esc(res.comfort_level||"\u2014")+'</td><td>'+esc((res.devices||[]).join(", ")||"\u2014")+'</td></tr>';
@@ -407,7 +435,7 @@ function renderProfiles(r){
 function renderPractices(r){
   var html='<div class="panel active">';
   var fields=["attendance_method","grading_method","materials_method","comms_method"];
-  var labels=STATE.source==="admin"?["Report Generation","Compliance Tracking","Enrollment Management","Communication"]:["Attendance","Grading","Materials","Communication"];
+  var labels=STATE.source==="admin"?["Report Generation","Compliance Tracking","Enrollment Management","Communication"]:STATE.source==="student"?["Grade Checking","Materials Receiving","Announcements","Communication"]:["Attendance","Grading","Materials","Communication"];
   fields.forEach(function(f,i){
     html+='<div class="section-heading">'+labels[i]+' Method Distribution</div>';
     var counts={};r.forEach(function(res){var v=res[f]||"Unknown";counts[v]=(counts[v]||0)+1});
@@ -440,7 +468,7 @@ function renderOpenEnded(r){
 function destroyCharts(){Object.values(STATE.charts||{}).forEach(function(c){try{c.destroy()}catch(e){}});STATE.charts={}}
 
 function applyFilters(){
-  var r=STATE.source==="admin"?STATE.adminResponses:STATE.teacherResponses;
+  var r=STATE.source==="admin"?STATE.adminResponses:STATE.source==="student"?STATE.studentResponses:STATE.teacherResponses;
   var f=STATE.filters;
   if(f.search){var q=f.search.toLowerCase();r=r.filter(function(res){return(res.respondent_name||"").toLowerCase().indexOf(q)!==-1||(res.grade_subject||"").toLowerCase().indexOf(q)!==-1||(res.admin_role||"").toLowerCase().indexOf(q)!==-1||(res.years_experience||"").toLowerCase().indexOf(q)!==-1})}
   if(f.experience!=="all") r=r.filter(function(res){return res.years_experience===f.experience});
@@ -452,13 +480,16 @@ function loadResponses(){
   STATE.loading=true;render();
   Promise.all([
     supabaseClient.from("needs_analysis_responses").select("*").order("submitted_at",{ascending:false}),
-    supabaseClient.from("needs_analysis_admin_responses").select("*").order("submitted_at",{ascending:false})
+    supabaseClient.from("needs_analysis_admin_responses").select("*").order("submitted_at",{ascending:false}),
+    supabaseClient.from("needs_analysis_student_responses").select("*").order("submitted_at",{ascending:false})
   ]).then(function(results){
-    var tErr=results[0].error;var aErr=results[1].error;
+    var tErr=results[0].error;var aErr=results[1].error;var sErr=results[2].error;
     if(tErr)toast("Teacher load error: "+tErr.message);
     if(aErr)toast("Admin load error: "+aErr.message);
+    if(sErr)toast("Student load error: "+sErr.message);
     STATE.teacherResponses=results[0].data||[];
     STATE.adminResponses=results[1].data||[];
+    STATE.studentResponses=results[2].data||[];
     STATE.loading=false;applyFilters();render();
   });
 }
@@ -511,9 +542,17 @@ function attachDashboardHandlers(){
 function exportCSV(){
   var r=STATE.filtered;if(!r.length){toast("No data to export");return}
   var isAdmin=STATE.source==="admin";
+  var isStudent=STATE.source==="student";
   var CHALLENGES=getChallenges();
   var FEATURES=getFeatures();
-  var headers=isAdmin?["Reference","Submitted","Name","Position/Role","Experience","Comfort","Devices","Report Generation","Compliance Tracking","Enrollment Mgmt","Communication"]:["Reference","Submitted","Name","Grade/Subject","Experience","Comfort","Devices","Attendance","Grading","Materials","Communication"];
+  var headers;
+  if(isAdmin){
+    headers=["Reference","Submitted","Name","Position/Role","Experience","Comfort","Devices","Report Generation","Compliance Tracking","Enrollment Mgmt","Communication"];
+  }else if(isStudent){
+    headers=["Reference","Submitted","Name","Grade/Section","Years at KNHS","Comfort","Devices","Grade Checking","Materials Receiving","Announcements","Communication"];
+  }else{
+    headers=["Reference","Submitted","Name","Grade/Subject","Experience","Comfort","Devices","Attendance","Grading","Materials","Communication"];
+  }
   CHALLENGES.forEach(function(_,i){headers.push("C"+(i+1))});
   FEATURES.forEach(function(_,i){headers.push("F"+(i+1))});
   headers.push("Top 3 Picks","Biggest Challenge","Missing Features","Concerns");

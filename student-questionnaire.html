@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PRISM — Teacher Needs Analysis Questionnaire</title>
+<title>PRISM — Student Needs Analysis Questionnaire</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -130,7 +130,6 @@
   .rail-step.done .rail-dot{background:var(--thread); border-color:var(--thread); color:#fff;}
   .rail-label{font-size:.62rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); text-align:center;}
   .rail-step.active .rail-label{color:var(--navy); font-weight:700;}
-
 
   .step{display:none; animation:fade .35s ease;}
   .step.active{display:block;}
@@ -259,7 +258,7 @@
     .prism-word{font-size:2.1rem;}
     .rail-label{display:none;}
     .likert{font-size:.72rem;}
-  .wrap{padding-bottom:12rem;}
+    .wrap{padding-bottom:12rem;}
   }
   @media print{
     .nav-footer, .rail-outer, .admin-link, .toast{display:none !important;}
@@ -276,15 +275,15 @@
     <p class="division">School Records &amp; Communication Needs Analysis</p>
     <p class="prism-word">PRISM</p>
     <p class="prism-tag">Portal for Records, Information, and School Management</p>
-    <p class="qtitle">Teacher Needs Analysis Questionnaire</p>
-    <p class="qmeta">Estimated completion time: 8–10 minutes</p>
+    <p class="qtitle">Student Needs Analysis Questionnaire</p>
+    <p class="qmeta">Estimated completion time: 5–7 minutes</p>
   </div>
 </header>
 
 <main class="wrap">
   <div class="purpose" id="purposeCard">
     <strong>Purpose of this questionnaire.</strong>
-    This questionnaire is part of a needs analysis for PRISM, a proposed web-based school management system for Kiwalan National High School. Your day-to-day experience recording attendance, computing grades, distributing learning materials, and communicating with students and parents is essential to designing a system that genuinely supports your work.
+    This questionnaire is part of a needs analysis for PRISM, a proposed web-based school management system for Kiwalan National High School. Your experience checking your grades and attendance, receiving learning materials, and getting announcements from your teachers is important for designing a system that works well for students like you.
     <br><br>
     Responses are used solely for research purposes and treated with confidentiality in line with the Data Privacy Act of 2012 (RA 10173). Participation is voluntary — you may skip any item you prefer not to answer.
   </div>
@@ -307,16 +306,15 @@
           <input type="text" id="f-name" name="name" placeholder="Juan Dela Cruz" autocomplete="name">
         </div>
         <div class="field">
-          <label class="q-label" for="f-gradeSubject">Grade level(s) / subject area(s) taught</label>
-          <input type="text" id="f-gradeSubject" name="gradeSubject" placeholder="e.g., Grade 9 – Mathematics">
+          <label class="q-label" for="f-gradeSubject">Grade level &amp; section</label>
+          <input type="text" id="f-gradeSubject" name="gradeSubject" placeholder="e.g., Grade 9 – Narra">
         </div>
         <div class="field">
-          <label class="q-label">Years of teaching experience at KNHS</label>
-          <div class="options" role="radiogroup" aria-label="Years of teaching experience">
+          <label class="q-label">How long have you been a student at KNHS?</label>
+          <div class="options" role="radiogroup" aria-label="Years enrolled at KNHS">
             <label class="opt"><input type="radio" name="yearsExperience" value="Less than 1 year">Less than 1 year</label>
             <label class="opt"><input type="radio" name="yearsExperience" value="1–3 years">1–3 years</label>
-            <label class="opt"><input type="radio" name="yearsExperience" value="4–7 years">4–7 years</label>
-            <label class="opt"><input type="radio" name="yearsExperience" value="8 years or more">8 years or more</label>
+            <label class="opt"><input type="radio" name="yearsExperience" value="4 years or more">4 years or more</label>
           </div>
         </div>
         <div class="field">
@@ -347,48 +345,48 @@
       <div class="part-head">
         <div class="part-eyebrow">Part II</div>
         <h2 class="part-title">Current Practices</h2>
-        <p class="part-sub">These items ask about how you currently handle records and communication tasks.</p>
+        <p class="part-sub">These items ask about how you currently keep track of your grades, materials, and school updates.</p>
       </div>
       <div class="card">
         <div class="field">
-          <label class="q-label"><span class="q-num">1.</span>How do you currently record student attendance?</label>
-          <div class="options" role="radiogroup" aria-label="Attendance recording method">
-            <label class="opt"><input type="radio" name="attendanceMethod" value="Paper-based attendance sheet / logbook">Paper-based attendance sheet / logbook</label>
-            <label class="opt"><input type="radio" name="attendanceMethod" value="Spreadsheet (e.g., Excel, Google Sheets)">Spreadsheet (e.g., Excel, Google Sheets)</label>
-            <label class="opt"><input type="radio" name="attendanceMethod" value="Mobile app or existing digital tool">Mobile app or existing digital tool</label>
+          <label class="q-label"><span class="q-num">1.</span>How do you currently check your grades?</label>
+          <div class="options" role="radiogroup" aria-label="Grade checking method">
+            <label class="opt"><input type="radio" name="attendanceMethod" value="Teacher announces/shows grades in class">Teacher announces/shows grades in class</label>
+            <label class="opt"><input type="radio" name="attendanceMethod" value="Ask my teacher directly">Ask my teacher directly</label>
+            <label class="opt"><input type="radio" name="attendanceMethod" value="Only from my printed report card">Only from my printed report card</label>
             <label class="opt other"><input type="radio" name="attendanceMethod" value="Other" data-other-toggle>Other
-              <input type="text" class="other-input" name="attendanceMethodOther" placeholder="Please specify" aria-label="Specify other attendance method">
+              <input type="text" class="other-input" name="attendanceMethodOther" placeholder="Please specify" aria-label="Specify other grade-checking method">
             </label>
           </div>
         </div>
         <div class="field">
-          <label class="q-label"><span class="q-num">2.</span>How do you currently compute and record student grades?</label>
-          <div class="options" role="radiogroup" aria-label="Grading method">
-            <label class="opt"><input type="radio" name="gradingMethod" value="Manually, using the DepEd transmutation table">Manually, using the DepEd transmutation table</label>
-            <label class="opt"><input type="radio" name="gradingMethod" value="Spreadsheet with built-in formulas">Spreadsheet with built-in formulas</label>
-            <label class="opt"><input type="radio" name="gradingMethod" value="Existing digital grading tool/system">Existing digital grading tool/system</label>
+          <label class="q-label"><span class="q-num">2.</span>How do you currently receive learning materials (modules, activity sheets, assignments) from your teachers?</label>
+          <div class="options" role="radiogroup" aria-label="Materials receiving method">
+            <label class="opt"><input type="radio" name="gradingMethod" value="Printed handouts">Printed handouts</label>
+            <label class="opt"><input type="radio" name="gradingMethod" value="Messenger / group chat">Messenger / group chat</label>
+            <label class="opt"><input type="radio" name="gradingMethod" value="Email or cloud storage link (e.g., Google Drive)">Email or cloud storage link (e.g., Google Drive)</label>
             <label class="opt other"><input type="radio" name="gradingMethod" value="Other" data-other-toggle>Other
-              <input type="text" class="other-input" name="gradingMethodOther" placeholder="Please specify" aria-label="Specify other grading method">
+              <input type="text" class="other-input" name="gradingMethodOther" placeholder="Please specify" aria-label="Specify other materials method">
             </label>
           </div>
         </div>
         <div class="field">
-          <label class="q-label"><span class="q-num">3.</span>How do you currently share learning materials (DLPs, DLLs, modules, activity sheets) with students?</label>
-          <div class="options" role="radiogroup" aria-label="Materials sharing method">
-            <label class="opt"><input type="radio" name="materialsMethod" value="Printed handouts">Printed handouts</label>
-            <label class="opt"><input type="radio" name="materialsMethod" value="Messenger / group chat">Messenger / group chat</label>
-            <label class="opt"><input type="radio" name="materialsMethod" value="Email or cloud storage link (e.g., Google Drive)">Email or cloud storage link (e.g., Google Drive)</label>
+          <label class="q-label"><span class="q-num">3.</span>How do you currently receive school or class announcements?</label>
+          <div class="options" role="radiogroup" aria-label="Announcement receiving method">
+            <label class="opt"><input type="radio" name="materialsMethod" value="Verbal announcement in class">Verbal announcement in class</label>
+            <label class="opt"><input type="radio" name="materialsMethod" value="Group chat (e.g., Messenger, GC)">Group chat (e.g., Messenger, GC)</label>
+            <label class="opt"><input type="radio" name="materialsMethod" value="School or class Facebook page">School or class Facebook page</label>
             <label class="opt other"><input type="radio" name="materialsMethod" value="Other" data-other-toggle>Other
-              <input type="text" class="other-input" name="materialsMethodOther" placeholder="Please specify" aria-label="Specify other materials method">
+              <input type="text" class="other-input" name="materialsMethodOther" placeholder="Please specify" aria-label="Specify other announcement method">
             </label>
           </div>
         </div>
         <div class="field">
-          <label class="q-label"><span class="q-num">4.</span>How do you currently communicate announcements or updates to students and parents?</label>
+          <label class="q-label"><span class="q-num">4.</span>How do you currently communicate with your teachers about your schoolwork?</label>
           <div class="options" role="radiogroup" aria-label="Communication method">
-            <label class="opt"><input type="radio" name="commsMethod" value="Verbal / in-person announcement">Verbal / in-person announcement</label>
-            <label class="opt"><input type="radio" name="commsMethod" value="Group chat (e.g., Messenger, GC)">Group chat (e.g., Messenger, GC)</label>
-            <label class="opt"><input type="radio" name="commsMethod" value="School or class Facebook page">School or class Facebook page</label>
+            <label class="opt"><input type="radio" name="commsMethod" value="Talk in person during/after class">Talk in person during/after class</label>
+            <label class="opt"><input type="radio" name="commsMethod" value="Message through Messenger/GC">Message through Messenger/GC</label>
+            <label class="opt"><input type="radio" name="commsMethod" value="Through my parents/guardians">Through my parents/guardians</label>
             <label class="opt other"><input type="radio" name="commsMethod" value="Other" data-other-toggle>Other
               <input type="text" class="other-input" name="commsMethodOther" placeholder="Please specify" aria-label="Specify other communication method">
             </label>
@@ -445,7 +443,7 @@
       </div>
       <div class="card">
         <div class="field">
-          <label class="q-label" for="f-biggestChallenge"><span class="q-num">1.</span>What is the single biggest challenge you currently face in managing records, grades, or communication with students and parents?</label>
+          <label class="q-label" for="f-biggestChallenge"><span class="q-num">1.</span>What is the single biggest challenge you currently face in keeping track of your grades, assignments, or school announcements?</label>
           <textarea id="f-biggestChallenge" name="biggestChallenge"></textarea>
         </div>
         <div class="field">
@@ -453,7 +451,7 @@
           <textarea id="f-missingFeatures" name="missingFeatures"></textarea>
         </div>
         <div class="field">
-          <label class="q-label" for="f-concerns"><span class="q-num">3.</span>Do you have any concerns about adopting a web-based system for your teaching-related tasks (e.g., training, internet access, time)?</label>
+          <label class="q-label" for="f-concerns"><span class="q-num">3.</span>Do you have any concerns about using a web-based system for your schoolwork (e.g., internet access, device access, ease of use)?</label>
           <textarea id="f-concerns" name="concerns"></textarea>
         </div>
       </div>
@@ -469,9 +467,8 @@
       <button class="btn btn-primary" id="downloadBtn">Download my responses</button>
       <button class="btn btn-ghost" id="anotherBtn">Submit another response</button>
     </div>
-    <a href="admin.html" class="admin-link" id="toAdminBtn">View collected results (admin)</a>
+    <a href="index.html" class="admin-link">Are you a teacher? Take the Teacher Needs Analysis instead.</a>
     <a href="admin-questionnaire.html" class="admin-link">Are you an administrator? Take the Administrator Needs Analysis instead.</a>
-    <a href="student-questionnaire.html" class="admin-link">Are you a student? Take the Student Needs Analysis instead.</a>
   </div>
 </main>
 
@@ -489,31 +486,29 @@
 (function(){
   var PARTS = ["Profile","Practices","Challenges","Priorities","Feedback"];
   var CHALLENGES = [
-    "Recording attendance manually is time-consuming.",
-    "Computing grades manually is prone to errors.",
-    "Storing and retrieving paper-based student records is difficult.",
-    "Important announcements often fail to reach all students or parents.",
-    "Information about students is scattered across different platforms or tools.",
-    "I lack a reliable way to track whether students or parents have seen an announcement or assignment.",
-    "Preparing report cards takes a significant amount of time each grading period.",
-    "I have difficulty communicating directly and efficiently with parents about a student's progress."
+    "I often don't find out about my grades until report cards are given.",
+    "It's hard to keep track of my assignments and their deadlines.",
+    "I sometimes miss important announcements from my teachers or the school.",
+    "Learning materials (modules, handouts) get lost, damaged, or are hard to keep organized.",
+    "I don't have an easy way to ask my teacher questions outside of class hours.",
+    "I'm not always sure whether my teacher received my submitted assignment.",
+    "Keeping track of my own attendance record is difficult.",
+    "Communicating with the school when I'm absent is inconvenient."
   ];
   var FEATURES = [
-    "Digital attendance tracking with historical records",
-    "Automated grade computation using the DepEd transmutation table",
-    "Automated, DepEd-compliant report card generation",
-    "A learning materials repository for uploading DLPs, DLLs, modules, and activity sheets",
-    "Digital assignment posting and submission tracking",
-    "A messaging system to communicate with students and parents",
-    "A categorized announcement system (general, academic, emergency, event, holiday)",
-    "Automatic notifications for assignments, grades, and attendance-related updates",
-    "A dashboard summarizing my classes, attendance status, and recent announcements",
-    "Audit logging that records and time-stamps important actions for accountability"
+    "View my grades online, anytime",
+    "View my own attendance record",
+    "Access learning materials (modules, activity sheets) online",
+    "Submit assignments online and confirm they were received",
+    "Receive notifications about new assignments, grades, and announcements",
+    "Message my teachers directly with questions",
+    "View categorized school announcements (general, academic, emergency, event, holiday)",
+    "A personal dashboard summarizing my grades, attendance, and recent updates"
   ];
   var FEATURE_SHORT = [
-    "Digital attendance tracking","Automated grade computation","Automated report card generation",
-    "Learning materials repository","Digital assignment submission","Messaging with students/parents",
-    "Categorized announcements","Automatic notifications","Teacher dashboard","Audit logging"
+    "View grades online","View attendance record","Access learning materials online",
+    "Submit assignments online","Notifications for updates","Message teachers directly",
+    "Categorized announcements","Personal dashboard"
   ];
 
   var form = document.getElementById('prismForm');
@@ -641,7 +636,7 @@
     if(submitting) return;
     submitting = true;
     nextBtn.disabled = true;
-    nextBtn.textContent = 'Submitting…';
+    nextBtn.textContent = 'Submitting\u2026';
 
     var data = collect();
     var id = genId();
@@ -677,7 +672,7 @@
 
     try{
       var { error } = await supabaseClient
-        .from('needs_analysis_responses')
+        .from('needs_analysis_student_responses')
         .insert({
           id: payload.id,
           submitted_at: payload.submitted_at,
@@ -700,7 +695,7 @@
       if(error) throw error;
     }catch(err){
       console.error('Submit error:', err);
-      showToast('Submission failed — please try again. (' + (err.message || 'Unknown error') + ')', 5000);
+      showToast('Submission failed \u2014 please try again. (' + (err.message || 'Unknown error') + ')', 5000);
       submitting = false;
       nextBtn.disabled = false;
       nextBtn.textContent = 'Submit';
@@ -718,32 +713,32 @@
 
   function summaryText(data){
     var lines = [];
-    lines.push('PRISM — Teacher Needs Analysis Questionnaire');
-    lines.push('Kiwalan National High School · '+new Date().toLocaleString());
+    lines.push('PRISM \u2014 Student Needs Analysis Questionnaire');
+    lines.push('Kiwalan National High School \u00b7 '+new Date().toLocaleString());
     lines.push('');
-    lines.push('PART I — Respondent Profile');
+    lines.push('PART I \u2014 Respondent Profile');
     lines.push('Name: '+(data.name||'(not provided)'));
-    lines.push('Grade/Subject: '+(data.gradeSubject||''));
+    lines.push('Grade level & section: '+(data.gradeSubject||''));
     lines.push('Years at KNHS: '+(data.yearsExperience||''));
     lines.push('Comfort level: '+(data.comfortLevel||''));
     var devices = data.devices ? (Array.isArray(data.devices)?data.devices:[data.devices]) : [];
     lines.push('Devices used: '+devices.join(', ')+(data.devicesOther?(' ('+data.devicesOther+')'):''));
     lines.push('');
-    lines.push('PART II — Current Practices');
-    lines.push('Attendance: '+(data.attendanceMethod||'')+(data.attendanceMethodOther?(' ('+data.attendanceMethodOther+')'):''));
-    lines.push('Grading: '+(data.gradingMethod||'')+(data.gradingMethodOther?(' ('+data.gradingMethodOther+')'):''));
-    lines.push('Materials sharing: '+(data.materialsMethod||'')+(data.materialsMethodOther?(' ('+data.materialsMethodOther+')'):''));
+    lines.push('PART II \u2014 Current Practices');
+    lines.push('Grade checking: '+(data.attendanceMethod||'')+(data.attendanceMethodOther?(' ('+data.attendanceMethodOther+')'):''));
+    lines.push('Materials receiving: '+(data.gradingMethod||'')+(data.gradingMethodOther?(' ('+data.gradingMethodOther+')'):''));
+    lines.push('Announcements: '+(data.materialsMethod||'')+(data.materialsMethodOther?(' ('+data.materialsMethodOther+')'):''));
     lines.push('Communication: '+(data.commsMethod||'')+(data.commsMethodOther?(' ('+data.commsMethodOther+')'):''));
     lines.push('');
-    lines.push('PART III — Challenges (1=Strongly Disagree .. 5=Strongly Agree)');
-    CHALLENGES.forEach(function(c,i){ lines.push('- '+c+' → '+(data['challenge_'+i]||'(skipped)')); });
+    lines.push('PART III \u2014 Challenges (1=Strongly Disagree .. 4=Strongly Agree)');
+    CHALLENGES.forEach(function(c,i){ lines.push('- '+c+' \u2192 '+(data['challenge_'+i]||'(skipped)')); });
     lines.push('');
-    lines.push('PART IV — Feature Priorities (1=Not Important .. 5=Very Important)');
-    FEATURES.forEach(function(f,i){ lines.push('- '+f+' → '+(data['feature_'+i]||'(skipped)')); });
+    lines.push('PART IV \u2014 Feature Priorities (1=Not Important .. 4=Very Important)');
+    FEATURES.forEach(function(f,i){ lines.push('- '+f+' \u2192 '+(data['feature_'+i]||'(skipped)')); });
     var top3 = data.top3 ? (Array.isArray(data.top3)?data.top3:[data.top3]) : [];
     lines.push('Top 3 picks: '+top3.join(', '));
     lines.push('');
-    lines.push('PART V — Additional Feedback');
+    lines.push('PART V \u2014 Additional Feedback');
     lines.push('Biggest challenge: '+(data.biggestChallenge||''));
     lines.push('Missing features: '+(data.missingFeatures||''));
     lines.push('Concerns: '+(data.concerns||''));
@@ -755,7 +750,7 @@
     var blob = new Blob([summaryText(lastData)], {type:'text/plain'});
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'PRISM_needs_analysis_'+Date.now()+'.txt';
+    a.download = 'PRISM_student_needs_analysis_'+Date.now()+'.txt';
     a.click();
   });
 
