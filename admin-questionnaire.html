@@ -81,6 +81,19 @@
 
   .wrap{max-width:760px; margin:0 auto; padding:0 1.25rem 12rem;}
 
+  .role-nav{
+    max-width:760px; margin:0 auto; padding:.6rem 1.25rem;
+    display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+  }
+  .role-nav-label{font-size:.78rem; font-weight:600; color:var(--ink-soft); margin-right:.2rem;}
+  .role-nav-btn{
+    font-size:.78rem; font-weight:600; padding:.35rem .8rem; border-radius:20px;
+    text-decoration:none; color:var(--ink-soft); border:1px solid var(--paper-line);
+    background:var(--card); transition:.15s;
+  }
+  .role-nav-btn:hover{border-color:var(--navy); color:var(--navy);}
+  .role-nav-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+
   .purpose{
     background:var(--card);
     border:1px solid var(--paper-line);
@@ -279,6 +292,13 @@
     <p class="qmeta">Estimated completion time: 8–10 minutes</p>
   </div>
 </header>
+
+<nav class="role-nav">
+  <span class="role-nav-label">I am a:</span>
+  <a href="index.html" class="role-nav-btn">Teacher</a>
+  <a href="admin-questionnaire.html" class="role-nav-btn active">Administrator</a>
+  <a href="student-questionnaire.html" class="role-nav-btn">Student</a>
+</nav>
 
 <main class="wrap">
   <div class="purpose" id="purposeCard">
