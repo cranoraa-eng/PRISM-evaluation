@@ -401,11 +401,12 @@
       <div class="part-head">
         <div class="part-eyebrow">Part III</div>
         <h2 class="part-title">Challenges Encountered</h2>
-        <p class="part-sub">Indicate how much you agree with each statement. 1 = Strongly Disagree, 5 = Strongly Agree.</p>
+        <p class="part-sub">Indicate how much you agree with each statement. 4 = Strongly Agree, 1 = Strongly Disagree.</p>
       </div>
       <div class="card" style="overflow-x:auto;">
+        <p class="hint" style="margin-bottom:.6rem;">4 = Strongly Agree &nbsp; 3 = Agree &nbsp; 2 = Disagree &nbsp; 1 = Strongly Disagree</p>
         <table class="likert" id="challengesTable">
-          <thead><tr><th scope="col">Statement</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th></tr></thead>
+          <thead><tr><th scope="col">Statement</th><th scope="col">4</th><th scope="col">3</th><th scope="col">2</th><th scope="col">1</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -416,11 +417,12 @@
       <div class="part-head">
         <div class="part-eyebrow">Part IV</div>
         <h2 class="part-title">Needs &amp; Feature Priorities for PRISM</h2>
-        <p class="part-sub">For each proposed feature, rate its importance to your work. 1 = Not Important, 5 = Very Important.</p>
+        <p class="part-sub">For each proposed feature, rate its importance to your work. 4 = Very Important, 1 = Not Important.</p>
       </div>
       <div class="card" style="overflow-x:auto;">
+        <p class="hint" style="margin-bottom:.6rem;">4 = Very Important &nbsp; 3 = Important &nbsp; 2 = Slightly Important &nbsp; 1 = Not Important</p>
         <table class="likert" id="featuresTable">
-          <thead><tr><th scope="col">Feature</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th></tr></thead>
+          <thead><tr><th scope="col">Feature</th><th scope="col">4</th><th scope="col">3</th><th scope="col">2</th><th scope="col">1</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -546,9 +548,10 @@
     items.forEach(function(text, idx){
       var tr = document.createElement('tr');
       var cells = '<td>'+text+'</td>';
-      for(var v=1; v<=5; v++){
+      var values = [4,3,2,1];
+      values.forEach(function(v){
         cells += '<td><input type="radio" name="'+namePrefix+'_'+idx+'" value="'+v+'" aria-label="'+text+' – rating '+v+'"></td>';
-      }
+      });
       tr.innerHTML = cells;
       tbody.appendChild(tr);
     });

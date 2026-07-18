@@ -167,8 +167,8 @@ var COLORS=["#163A5F","#D6A331","#2e7d32","#B9532F","#6b7280","#1f4d7a","#1565c0
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
 function mean(a){if(!a.length)return 0;return a.reduce(function(s,v){return s+Number(v)},0)/a.length}
 function stdDev(a){if(a.length<2)return 0;var m=mean(a);return Math.sqrt(a.reduce(function(s,v){return s+Math.pow(v-m,2)},0)/(a.length-1))}
-function interpret(m){if(m>=4.2)return{l:"Excellent",c:"excellent"};if(m>=3.4)return{l:"Good",c:"good"};if(m>=2.6)return{l:"Fair",c:"fair"};return{l:"Poor",c:"poor"}}
-function barClr(m){if(m>=4.2)return"var(--success)";if(m>=3.4)return"var(--navy)";if(m>=2.6)return"var(--gold)";return"var(--error)"}
+function interpret(m){if(m>=3.5)return{l:"Excellent",c:"excellent"};if(m>=2.5)return{l:"Good",c:"good"};if(m>=1.5)return{l:"Fair",c:"fair"};return{l:"Poor",c:"poor"}}
+function barClr(m){if(m>=3.5)return"var(--success)";if(m>=2.5)return"var(--navy)";if(m>=1.5)return"var(--gold)";return"var(--error)"}
 
 function toast(msg){var el=document.getElementById("toast");if(!el)return;el.textContent=msg;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show")},2500)}
 
@@ -252,7 +252,7 @@ function renderOverview(r){
   html+='<div class="table-wrap"><table><thead><tr><th>Challenge</th><th>Mean</th><th>Interpretation</th></tr></thead><tbody>';
   CHALLENGES.forEach(function(ch,i){
     var m=chMeans[i];var interp=interpret(m);
-    html+='<tr><td>'+esc(ch)+'</td><td><div class="mean-bar-wrap"><div class="mean-bar"><div class="mean-bar-fill" style="width:'+(m/5*100)+'%;background:'+barClr(m)+'"></div></div><span class="mean-val">'+m.toFixed(2)+'</span></div></td><td><span class="interp '+interp.c+'">'+interp.l+'</span></td></tr>';
+    html+='<tr><td>'+esc(ch)+'</td><td><div class="mean-bar-wrap"><div class="mean-bar"><div class="mean-bar-fill" style="width:'+(m/4*100)+'%;background:'+barClr(m)+'"></div></div><span class="mean-val">'+m.toFixed(2)+'</span></div></td><td><span class="interp '+interp.c+'">'+interp.l+'</span></td></tr>';
   });
   html+='</tbody></table></div>';
 
@@ -260,7 +260,7 @@ function renderOverview(r){
   html+='<div class="table-wrap"><table><thead><tr><th>Feature</th><th>Mean</th><th>Interpretation</th></tr></thead><tbody>';
   FEATURES.forEach(function(fe,i){
     var m=feMeans[i];var interp=interpret(m);
-    html+='<tr><td>'+esc(fe)+'</td><td><div class="mean-bar-wrap"><div class="mean-bar"><div class="mean-bar-fill" style="width:'+(m/5*100)+'%;background:'+barClr(m)+'"></div></div><span class="mean-val">'+m.toFixed(2)+'</span></div></td><td><span class="interp '+interp.c+'">'+interp.l+'</span></td></tr>';
+    html+='<tr><td>'+esc(fe)+'</td><td><div class="mean-bar-wrap"><div class="mean-bar"><div class="mean-bar-fill" style="width:'+(m/4*100)+'%;background:'+barClr(m)+'"></div></div><span class="mean-val">'+m.toFixed(2)+'</span></div></td><td><span class="interp '+interp.c+'">'+interp.l+'</span></td></tr>';
   });
   html+='</tbody></table></div>';
 
@@ -300,13 +300,13 @@ function renderCharts(r){
 
     var chCtx=document.getElementById("chart-challenges");
     if(chCtx){
-      STATE.challenges=new Chart(chCtx,{type:"bar",data:{labels:CHALLENGES.map(function(c){return c.length>50?c.slice(0,47)+"...":c}),datasets:[{label:"Mean Score",data:chMeans.map(function(m){return+m.toFixed(2)}),backgroundColor:chMeans.map(function(m){if(m>=4.2)return"rgba(46,125,50,0.8)";if(m>=3.4)return"rgba(22,58,95,0.8)";if(m>=2.6)return"rgba(214,163,49,0.8)";return"rgba(198,40,40,0.8)"}),borderRadius:4,barPercentage:0.7}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,scales:{x:{min:0,max:5,grid:{color:"rgba(0,0,0,0.04)"}},y:{grid:{display:false},ticks:{font:{size:10.5}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var interp=interpret(ctx.raw);return"Mean: "+ctx.raw+" ("+interp.l+")"}}}}}});
+      STATE.challenges=new Chart(chCtx,{type:"bar",data:{labels:CHALLENGES.map(function(c){return c.length>50?c.slice(0,47)+"...":c}),datasets:[{label:"Mean Score",data:chMeans.map(function(m){return+m.toFixed(2)}),backgroundColor:chMeans.map(function(m){if(m>=3.5)return"rgba(46,125,50,0.8)";if(m>=2.5)return"rgba(22,58,95,0.8)";if(m>=1.5)return"rgba(214,163,49,0.8)";return"rgba(198,40,40,0.8)"}),borderRadius:4,barPercentage:0.7}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,scales:{x:{min:0,max:4,grid:{color:"rgba(0,0,0,0.04)"}},y:{grid:{display:false},ticks:{font:{size:10.5}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var interp=interpret(ctx.raw);return"Mean: "+ctx.raw+" ("+interp.l+")"}}}}}});
       chCtx.parentElement.style.height=(CHALLENGES.length*44+60)+"px";
     }
 
     var feCtx=document.getElementById("chart-features");
     if(feCtx){
-      STATE.features=new Chart(feCtx,{type:"bar",data:{labels:FEATURES.map(function(f){return f.length>50?f.slice(0,47)+"...":f}),datasets:[{label:"Mean Score",data:feMeans.map(function(m){return+m.toFixed(2)}),backgroundColor:feMeans.map(function(m){if(m>=4.2)return"rgba(46,125,50,0.8)";if(m>=3.4)return"rgba(22,58,95,0.8)";if(m>=2.6)return"rgba(214,163,49,0.8)";return"rgba(198,40,40,0.8)"}),borderRadius:4,barPercentage:0.7}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,scales:{x:{min:0,max:5,grid:{color:"rgba(0,0,0,0.04)"}},y:{grid:{display:false},ticks:{font:{size:10.5}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var interp=interpret(ctx.raw);return"Mean: "+ctx.raw+" ("+interp.l+")"}}}}}});
+      STATE.features=new Chart(feCtx,{type:"bar",data:{labels:FEATURES.map(function(f){return f.length>50?f.slice(0,47)+"...":f}),datasets:[{label:"Mean Score",data:feMeans.map(function(m){return+m.toFixed(2)}),backgroundColor:feMeans.map(function(m){if(m>=3.5)return"rgba(46,125,50,0.8)";if(m>=2.5)return"rgba(22,58,95,0.8)";if(m>=1.5)return"rgba(214,163,49,0.8)";return"rgba(198,40,40,0.8)"}),borderRadius:4,barPercentage:0.7}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,scales:{x:{min:0,max:4,grid:{color:"rgba(0,0,0,0.04)"}},y:{grid:{display:false},ticks:{font:{size:10.5}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var interp=interpret(ctx.raw);return"Mean: "+ctx.raw+" ("+interp.l+")"}}}}}});
       feCtx.parentElement.style.height=(FEATURES.length*44+60)+"px";
     }
 
