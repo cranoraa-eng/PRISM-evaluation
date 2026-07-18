@@ -330,14 +330,6 @@
           <input type="text" id="f-gradeSubject" name="gradeSubject" placeholder="e.g., Grade 9 – Narra">
         </div>
         <div class="field">
-          <label class="q-label">How long have you been a student at KNHS?</label>
-          <div class="options" role="radiogroup" aria-label="Years enrolled at KNHS">
-            <label class="opt"><input type="radio" name="yearsExperience" value="Less than 1 year">Less than 1 year</label>
-            <label class="opt"><input type="radio" name="yearsExperience" value="1–3 years">1–3 years</label>
-            <label class="opt"><input type="radio" name="yearsExperience" value="4 years or more">4 years or more</label>
-          </div>
-        </div>
-        <div class="field">
           <label class="q-label">Comfort level using computers, smartphones, or web-based applications</label>
           <div class="options" role="radiogroup" aria-label="Comfort level with technology">
             <label class="opt"><input type="radio" name="comfortLevel" value="Not comfortable">Not comfortable</label>
@@ -666,7 +658,6 @@
       submitted_at: new Date().toISOString(),
       respondent_name: data.name || null,
       grade_subject: data.gradeSubject || null,
-      years_experience: data.yearsExperience || null,
       comfort_level: data.comfortLevel || null,
       devices: Array.isArray(data.devices) ? data.devices : (data.devices ? [data.devices] : []),
       attendance_method: data.attendanceMethod || null,
@@ -698,7 +689,6 @@
           submitted_at: payload.submitted_at,
           respondent_name: payload.respondent_name,
           grade_subject: payload.grade_subject,
-          years_experience: payload.years_experience,
           comfort_level: payload.comfort_level,
           devices: payload.devices,
           attendance_method: payload.attendance_method,
@@ -739,7 +729,6 @@
     lines.push('PART I \u2014 Respondent Profile');
     lines.push('Name: '+(data.name||'(not provided)'));
     lines.push('Grade level & section: '+(data.gradeSubject||''));
-    lines.push('Years at KNHS: '+(data.yearsExperience||''));
     lines.push('Comfort level: '+(data.comfortLevel||''));
     var devices = data.devices ? (Array.isArray(data.devices)?data.devices:[data.devices]) : [];
     lines.push('Devices used: '+devices.join(', ')+(data.devicesOther?(' ('+data.devicesOther+')'):''));
