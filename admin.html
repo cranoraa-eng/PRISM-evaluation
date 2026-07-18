@@ -258,7 +258,7 @@ function renderFilters(){
 function renderDashboard(){
   var tabs=[
     {id:"overview",label:"Overview"},{id:"charts",label:"Charts"},{id:"profiles",label:"Profiles"},
-    {id:"practices",label:"Practices"},{id:"open-ended",label:"Open-Ended"}
+    {id:"practices",label:"Practices"},{id:"open-ended",label:"Open-Ended"},{id:"thematic",label:"Thematic Analysis"}
   ];
   var teacherCount=STATE.teacherResponses.length;
   var adminCount=STATE.adminResponses.length;
@@ -289,6 +289,7 @@ function renderDashboard(){
   else if(STATE.activeTab==="profiles") html+=renderProfiles(r);
   else if(STATE.activeTab==="practices") html+=renderPractices(r);
   else if(STATE.activeTab==="open-ended") html+=renderOpenEnded(r);
+  else if(STATE.activeTab==="thematic") html+=renderThematic(r);
   html+='</div>';
   return html;
 }
@@ -465,6 +466,211 @@ function renderOpenEnded(r){
   return html;
 }
 
+var THEMES={
+  teacher:{
+    biggest_challenge:[
+      {label:"Time-Consuming Manual Tasks",keywords:["time","slow","manual","hours","long","tedious","exhausting"],color:"#B9532F"},
+      {label:"Grade Computation Errors",keywords:["error","mistake","wrong","inaccurate","incorrect","computation","transmute"],color:"#c62828"},
+      {label:"Record-Keeping Difficulties",keywords:["record","file","paper","store","organize","lost","filing","folder"],color:"#e65100"},
+      {label:"Communication Gaps",keywords:["communicate","reach","announce","inform","parent","contact","message","relay"],color:"#6a1b9a"},
+      {label:"Scattered Information",keywords:["scatter","different","platform","tool","multiple","fragmented","disorganized"],color:"#1565c0"},
+      {label:"Report Card Preparation",keywords:["report card","card","quarterly","grading period","submit","period"],color:"#2e7d32"},
+      {label:"Student/Parent Engagement",keywords:["engage","student","parent","participate","response","reply","acknowledge"],color:"#00695c"}
+    ],
+    missing_features:[
+      {label:"Grade Tracking / Transparency",keywords:["grade","view","check","see","track","transparency","compute"],color:"#B9532F"},
+      {label:"Messaging / Communication",keywords:["message","chat","communicate","contact","parent","notify","inform"],color:"#6a1b9a"},
+      {label:"Announcements",keywords:["announce","broadcast","notification","post","general","emergency"],color:"#1565c0"},
+      {label:"Attendance Features",keywords:["attend","record","track","monitor","daily","present","absent"],color:"#2e7d32"},
+      {label:"Assignment Management",keywords:["assign","submit","deadline","collection","tracking","homework"],color:"#e65100"},
+      {label:"Materials Repository",keywords:["material","upload","module","dll","dlp","repository","file","share"],color:"#00695c"},
+      {label:"Dashboard / Overview",keywords:["dashboard","summary","overview","home","main","landing"],color:"#6a1b9a"}
+    ],
+    concerns:[
+      {label:"Internet / Connectivity",keywords:["internet","connection","wifi","signal","online","access","slow","loading"],color:"#B9532F"},
+      {label:"Device / Hardware Access",keywords:["device","phone","computer","laptop","tablet","hardware","available"],color:"#c62828"},
+      {label:"Training / Learning Curve",keywords:["train","learn","how to","guide","tutorial","complex","difficult","new"],color:"#e65100"},
+      {label:"Data Privacy / Security",keywords:["privacy","security","confidential","data","leak","safe","protect"],color:"#6a1b9a"},
+      {label:"Transition / Adoption",keywords:["transition","adjust","change","adapt","old way","familiar","paper"],color:"#1565c0"},
+      {label:"Reliability / Downtime",keywords:["reliable","down","error","bug","crash","server","available"],color:"#2e7d32"}
+    ]
+  },
+  admin:{
+    biggest_challenge:[
+      {label:"Consolidation Time",keywords:["consolidat","time","compile","gather","collect","aggregate","slow"],color:"#B9532F"},
+      {label:"Data Verification",keywords:["verify","accuracy","correct","check","validate","error","mistake","inaccurate"],color:"#c62828"},
+      {label:"Submission Tracking",keywords:["track","submit","compliance","follow up","monitor","status","pending"],color:"#e65100"},
+      {label:"Communication Reach",keywords:["communicat","reach","announce","inform","relay","message","notif"],color:"#6a1b9a"},
+      {label:"Scattered Records",keywords:["scatter","paper","file","spreadsheet","multiple","tool","fragmented"],color:"#1565c0"},
+      {label:"Report Generation",keywords:["report","SF1","SF2","SF9","SF10","deped","prepare","generate"],color:"#2e7d32"},
+      {label:"Lack of Overview",keywords:["overview","clear","summary","snapshot","status","real-time","dashboard"],color:"#00695c"},
+      {label:"Audit Trails",keywords:["audit","trail","account","log","record","trace","history"],color:"#6a1b9a"}
+    ],
+    missing_features:[
+      {label:"Dashboard / Status Overview",keywords:["dashboard","overview","summary","status","real-time","snapshot"],color:"#B9532F"},
+      {label:"Automated Reports",keywords:["auto","generat","report","SF1","SF2","SF9","SF10","deped","compliant"],color:"#2e7d32"},
+      {label:"Compliance Monitoring",keywords:["compliance","track","submit","monitor","follow","pending","deadline"],color:"#e65100"},
+      {label:"Student Records Management",keywords:["student","record","enrollment","transfer","update","centraliz"],color:"#1565c0"},
+      {label:"Announcements / Broadcasting",keywords:["announce","broadcast","categor","emergency","general","event"],color:"#6a1b9a"},
+      {label:"User / Access Management",keywords:["account","user","access","role","permission","manage"],color:"#c62828"},
+      {label:"Audit Logging",keywords:["audit","log","timestamp","record","account","trace"],color:"#00695c"},
+      {label:"Data Backup / Export",keywords:["backup","export","data","save","download","csv"],color:"#6a1b9a"}
+    ],
+    concerns:[
+      {label:"Staff Training / Adoption",keywords:["train","staff","learn","how to","complex","resist","change","adopt"],color:"#B9532F"},
+      {label:"Internet / Connectivity",keywords:["internet","connection","wifi","signal","online","access","slow"],color:"#c62828"},
+      {label:"Data Privacy / Security",keywords:["privacy","security","confidential","data","leak","safe","protect"],color:"#6a1b9a"},
+      {label:"Transition Period",keywords:["transition","adjust","change","time","parallel","old system","familiar"],color:"#e65100"},
+      {label:"Device Availability",keywords:["device","computer","phone","hardware","available","share"],color:"#1565c0"},
+      {label:"Reliability Concerns",keywords:["reliable","downtime","error","bug","server","stable","uptime"],color:"#2e7d32"}
+    ]
+  },
+  student:{
+    biggest_challenge:[
+      {label:"Grade Visibility",keywords:["grade","see","check","view","know","report card","late","find out"],color:"#B9532F"},
+      {label:"Assignment Tracking",keywords:["assign","deadline","track","forget","miss","submission","homework"],color:"#c62828"},
+      {label:"Missed Announcements",keywords:["announce","miss","inform","know","reach","school","class"],color:"#e65100"},
+      {label:"Lost / Disorganized Materials",keywords:["material","lost","organize","module","handout","keep","damage"],color:"#6a1b9a"},
+      {label:"Communication Barriers",keywords:["ask","question","teacher","outside","class","contact","reach"],color:"#1565c0"},
+      {label:"Submission Confirmation",keywords:["submit","receive","confirm","sure","whether","got"],color:"#2e7d32"},
+      {label:"Attendance Tracking",keywords:["attend","record","track","absent","present","difficult"],color:"#00695c"}
+    ],
+    missing_features:[
+      {label:"View Grades Online",keywords:["grade","view","check","see","online","anytime","track"],color:"#B9532F"},
+      {label:"Messaging / Direct Contact",keywords:["message","ask","question","teacher","chat","direct","contact"],color:"#6a1b9a"},
+      {label:"Online Materials Access",keywords:["material","access","online","module","download","upload","sheet"],color:"#2e7d32"},
+      {label:"Assignment Submission",keywords:["assign","submit","online","upload","confirm","received","track"],color:"#e65100"},
+      {label:"Notifications / Alerts",keywords:["notif","alert","remind","update","new","announce"],color:"#1565c0"},
+      {label:"Announcements",keywords:["announce","categor","general","academic","emergency","event"],color:"#c62828"},
+      {label:"Attendance View",keywords:["attend","view","record","check","personal"],color:"#00695c"}
+    ],
+    concerns:[
+      {label:"Internet / Data Access",keywords:["internet","data","wifi","load","signal","connection","online"],color:"#B9532F"},
+      {label:"Device Access",keywords:["device","phone","computer","borrow","share","available","own"],color:"#c62828"},
+      {label:"Ease of Use / Learning",keywords:["easy","learn","how to","simple","complex","confusing","new"],color:"#e65100"},
+      {label:"Reliability / Downtime",keywords:["reliable","down","error","slow","load","server"],color:"#6a1b9a"},
+      {label:"Privacy / Safety",keywords:["privacy","safe","security","personal","info","data"],color:"#1565c0"}
+    ]
+  }
+};
+
+function extractThemes(text,themeList){
+  if(!text)return null;
+  var lower=text.toLowerCase();
+  var scores=themeList.map(function(t){
+    var score=0;
+    t.keywords.forEach(function(kw){if(lower.indexOf(kw)!==-1)score++});
+    return{theme:t,score:score};
+  });
+  scores.sort(function(a,b){return b.score-a.score});
+  if(scores[0].score===0)return{primary:themeList[themeList.length-1],confidence:0};
+  return{primary:scores[0].theme,confidence:scores[0].score/(scores[0].score+1)};
+}
+
+function renderThematic(r){
+  var html='<div class="panel active">';
+  var n=r.length;
+  var src=STATE.source;
+  var themes=THEMES[src]||THEMES.teacher;
+  var fields=[
+    {key:"biggest_challenge",label:"Biggest Challenge",themeKey:"biggest_challenge"},
+    {key:"missing_features",label:"Missing Features",themeKey:"missing_features"},
+    {key:"concerns",label:"Concerns",themeKey:"concerns"}
+  ];
+
+  html+='<div class="section-heading">Automatic Thematic Analysis</div>';
+  html+='<p style="font-size:12.5px;color:var(--muted);margin-bottom:20px">Responses are automatically categorized into themes using keyword extraction. Each response is assigned to the best-matching theme based on keyword overlap.</p>';
+
+  fields.forEach(function(field){
+    var themeList=themes[field.themeKey];
+    var responses=r.filter(function(res){return res[field.key]&&res[field.key].trim()});
+    var themeCounts={};
+    var themeExamples={};
+    themeList.forEach(function(t){themeCounts[t.label]=0;themeExamples[t.label]=[]});
+
+    var unclassified=0;
+    responses.forEach(function(res){
+      var result=extractThemes(res[field.key],themeList);
+      if(result&&result.score>0){
+        var label=result.primary.label;
+        themeCounts[label]++;
+        if(themeExamples[label].length<3){
+          var dt=res.submitted_at?new Date(res.submitted_at).toLocaleDateString("en-US",{month:"short",day:"numeric"}):"";
+          themeExamples[label].push({text:res[field.key],name:res.respondent_name||"Anonymous",date:dt});
+        }
+      }else{
+        unclassified++;
+      }
+    });
+
+    var sorted=themeList.slice().sort(function(a,b){return themeCounts[b.label]-themeCounts[a.label]});
+
+    html+='<div class="section-heading">'+field.label+' — Theme Distribution</div>';
+    html+='<div class="chart-card chart-card-wide" style="margin-bottom:20px"><canvas id="chart-theme-'+field.key+'" height="100"></canvas></div>';
+
+    html+='<div class="table-wrap"><table><thead><tr><th>Theme</th><th>Count</th><th>%</th><th>Example Response</th></tr></thead><tbody>';
+    sorted.forEach(function(t){
+      var count=themeCounts[t.label];
+      var pct=responses.length?(count/responses.length*100).toFixed(1):0;
+      var example=themeExamples[t.label][0];
+      var exText=example?example.text:"";
+      if(exText.length>120)exText=exText.slice(0,117)+"...";
+      html+='<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+t.color+';margin-right:6px"></span>'+esc(t.label)+'</td>';
+      html+='<td style="font-weight:700">'+count+'</td>';
+      html+='<td>'+pct+'%</td>';
+      html+='<td style="font-size:11.5px;color:var(--muted);font-style:italic">"'+esc(exText)+'"</td></tr>';
+    });
+    if(unclassified>0){
+      html+='<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#9e9e9e;margin-right:6px"></span>Unclassified</td>';
+      html+='<td style="font-weight:700">'+unclassified+'</td>';
+      html+='<td>'+(responses.length?(unclassified/responses.length*100).toFixed(1):0)+'%</td>';
+      html+='<td style="font-size:11.5px;color:var(--muted)">—</td></tr>';
+    }
+    html+='</tbody></table></div>';
+
+    html+='<div class="section-heading">'+field.label+' — Detailed Theme Breakdown</div>';
+    sorted.forEach(function(t){
+      var examples=themeExamples[t.label];
+      if(!examples.length)return;
+      html+='<div style="margin-bottom:16px">';
+      html+='<div style="font-size:13px;font-weight:700;color:'+t.color+';margin-bottom:6px">'+esc(t.label)+' ('+themeCounts[t.label]+')</div>';
+      examples.forEach(function(ex){
+        html+='<div class="open-text-card"><div class="ot-text">"'+esc(ex.text)+'"</div><div class="ot-meta">'+esc(ex.name)+(ex.date?" — "+ex.date:"")+'</div></div>';
+      });
+      html+='</div>';
+    });
+  });
+
+  setTimeout(function(){
+    destroyCharts();
+    fields.forEach(function(field){
+      var themeList=themes[field.themeKey];
+      var responses=r.filter(function(res){return res[field.key]&&res[field.key].trim()});
+      var themeCounts={};
+      themeList.forEach(function(t){themeCounts[t.label]=0});
+      var unclassified=0;
+      responses.forEach(function(res){
+        var result=extractThemes(res[field.key],themeList);
+        if(result&&result.score>0){themeCounts[result.primary.label]++}
+        else{unclassified++}
+      });
+      var sorted=themeList.slice().sort(function(a,b){return themeCounts[b.label]-themeCounts[a.label]});
+      var labels=sorted.map(function(t){return t.label});
+      var data=labels.map(function(l){return themeCounts[l]});
+      var colors=sorted.map(function(t){return t.color+"cc"});
+      if(unclassified>0){labels.push("Unclassified");data.push(unclassified);colors.push("#9e9e9ecc")}
+      var ctx=document.getElementById("chart-theme-"+field.key);
+      if(ctx){
+        var c=new Chart(ctx,{type:"bar",data:{labels:labels,datasets:[{label:"Responses",data:data,backgroundColor:colors,borderRadius:4,barPercentage:0.65}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,scales:{x:{beginAtZero:true,grid:{color:"rgba(0,0,0,0.04)"}},y:{grid:{display:false},ticks:{font:{size:11}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var total=responses.length;var pct=total?(ctx.raw/total*100).toFixed(1):0;return ctx.raw+" responses ("+pct+"%)"}}}}}});
+        ctx.parentElement.style.height=(labels.length*36+40)+"px";
+      }
+    });
+  },50);
+
+  html+='</div>';
+  return html;
+}
+
 function destroyCharts(){Object.values(STATE.charts||{}).forEach(function(c){try{c.destroy()}catch(e){}});STATE.charts={}}
 
 function applyFilters(){
@@ -521,7 +727,7 @@ function attachLoginHandlers(){
 
 function attachDashboardHandlers(){
   document.querySelectorAll(".tab").forEach(function(t){
-    t.addEventListener("click",function(){STATE.activeTab=t.getAttribute("data-tab");render();if(STATE.activeTab==="charts"&&STATE.filtered.length) setTimeout(function(){renderCharts(STATE.filtered);attachDashboardHandlers()},50)})
+    t.addEventListener("click",function(){STATE.activeTab=t.getAttribute("data-tab");render();if((STATE.activeTab==="charts"||STATE.activeTab==="thematic")&&STATE.filtered.length) setTimeout(function(){if(STATE.activeTab==="charts")renderCharts(STATE.filtered);attachDashboardHandlers()},50)})
   });
   document.querySelectorAll(".source-btn").forEach(function(b){
     b.addEventListener("click",function(){STATE.source=b.getAttribute("data-source");applyFilters();render()})
