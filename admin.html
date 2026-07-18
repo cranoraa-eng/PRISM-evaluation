@@ -194,7 +194,7 @@ function getFeatures(){return STATE.source==="admin"?FEATURES_ADMIN:FEATURES_TEA
 
 var COLORS=["#163A5F","#D6A331","#2e7d32","#B9532F","#6b7280","#1f4d7a","#1565c0","#f57f17","#7b1fa2","#00838f"];
 
-function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;","<":">","\"":"&quot;","'":"&#39;"}[c]})}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
 function mean(a){if(!a.length)return 0;return a.reduce(function(s,v){return s+Number(v)},0)/a.length}
 function interpret(m){if(m>=3.5)return{l:"Excellent",c:"excellent"};if(m>=2.5)return{l:"Good",c:"good"};if(m>=1.5)return{l:"Fair",c:"fair"};return{l:"Poor",c:"poor"}}
 function barClr(m){if(m>=3.5)return"var(--success)";if(m>=2.5)return"var(--navy)";if(m>=1.5)return"var(--gold)";return"var(--error)"}
