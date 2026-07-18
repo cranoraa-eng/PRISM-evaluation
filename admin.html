@@ -48,6 +48,13 @@ body{font-family:'Public Sans',sans-serif;color:var(--ink);background:var(--pape
 .btn-danger:hover{opacity:.85}
 .btn-sm{font-size:11.5px;padding:5px 10px}
 
+.source-bar{display:flex;gap:0;padding:0 28px;border-bottom:1px solid var(--line);overflow-x:auto}
+.source-btn{all:unset;cursor:pointer;padding:12px 20px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s}
+.source-btn:hover{color:var(--ink2)}
+.source-btn.active{color:var(--ink);border-bottom-color:var(--gold)}
+.source-btn .count{font-size:11px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:1px 7px;margin-left:6px;font-weight:700}
+.source-btn.active .count{background:var(--navy);color:#fff;border-color:var(--navy)}
+
 .tabs{display:flex;border-bottom:1px solid var(--line);padding:0 28px;gap:0;overflow-x:auto}
 .tab{all:unset;cursor:pointer;padding:12px 16px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
 .tab:hover{color:var(--ink2)}
@@ -114,6 +121,8 @@ tr:hover td{background:rgba(22,58,95,0.02)}
   .masthead h1{font-size:16px}
   .tabs{padding:0}
   .tab{padding:10px 12px;font-size:11.5px}
+  .source-bar{padding:0}
+  .source-btn{padding:10px 14px;font-size:12px}
   .stat-grid{grid-template-columns:1fr 1fr;gap:8px}
   .stat-card{padding:10px 12px}
   .stat-card .value{font-size:20px}
@@ -130,9 +139,9 @@ tr:hover td{background:rgba(22,58,95,0.02)}
 (function(){
 "use strict";
 
-var STATE={loggedIn:false,loading:true,responses:[],filtered:[],activeTab:"overview",filters:{search:"",experience:"all",comfort:"all"},charts:{},page:1,pageSize:25};
+var STATE={loggedIn:false,loading:true,teacherResponses:[],adminResponses:[],filtered:[],source:"teacher",activeTab:"overview",filters:{search:"",experience:"all",comfort:"all"},charts:{},page:1,pageSize:25};
 
-var CHALLENGES=[
+var CHALLENGES_TEACHER=[
   "Recording attendance manually is time-consuming.",
   "Computing grades manually is prone to errors.",
   "Storing and retrieving paper-based student records is difficult.",
@@ -143,7 +152,7 @@ var CHALLENGES=[
   "I have difficulty communicating directly and efficiently with parents about a student's progress."
 ];
 
-var FEATURES=[
+var FEATURES_TEACHER=[
   "Digital attendance tracking with historical records",
   "Automated grade computation using the DepEd transmutation table",
   "Automated, DepEd-compliant report card generation",
@@ -156,17 +165,37 @@ var FEATURES=[
   "Audit logging that records and time-stamps important actions for accountability"
 ];
 
-var FEATURE_SHORT=[
-  "Digital attendance tracking","Automated grade computation","Automated report card generation",
-  "Learning materials repository","Digital assignment submission","Messaging with students/parents",
-  "Categorized announcements","Automatic notifications","Teacher dashboard","Audit logging"
+var CHALLENGES_ADMIN=[
+  "Consolidating reports from multiple teachers is time-consuming.",
+  "Verifying the accuracy of submitted grades or attendance data is difficult.",
+  "Tracking which teachers have or haven't submitted required records is hard to monitor.",
+  "Important announcements do not reliably reach all teachers, students, or parents.",
+  "Student records are scattered across multiple paper files, spreadsheets, and tools.",
+  "Preparing DepEd-required reports (SF1, SF2, SF9, SF10) each period takes significant time.",
+  "I lack a clear overview of overall school attendance, grading, or compliance status at any given time.",
+  "Maintaining accountability and audit trails for administrative actions is difficult."
 ];
+
+var FEATURES_ADMIN=[
+  "Consolidated, real-time dashboard of school-wide attendance, grades, and compliance status",
+  "Automated generation of DepEd-compliant reports (SF1, SF2, SF9, SF10)",
+  "Teacher submission tracking and compliance monitoring",
+  "Centralized student records management (enrollment, transfers, updates)",
+  "School-wide categorized announcement broadcasting (general, academic, emergency, event, holiday)",
+  "User account and access management for teachers, students, and staff",
+  "Audit logging that records and time-stamps important administrative actions",
+  "Data backup and export capabilities",
+  "Automatic notifications for pending submissions or compliance deadlines",
+  "A messaging system to communicate directly with teachers, students, or parents"
+];
+
+function getChallenges(){return STATE.source==="admin"?CHALLENGES_ADMIN:CHALLENGES_TEACHER}
+function getFeatures(){return STATE.source==="admin"?FEATURES_ADMIN:FEATURES_TEACHER}
 
 var COLORS=["#163A5F","#D6A331","#2e7d32","#B9532F","#6b7280","#1f4d7a","#1565c0","#f57f17","#7b1fa2","#00838f"];
 
-function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;","<":">","\"":"&quot;","'":"&#39;"}[c]})}
 function mean(a){if(!a.length)return 0;return a.reduce(function(s,v){return s+Number(v)},0)/a.length}
-function stdDev(a){if(a.length<2)return 0;var m=mean(a);return Math.sqrt(a.reduce(function(s,v){return s+Math.pow(v-m,2)},0)/(a.length-1))}
 function interpret(m){if(m>=3.5)return{l:"Excellent",c:"excellent"};if(m>=2.5)return{l:"Good",c:"good"};if(m>=1.5)return{l:"Fair",c:"fair"};return{l:"Poor",c:"poor"}}
 function barClr(m){if(m>=3.5)return"var(--success)";if(m>=2.5)return"var(--navy)";if(m>=1.5)return"var(--gold)";return"var(--error)"}
 
@@ -178,14 +207,15 @@ function renderLogin(){
     +'<input type="email" id="login-email" placeholder="Email" autocomplete="email" />'
     +'<input type="password" id="login-pass" placeholder="Password" autocomplete="current-password" />'
     +'<button id="login-btn">Sign In</button>'
-    +'<a href="index.html">← Back to Questionnaire</a></div>';
+    +'<a href="index.html">\u2190 Back to Teacher Questionnaire</a>'
+    +'<a href="admin-questionnaire.html">\u2190 Back to Administrator Questionnaire</a></div>';
 }
 
 function renderFilters(){
   var eOpts=['<option value="all">'+(STATE.filters.experience==="all"?"All Experience":"All")+'</option>',
     '<option value="Less than 1 year"'+(STATE.filters.experience==="Less than 1 year"?' selected':'')+'>Less than 1 year</option>',
-    '<option value="1–3 years"'+(STATE.filters.experience==="1–3 years"?' selected':'')+'>1–3 years</option>',
-    '<option value="4–7 years"'+(STATE.filters.experience==="4–7 years"?' selected':'')+'>4–7 years</option>',
+    '<option value="1\u20133 years"'+(STATE.filters.experience==="1\u20133 years"?' selected':'')+'>1\u20133 years</option>',
+    '<option value="4\u20137 years"'+(STATE.filters.experience==="4\u20137 years"?' selected':'')+'>4\u20137 years</option>',
     '<option value="8 years or more"'+(STATE.filters.experience==="8 years or more"?' selected':'')+'>8 years or more</option>'
   ].join('');
   var cOpts=['<option value="all">All Comfort</option>',
@@ -195,10 +225,10 @@ function renderFilters(){
     '<option value="Very comfortable"'+(STATE.filters.comfort==="Very comfortable"?' selected':'')+'>Very comfortable</option>'
   ].join('');
   return '<div class="filter-bar">'
-    +'<div class="filter-group" style="flex:2;min-width:130px"><label>Search</label><input type="text" id="f-search" value="'+esc(STATE.filters.search)+'" placeholder="Name, grade, comments..." /></div>'
+    +'<div class="filter-group" style="flex:2;min-width:130px"><label>Search</label><input type="text" id="f-search" value="'+esc(STATE.filters.search)+'" placeholder="Name, role, comments..." /></div>'
     +'<div class="filter-group"><label>Experience</label><select id="f-exp">'+eOpts+'</select></div>'
     +'<div class="filter-group"><label>Comfort</label><select id="f-comf">'+cOpts+'</select></div>'
-    +'<div class="filter-count">Showing <b>'+STATE.filtered.length+'</b> of '+STATE.responses.length+' responses</div>'
+    +'<div class="filter-count">Showing <b>'+STATE.filtered.length+'</b> of '+(STATE.source==="admin"?STATE.adminResponses.length:STATE.teacherResponses.length)+' responses</div>'
     +'</div>';
 }
 
@@ -207,11 +237,22 @@ function renderDashboard(){
     {id:"overview",label:"Overview"},{id:"charts",label:"Charts"},{id:"profiles",label:"Profiles"},
     {id:"practices",label:"Practices"},{id:"open-ended",label:"Open-Ended"}
   ];
-  var html='<div class="shell"><div class="masthead"><div><h1 class="serif">PRISM Needs Analysis Dashboard</h1><p class="sub">Kiwalan National High School — Teacher Needs Analysis</p></div><div class="actions">';
-  html+='<a href="index.html" class="btn btn-ghost">Back to Form</a>';
+  var teacherCount=STATE.teacherResponses.length;
+  var adminCount=STATE.adminResponses.length;
+  var sourceLabel=STATE.source==="admin"?"Administrator":"Teacher";
+
+  var html='<div class="shell"><div class="masthead"><div><h1 class="serif">PRISM Needs Analysis Dashboard</h1><p class="sub">Kiwalan National High School \u2014 '+sourceLabel+' Responses</p></div><div class="actions">';
+  html+='<a href="index.html" class="btn btn-ghost">Teacher Form</a>';
+  html+='<a href="admin-questionnaire.html" class="btn btn-ghost">Admin Form</a>';
   html+='<button class="btn btn-ghost" id="refresh-btn">&#8635; Refresh</button>';
   html+='<button class="btn btn-ghost" id="export-csv">Export CSV</button>';
   html+='</div></div>';
+
+  html+='<div class="source-bar">';
+  html+='<button class="source-btn'+(STATE.source==="teacher"?" active":"")+'" data-source="teacher">Teachers<span class="count">'+teacherCount+'</span></button>';
+  html+='<button class="source-btn'+(STATE.source==="admin"?" active":"")+'" data-source="admin">Administrators<span class="count">'+adminCount+'</span></button>';
+  html+='</div>';
+
   html+='<div class="tabs" role="tablist">';
   tabs.forEach(function(t){html+='<button class="tab'+(STATE.activeTab===t.id?" active" : "")+'" data-tab="'+t.id+'">'+t.label+'</button>'});
   html+='</div>';
@@ -229,6 +270,8 @@ function renderDashboard(){
 function renderOverview(r){
   var html='<div class="panel active">';
   var n=r.length;
+  var CHALLENGES=getChallenges();
+  var FEATURES=getFeatures();
   var expCounts={};var comfCounts={};
   r.forEach(function(res){
     var e=res.years_experience||"Unknown";expCounts[e]=(expCounts[e]||0)+1;
@@ -278,21 +321,23 @@ function renderOverview(r){
 function renderCharts(r){
   var html='<div class="panel active">';
   var n=r.length;
+  var CHALLENGES=getChallenges();
+  var FEATURES=getFeatures();
   var chMeans=[];var feMeans=[];
   CHALLENGES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.challenge_answers||{})[String(i)];if(val)v.push(+val)});chMeans.push(mean(v))});
   FEATURES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.feature_answers||{})[String(i)];if(val)v.push(+val)});feMeans.push(mean(v))});
 
   html+='<div class="chart-grid">';
-  html+='<div class="chart-card chart-card-wide"><h3>Challenges — Mean Scores</h3><p class="sub">Horizontal bar chart with interpretation labels</p><canvas id="chart-challenges" height="120"></canvas></div>';
-  html+='<div class="chart-card chart-card-wide"><h3>Feature Priorities — Mean Scores</h3><p class="sub">Horizontal bar chart with interpretation labels</p><canvas id="chart-features" height="140"></canvas></div>';
+  html+='<div class="chart-card chart-card-wide"><h3>Challenges \u2014 Mean Scores</h3><p class="sub">Horizontal bar chart with interpretation labels</p><canvas id="chart-challenges" height="120"></canvas></div>';
+  html+='<div class="chart-card chart-card-wide"><h3>Feature Priorities \u2014 Mean Scores</h3><p class="sub">Horizontal bar chart with interpretation labels</p><canvas id="chart-features" height="140"></canvas></div>';
 
   var top3Counts={};r.forEach(function(res){(res.top3_picks||[]).forEach(function(p){top3Counts[p]=(top3Counts[p]||0)+1})});
   var sortedTop3=Object.keys(top3Counts).sort(function(a,b){return top3Counts[b]-top3Counts[a]});
   html+='<div class="chart-card"><h3>Top 3 Picks Tally</h3><p class="sub">Most desired features</p><canvas id="chart-top3"></canvas></div>';
 
   var pracFields=["attendance_method","grading_method","materials_method","comms_method"];
-  var pracLabels=["Attendance","Grading","Materials","Communication"];
-  html+='<div class="chart-card"><h3>Current Practices Distribution</h3><p class="sub">How teachers currently handle tasks</p><canvas id="chart-practices"></canvas></div>';
+  var pracLabels=STATE.source==="admin"?["Report Generation","Compliance Tracking","Enrollment Mgmt","Communication"]:["Attendance","Grading","Materials","Communication"];
+  html+='<div class="chart-card"><h3>Current Practices Distribution</h3><p class="sub">How '+(STATE.source==="admin"?"administrators":"teachers")+' currently handle tasks</p><canvas id="chart-practices"></canvas></div>';
   html+='</div></div>';
 
   setTimeout(function(){
@@ -334,11 +379,12 @@ function renderCharts(r){
 
 function renderProfiles(r){
   var html='<div class="panel active">';
+  var isAdmin=STATE.source==="admin";
   html+='<div class="section-heading">Respondent Profiles</div>';
-  html+='<div class="table-wrap"><table><thead><tr><th>#</th><th>Reference</th><th>Date</th><th>Name</th><th>Grade/Subject</th><th>Experience</th><th>Comfort</th><th>Devices</th></tr></thead><tbody>';
+  html+='<div class="table-wrap"><table><thead><tr><th>#</th><th>Reference</th><th>Date</th><th>Name</th>'+(isAdmin?'<th>Position/Role</th>':'<th>Grade/Subject</th>')+'<th>Experience</th><th>Comfort</th><th>Devices</th></tr></thead><tbody>';
   r.forEach(function(res,i){
-    var dt=res.submitted_at?new Date(res.submitted_at).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"}):"—";
-    html+='<tr><td>'+(i+1)+'</td><td style="font-family:monospace;font-size:11px">'+(res.id?res.id.slice(0,8).toUpperCase():"—")+'</td><td>'+dt+'</td><td>'+esc(res.respondent_name||"—")+'</td><td>'+esc(res.grade_subject||"—")+'</td><td>'+esc(res.years_experience||"—")+'</td><td>'+esc(res.comfort_level||"—")+'</td><td>'+esc((res.devices||[]).join(", ")||"—")+'</td></tr>';
+    var dt=res.submitted_at?new Date(res.submitted_at).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"}):"\u2014";
+    html+='<tr><td>'+(i+1)+'</td><td style="font-family:monospace;font-size:11px">'+(res.id?res.id.slice(0,8).toUpperCase():"\u2014")+'</td><td>'+dt+'</td><td>'+esc(res.respondent_name||"\u2014")+'</td><td>'+esc(isAdmin?(res.admin_role||"\u2014"):(res.grade_subject||"\u2014"))+'</td><td>'+esc(res.years_experience||"\u2014")+'</td><td>'+esc(res.comfort_level||"\u2014")+'</td><td>'+esc((res.devices||[]).join(", ")||"\u2014")+'</td></tr>';
   });
   html+='</tbody></table></div>';
 
@@ -361,7 +407,7 @@ function renderProfiles(r){
 function renderPractices(r){
   var html='<div class="panel active">';
   var fields=["attendance_method","grading_method","materials_method","comms_method"];
-  var labels=["Attendance","Grading","Materials","Communication"];
+  var labels=STATE.source==="admin"?["Report Generation","Compliance Tracking","Enrollment Management","Communication"]:["Attendance","Grading","Materials","Communication"];
   fields.forEach(function(f,i){
     html+='<div class="section-heading">'+labels[i]+' Method Distribution</div>';
     var counts={};r.forEach(function(res){var v=res[f]||"Unknown";counts[v]=(counts[v]||0)+1});
@@ -384,7 +430,7 @@ function renderOpenEnded(r){
     if(!responses.length){html+='<p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">No responses for this field.</p>';return}
     responses.forEach(function(res){
       var dt=res.submitted_at?new Date(res.submitted_at).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"}):"";
-      html+='<div class="open-text-card"><div class="ot-text">'+esc(res[f.key])+'</div><div class="ot-meta">'+esc(res.respondent_name||"Anonymous")+(dt?" — "+dt:"")+'</div></div>';
+      html+='<div class="open-text-card"><div class="ot-text">'+esc(res[f.key])+'</div><div class="ot-meta">'+esc(res.respondent_name||"Anonymous")+(dt?" \u2014 "+dt:"")+'</div></div>';
     });
   });
   html+='</div>';
@@ -394,8 +440,9 @@ function renderOpenEnded(r){
 function destroyCharts(){Object.values(STATE.charts||{}).forEach(function(c){try{c.destroy()}catch(e){}});STATE.charts={}}
 
 function applyFilters(){
-  var r=STATE.responses;var f=STATE.filters;
-  if(f.search){var q=f.search.toLowerCase();r=r.filter(function(res){return(res.respondent_name||"").toLowerCase().indexOf(q)!==-1||(res.grade_subject||"").toLowerCase().indexOf(q)!==-1||(res.years_experience||"").toLowerCase().indexOf(q)!==-1})}
+  var r=STATE.source==="admin"?STATE.adminResponses:STATE.teacherResponses;
+  var f=STATE.filters;
+  if(f.search){var q=f.search.toLowerCase();r=r.filter(function(res){return(res.respondent_name||"").toLowerCase().indexOf(q)!==-1||(res.grade_subject||"").toLowerCase().indexOf(q)!==-1||(res.admin_role||"").toLowerCase().indexOf(q)!==-1||(res.years_experience||"").toLowerCase().indexOf(q)!==-1})}
   if(f.experience!=="all") r=r.filter(function(res){return res.years_experience===f.experience});
   if(f.comfort!=="all") r=r.filter(function(res){return res.comfort_level===f.comfort});
   STATE.filtered=r;STATE.page=1;
@@ -403,9 +450,16 @@ function applyFilters(){
 
 function loadResponses(){
   STATE.loading=true;render();
-  supabaseClient.from("needs_analysis_responses").select("*").order("submitted_at",{ascending:false}).then(function(res){
-    if(res.error){STATE.loading=false;toast("Load error: "+res.error.message);render();return}
-    STATE.responses=res.data||[];STATE.loading=false;applyFilters();render();
+  Promise.all([
+    supabaseClient.from("needs_analysis_responses").select("*").order("submitted_at",{ascending:false}),
+    supabaseClient.from("needs_analysis_admin_responses").select("*").order("submitted_at",{ascending:false})
+  ]).then(function(results){
+    var tErr=results[0].error;var aErr=results[1].error;
+    if(tErr)toast("Teacher load error: "+tErr.message);
+    if(aErr)toast("Admin load error: "+aErr.message);
+    STATE.teacherResponses=results[0].data||[];
+    STATE.adminResponses=results[1].data||[];
+    STATE.loading=false;applyFilters();render();
   });
 }
 
@@ -438,6 +492,9 @@ function attachDashboardHandlers(){
   document.querySelectorAll(".tab").forEach(function(t){
     t.addEventListener("click",function(){STATE.activeTab=t.getAttribute("data-tab");render();if(STATE.activeTab==="charts"&&STATE.filtered.length) setTimeout(function(){renderCharts(STATE.filtered);attachDashboardHandlers()},50)})
   });
+  document.querySelectorAll(".source-btn").forEach(function(b){
+    b.addEventListener("click",function(){STATE.source=b.getAttribute("data-source");applyFilters();render()})
+  });
   var refreshBtn=document.getElementById("refresh-btn");
   if(refreshBtn) refreshBtn.addEventListener("click",function(){loadResponses()});
   var exportBtn=document.getElementById("export-csv");
@@ -453,14 +510,17 @@ function attachDashboardHandlers(){
 
 function exportCSV(){
   var r=STATE.filtered;if(!r.length){toast("No data to export");return}
-  var headers=["Reference","Submitted","Name","Grade/Subject","Experience","Comfort","Devices","Attendance","Grading","Materials","Communication"];
+  var isAdmin=STATE.source==="admin";
+  var CHALLENGES=getChallenges();
+  var FEATURES=getFeatures();
+  var headers=isAdmin?["Reference","Submitted","Name","Position/Role","Experience","Comfort","Devices","Report Generation","Compliance Tracking","Enrollment Mgmt","Communication"]:["Reference","Submitted","Name","Grade/Subject","Experience","Comfort","Devices","Attendance","Grading","Materials","Communication"];
   CHALLENGES.forEach(function(_,i){headers.push("C"+(i+1))});
   FEATURES.forEach(function(_,i){headers.push("F"+(i+1))});
   headers.push("Top 3 Picks","Biggest Challenge","Missing Features","Concerns");
   var rows=[headers.join(",")];
   r.forEach(function(res){
     var ref=res.id?res.id.slice(0,8).toUpperCase():"";
-    var line=[ref,res.submitted_at||"",res.respondent_name||"",res.grade_subject||"",res.years_experience||"",res.comfort_level||"",(res.devices||[]).join("; "),res.attendance_method||"",res.grading_method||"",res.materials_method||"",res.comms_method||""];
+    var line=[ref,res.submitted_at||"",res.respondent_name||"",isAdmin?(res.admin_role||""):(res.grade_subject||""),res.years_experience||"",res.comfort_level||"",(res.devices||[]).join("; "),res.attendance_method||"",res.grading_method||"",res.materials_method||"",res.comms_method||""];
     CHALLENGES.forEach(function(_,i){line.push((res.challenge_answers||{})["challenge_"+i]||"")});
     FEATURES.forEach(function(_,i){line.push((res.feature_answers||{})["feature_"+i]||"")});
     line.push((res.top3_picks||[]).join("; "),res.biggest_challenge||"",res.missing_features||"",res.concerns||"");
@@ -468,7 +528,7 @@ function exportCSV(){
   });
   var blob=new Blob([rows.join("\n")],{type:"text/csv"});
   var url=URL.createObjectURL(blob);
-  var a=document.createElement("a");a.href=url;a.download="prism_needs_analysis_"+new Date().toISOString().slice(0,10)+".csv";a.click();
+  var a=document.createElement("a");a.href=url;a.download="prism_"+STATE.source+"_needs_analysis_"+new Date().toISOString().slice(0,10)+".csv";a.click();
   URL.revokeObjectURL(url);toast("CSV exported ("+r.length+" responses)");
 }
 
