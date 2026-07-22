@@ -139,7 +139,7 @@ tr:hover td{background:rgba(22,58,95,0.02)}
 (function(){
 "use strict";
 
-var STATE={loggedIn:false,loading:true,teacherResponses:[],adminResponses:[],studentResponses:[],filtered:[],source:"teacher",activeTab:"overview",filters:{search:"",experience:"all",comfort:"all"},charts:{},page:1,pageSize:25};
+var STATE={loggedIn:false,loading:true,teacherResponses:[],adminResponses:[],studentResponses:[],filtered:[],source:"teacher",activeTab:"overview",filters:{search:"",experience:"all",comfort:"all"},charts:{},page:1,pageSize:25,selectedRespondent:null};
 
 var CHALLENGES_TEACHER=[
   "Recording attendance manually is time-consuming.",
@@ -259,7 +259,8 @@ function renderFilters(){
 function renderDashboard(){
   var tabs=[
     {id:"overview",label:"Overview"},{id:"charts",label:"Charts"},{id:"profiles",label:"Profiles"},
-    {id:"practices",label:"Practices"},{id:"open-ended",label:"Open-Ended"},{id:"thematic",label:"Thematic Analysis"}
+    {id:"practices",label:"Practices"},{id:"open-ended",label:"Open-Ended"},{id:"thematic",label:"Thematic Analysis"},
+    {id:"respondents",label:"Respondents"}
   ];
   var teacherCount=STATE.teacherResponses.length;
   var adminCount=STATE.adminResponses.length;
@@ -291,6 +292,7 @@ function renderDashboard(){
   else if(STATE.activeTab==="practices") html+=renderPractices(r);
   else if(STATE.activeTab==="open-ended") html+=renderOpenEnded(r);
   else if(STATE.activeTab==="thematic") html+=renderThematic(r);
+  else if(STATE.activeTab==="respondents") html+=renderRespondents(r);
   html+='</div>';
   return html;
 }
@@ -749,6 +751,152 @@ function renderThematic(r){
   return html;
 }
 
+function renderRespondentDetail(res,src){
+  var isAdmin=src==="admin";
+  var isStudent=src==="student";
+  var CHALLENGES=getChallenges();
+  var FEATURES=getFeatures();
+  var html='<div class="panel active">';
+  html+='<button class="btn btn-ghost" id="back-to-list" style="margin-bottom:16px">\u2190 Back to All Respondents</button>';
+
+  var dt=res.submitted_at?new Date(res.submitted_at).toLocaleString("en-US",{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"}):"\u2014";
+  var ref=res.id?res.id.slice(0,8).toUpperCase():"\u2014";
+
+  html+='<div style="background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:20px">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">';
+  html+='<div>';
+  html+='<div style="font-size:18px;font-weight:700;color:var(--ink)">'+esc(res.respondent_name||"Anonymous")+'</div>';
+  html+='<div style="font-size:12px;color:var(--muted);margin-top:2px">Ref: <code>'+ref+'</code> &middot; Submitted: '+dt+'</div>';
+  html+='</div>';
+  html+='</div>';
+  html+='</div>';
+
+  html+='<div class="section-heading">Part I \u2014 Profile</div>';
+  html+='<div class="table-wrap"><table>';
+  html+='<tr><td style="font-weight:600;width:200px">Name</td><td>'+esc(res.respondent_name||"\u2014")+'</td></tr>';
+  if(isAdmin){
+    html+='<tr><td style="font-weight:600">Position/Role</td><td>'+esc(res.admin_role||"\u2014")+'</td></tr>';
+  }else{
+    html+='<tr><td style="font-weight:600">Grade/Subject</td><td>'+esc(res.grade_subject||"\u2014")+'</td></tr>';
+  }
+  if(res.years_experience){
+    html+='<tr><td style="font-weight:600">'+(isStudent?"Years at KNHS":isAdmin?"Years in Role":"Experience")+'</td><td>'+esc(res.years_experience)+'</td></tr>';
+  }
+  html+='<tr><td style="font-weight:600">Comfort Level</td><td>'+esc(res.comfort_level||"\u2014")+'</td></tr>';
+  html+='<tr><td style="font-weight:600">Devices</td><td>'+esc((res.devices||[]).join(", ")||"\u2014")+'</td></tr>';
+  html+='</table></div>';
+
+  html+='<div class="section-heading">Part II \u2014 Current Practices</div>';
+  html+='<div class="table-wrap"><table>';
+  var pracFields=[
+    {key:"attendance_method",label:isAdmin?"Report Generation":isStudent?"Grade Checking":"Attendance"},
+    {key:"grading_method",label:isAdmin?"Compliance Tracking":isStudent?"Materials Receiving":"Grading"},
+    {key:"materials_method",label:isAdmin?"Enrollment Management":isStudent?"Announcements":"Materials"},
+    {key:"comms_method",label:"Communication"}
+  ];
+  pracFields.forEach(function(f){
+    html+='<tr><td style="font-weight:600;width:200px">'+f.label+'</td><td>'+esc(res[f.key]||"\u2014")+'</td></tr>';
+  });
+  html+='</table></div>';
+
+  html+='<div class="section-heading">Part III \u2014 Challenges (1\u20134)</div>';
+  html+='<div class="table-wrap"><table><thead><tr><th style="width:60%">Statement</th><th style="width:15%;text-align:center">Rating</th><th style="width:25%;text-align:center">Interpretation</th></tr></thead><tbody>';
+  CHALLENGES.forEach(function(ch,i){
+    var val=(res.challenge_answers||{})["challenge_"+i];
+    var m=val?Number(val):0;
+    var interp=interpretChallenge(m);
+    var barW=m?((m/4)*100):0;
+    html+='<tr><td>'+esc(ch)+'</td><td style="text-align:center"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-weight:700;font-size:13px;background:var(--paper);border:1px solid var(--line)">'+(val||"\u2014")+'</span></td>';
+    html+='<td style="text-align:center"><span class="interp '+interp.c+'">'+interp.l+'</span></td></tr>';
+  });
+  html+='</tbody></table></div>';
+
+  html+='<div class="section-heading">Part IV \u2014 Feature Priorities (1\u20134)</div>';
+  html+='<div class="table-wrap"><table><thead><tr><th style="width:60%">Feature</th><th style="width:15%;text-align:center">Rating</th><th style="width:25%;text-align:center">Interpretation</th></tr></thead><tbody>';
+  FEATURES.forEach(function(fe,i){
+    var val=(res.feature_answers||{})["feature_"+i];
+    var m=val?Number(val):0;
+    var interp=interpretFeature(m);
+    html+='<tr><td>'+esc(fe)+'</td><td style="text-align:center"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-weight:700;font-size:13px;background:var(--paper);border:1px solid var(--line)">'+(val||"\u2014")+'</span></td>';
+    html+='<td style="text-align:center"><span class="interp '+interp.c+'">'+interp.l+'</span></td></tr>';
+  });
+  html+='</tbody></table></div>';
+
+  var top3=res.top3_picks||[];
+  if(top3.length){
+    html+='<div class="section-heading">Top 3 Feature Picks</div>';
+    html+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">';
+    top3.forEach(function(p,i){
+      html+='<span style="display:inline-block;padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;background:var(--navy);color:#fff">'+(i+1)+'. '+esc(p)+'</span>';
+    });
+    html+='</div>';
+  }
+
+  html+='<div class="section-heading">Part V \u2014 Open-Ended Responses</div>';
+  html+='<div class="table-wrap"><table>';
+  html+='<tr><td style="font-weight:600;width:200px;vertical-align:top">Biggest Challenge</td><td style="font-size:13px;line-height:1.6">'+esc(res.biggest_challenge||"\u2014")+'</td></tr>';
+  html+='<tr><td style="font-weight:600;vertical-align:top">Missing Features</td><td style="font-size:13px;line-height:1.6">'+esc(res.missing_features||"\u2014")+'</td></tr>';
+  html+='<tr><td style="font-weight:600;vertical-align:top">Concerns</td><td style="font-size:13px;line-height:1.6">'+esc(res.concerns||"\u2014")+'</td></tr>';
+  html+='</table></div>';
+
+  html+='</div>';
+  return html;
+}
+
+function renderRespondents(r){
+  var src=STATE.source;
+
+  if(STATE.selectedRespondent){
+    return renderRespondentDetail(STATE.selectedRespondent,src);
+  }
+
+  var html='<div class="panel active">';
+  var n=r.length;
+  html+='<div class="section-heading">All Respondents ('+n+')</div>';
+  html+='<p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Click on any respondent to view their complete answers.</p>';
+
+  if(!n){
+    html+='<p style="font-size:13px;color:var(--muted);padding:20px;text-align:center">No responses found for the current filters.</p>';
+    html+='</div>';
+    return html;
+  }
+
+  html+='<div class="table-wrap"><table><thead><tr>';
+  html+='<th style="width:5%">#</th>';
+  html+='<th style="width:10%">Ref</th>';
+  html+='<th style="width:15%">Date</th>';
+  html+='<th style="width:15%">Name</th>';
+  html+='<th style="width:15%">'+(src==="admin"?"Position/Role":"Grade/Subject")+'</th>';
+  html+='<th style="width:12%">Experience</th>';
+  html+='<th style="width:12%">Comfort</th>';
+  html+='<th style="width:8%">Challenges</th>';
+  html+='<th style="width:8%">Features</th>';
+  html+='</tr></thead><tbody>';
+
+  r.forEach(function(res,i){
+    var dt=res.submitted_at?new Date(res.submitted_at).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"}):"\u2014";
+    var ref=res.id?res.id.slice(0,8).toUpperCase():"\u2014";
+    var chCount=0;var feCount=0;
+    for(var ci=0;ci<8;ci++){if((res.challenge_answers||{})["challenge_"+ci])chCount++}
+    for(var fi=0;fi<10;fi++){if((res.feature_answers||{})["feature_"+fi])feCount++}
+    html+='<tr class="respondent-row" data-idx="'+i+'" style="cursor:pointer">';
+    html+='<td>'+(i+1)+'</td>';
+    html+='<td style="font-family:monospace;font-size:11px">'+ref+'</td>';
+    html+='<td>'+dt+'</td>';
+    html+='<td style="font-weight:600">'+esc(res.respondent_name||"Anonymous")+'</td>';
+    html+='<td>'+esc(src==="admin"?(res.admin_role||"\u2014"):(res.grade_subject||"\u2014"))+'</td>';
+    html+='<td>'+esc(res.years_experience||"\u2014")+'</td>';
+    html+='<td>'+esc(res.comfort_level||"\u2014")+'</td>';
+    html+='<td style="text-align:center">'+chCount+'/8</td>';
+    html+='<td style="text-align:center">'+feCount+'/10</td>';
+    html+='</tr>';
+  });
+
+  html+='</tbody></table></div>';
+  html+='</div>';
+  return html;
+}
+
 function destroyCharts(){Object.values(STATE.charts||{}).forEach(function(c){try{c.destroy()}catch(e){}});STATE.charts={}}
 
 function applyFilters(){
@@ -805,7 +953,7 @@ function attachLoginHandlers(){
 
 function attachDashboardHandlers(){
   document.querySelectorAll(".tab").forEach(function(t){
-    t.addEventListener("click",function(){STATE.activeTab=t.getAttribute("data-tab");render();if((STATE.activeTab==="charts"||STATE.activeTab==="thematic")&&STATE.filtered.length) setTimeout(function(){if(STATE.activeTab==="charts")renderCharts(STATE.filtered);attachDashboardHandlers()},50)})
+    t.addEventListener("click",function(){STATE.activeTab=t.getAttribute("data-tab");STATE.selectedRespondent=null;render();if((STATE.activeTab==="charts"||STATE.activeTab==="thematic")&&STATE.filtered.length) setTimeout(function(){if(STATE.activeTab==="charts")renderCharts(STATE.filtered);attachDashboardHandlers()},50)})
   });
   document.querySelectorAll(".source-btn").forEach(function(b){
     b.addEventListener("click",function(){STATE.source=b.getAttribute("data-source");applyFilters();render()})
@@ -821,6 +969,20 @@ function attachDashboardHandlers(){
   if(fSearch) fSearch.addEventListener("input",function(){STATE.filters.search=fSearch.value;applyFilters();render()});
   if(fExp) fExp.addEventListener("change",function(){STATE.filters.experience=fExp.value;applyFilters();render()});
   if(fComf) fComf.addEventListener("change",function(){STATE.filters.comfort=fComf.value;applyFilters();render()});
+
+  document.querySelectorAll(".respondent-row").forEach(function(row){
+    row.addEventListener("click",function(){
+      var idx=Number(row.getAttribute("data-idx"));
+      STATE.selectedRespondent=STATE.filtered[idx];
+      render();
+      attachDashboardHandlers();
+    });
+    row.addEventListener("mouseenter",function(){row.style.background="var(--paper)"});
+    row.addEventListener("mouseleave",function(){row.style.background=""});
+  });
+
+  var backBtn=document.getElementById("back-to-list");
+  if(backBtn) backBtn.addEventListener("click",function(){STATE.selectedRespondent=null;render();attachDashboardHandlers()});
 }
 
 function exportCSV(){
