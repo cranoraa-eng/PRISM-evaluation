@@ -470,102 +470,129 @@ function renderOpenEnded(r){
 var THEMES={
   teacher:{
     biggest_challenge:[
-      {label:"Time-Consuming Manual Tasks",keywords:["time","slow","manual","hours","long","tedious","exhausting"],color:"#B9532F"},
-      {label:"Grade Computation Errors",keywords:["error","mistake","wrong","inaccurate","incorrect","computation","transmute"],color:"#c62828"},
-      {label:"Record-Keeping Difficulties",keywords:["record","file","paper","store","organize","lost","filing","folder"],color:"#e65100"},
-      {label:"Communication Gaps",keywords:["communicate","reach","announce","inform","parent","contact","message","relay"],color:"#6a1b9a"},
-      {label:"Scattered Information",keywords:["scatter","different","platform","tool","multiple","fragmented","disorganized"],color:"#1565c0"},
-      {label:"Report Card Preparation",keywords:["report card","card","quarterly","grading period","submit","period"],color:"#2e7d32"},
-      {label:"Student/Parent Engagement",keywords:["engage","student","parent","participate","response","reply","acknowledge"],color:"#00695c"}
+      {label:"Time-Consuming Manual Tasks",desc:"Teachers spend excessive time on repetitive manual work like recording attendance, computing grades, or preparing reports by hand.",keywords:["time","slow","manual","hours","long","tedious","exhausting","lot of time","too much","waste"],color:"#B9532F"},
+      {label:"Grade Computation Errors",desc:"Manual grade computation using the DepEd transmutation table is error-prone and stressful.",keywords:["error","mistake","wrong","inaccurate","incorrect","computation","transmute","miscalculate","calculator"],color:"#c62828"},
+      {label:"Record-Keeping Difficulties",desc:"Paper-based records are hard to store, organize, and retrieve when needed.",keywords:["record","file","paper","store","organize","lost","filing","folder","search","find","cabinet"],color:"#e65100"},
+      {label:"Communication Gaps",desc:"Announcements and messages fail to reach all students or parents reliably.",keywords:["communicate","reach","announce","inform","parent","contact","message","relay","receive","reply"],color:"#6a1b9a"},
+      {label:"Scattered Information",desc:"Student data is spread across multiple tools, spreadsheets, and paper files making it hard to get a complete picture.",keywords:["scatter","different","platform","tool","multiple","fragmented","disorganized","spreadsheet","separate"],color:"#1565c0"},
+      {label:"Report Card Preparation",desc:"Generating DepEd-compliant report cards each quarter is extremely time-consuming.",keywords:["report card","card","quarterly","grading period","submit","period","SF1","SF2","SF9","SF10","report card"],color:"#2e7d32"},
+      {label:"Student/Parent Engagement",desc:"Getting responses and acknowledgments from students and parents is difficult.",keywords:["engage","student","parent","participate","response","reply","acknowledge","respond","feedback"],color:"#00695c"}
     ],
     missing_features:[
-      {label:"Grade Tracking / Transparency",keywords:["grade","view","check","see","track","transparency","compute"],color:"#B9532F"},
-      {label:"Messaging / Communication",keywords:["message","chat","communicate","contact","parent","notify","inform"],color:"#6a1b9a"},
-      {label:"Announcements",keywords:["announce","broadcast","notification","post","general","emergency"],color:"#1565c0"},
-      {label:"Attendance Features",keywords:["attend","record","track","monitor","daily","present","absent"],color:"#2e7d32"},
-      {label:"Assignment Management",keywords:["assign","submit","deadline","collection","tracking","homework"],color:"#e65100"},
-      {label:"Materials Repository",keywords:["material","upload","module","dll","dlp","repository","file","share"],color:"#00695c"},
-      {label:"Dashboard / Overview",keywords:["dashboard","summary","overview","home","main","landing"],color:"#6a1b9a"}
+      {label:"Grade Tracking / Transparency",desc:"Ability to view, compute, and share grades digitally in real-time.",keywords:["grade","view","check","see","track","transparency","compute","digital","online","real-time"],color:"#B9532F"},
+      {label:"Messaging / Communication",desc:"Direct messaging system to communicate with students and parents efficiently.",keywords:["message","chat","communicate","contact","parent","notify","inform","inbox","send"],color:"#6a1b9a"},
+      {label:"Announcements",desc:"Categorized announcement system to broadcast updates to specific or all groups.",keywords:["announce","broadcast","notification","post","general","emergency","categorize","category"],color:"#1565c0"},
+      {label:"Attendance Features",desc:"Digital attendance tracking with historical records and easy input.",keywords:["attend","record","track","monitor","daily","present","absent","attendance","absent"],color:"#2e7d32"},
+      {label:"Assignment Management",desc:"Online posting and submission tracking for assignments and homework.",keywords:["assign","submit","deadline","collection","tracking","homework","task","due"],color:"#e65100"},
+      {label:"Materials Repository",desc:"Centralized storage for learning materials, modules, DLLs, and DLPs.",keywords:["material","upload","module","dll","dlp","repository","file","share","storage","folder"],color:"#00695c"},
+      {label:"Dashboard / Overview",desc:"A single view summarizing classes, attendance, grades, and recent activity.",keywords:["dashboard","summary","overview","home","main","landing","snapshot","at a glance"],color:"#6a1b9a"}
     ],
     concerns:[
-      {label:"Internet / Connectivity",keywords:["internet","connection","wifi","signal","online","access","slow","loading"],color:"#B9532F"},
-      {label:"Device / Hardware Access",keywords:["device","phone","computer","laptop","tablet","hardware","available"],color:"#c62828"},
-      {label:"Training / Learning Curve",keywords:["train","learn","how to","guide","tutorial","complex","difficult","new"],color:"#e65100"},
-      {label:"Data Privacy / Security",keywords:["privacy","security","confidential","data","leak","safe","protect"],color:"#6a1b9a"},
-      {label:"Transition / Adoption",keywords:["transition","adjust","change","adapt","old way","familiar","paper"],color:"#1565c0"},
-      {label:"Reliability / Downtime",keywords:["reliable","down","error","bug","crash","server","available"],color:"#2e7d32"}
+      {label:"Internet / Connectivity",desc:"Unreliable or slow internet access may prevent system use.",keywords:["internet","connection","wifi","signal","online","access","slow","loading","bandwidth","data"],color:"#B9532F"},
+      {label:"Device / Hardware Access",desc:"Lack of personal computers or smartphones for accessing the system.",keywords:["device","phone","computer","laptop","tablet","hardware","available","afford"],color:"#c62828"},
+      {label:"Training / Learning Curve",desc:"Teachers may need training to adapt to a new digital system.",keywords:["train","learn","how to","guide","tutorial","complex","difficult","new","orientation"],color:"#e65100"},
+      {label:"Data Privacy / Security",desc:"Concerns about the safety and confidentiality of student data.",keywords:["privacy","security","confidential","data","leak","safe","protect","breach","hack"],color:"#6a1b9a"},
+      {label:"Transition / Adoption",desc:"Difficulty adjusting from paper-based workflows to a digital system.",keywords:["transition","adjust","change","adapt","old way","familiar","paper","习惯","convenience"],color:"#1565c0"},
+      {label:"Reliability / Downtime",desc:"System may be down or unavailable when needed most.",keywords:["reliable","down","error","bug","crash","server","available","uptime","maintenance"],color:"#2e7d32"}
     ]
   },
   admin:{
     biggest_challenge:[
-      {label:"Consolidation Time",keywords:["consolidat","time","compile","gather","collect","aggregate","slow"],color:"#B9532F"},
-      {label:"Data Verification",keywords:["verify","accuracy","correct","check","validate","error","mistake","inaccurate"],color:"#c62828"},
-      {label:"Submission Tracking",keywords:["track","submit","compliance","follow up","monitor","status","pending"],color:"#e65100"},
-      {label:"Communication Reach",keywords:["communicat","reach","announce","inform","relay","message","notif"],color:"#6a1b9a"},
-      {label:"Scattered Records",keywords:["scatter","paper","file","spreadsheet","multiple","tool","fragmented"],color:"#1565c0"},
-      {label:"Report Generation",keywords:["report","SF1","SF2","SF9","SF10","deped","prepare","generate"],color:"#2e7d32"},
-      {label:"Lack of Overview",keywords:["overview","clear","summary","snapshot","status","real-time","dashboard"],color:"#00695c"},
-      {label:"Audit Trails",keywords:["audit","trail","account","log","record","trace","history"],color:"#6a1b9a"}
+      {label:"Consolidation Time",desc:"Collecting and merging data from multiple teachers takes too long.",keywords:["consolidat","time","compile","gather","collect","aggregate","slow","merge","combine","too long"],color:"#B9532F"},
+      {label:"Data Verification",desc:"Checking the accuracy of submitted grades and attendance data is difficult.",keywords:["verify","accuracy","correct","check","validate","error","mistake","inaccurate","discrepancy"],color:"#c62828"},
+      {label:"Submission Tracking",desc:"Knowing which teachers have or haven't submitted required records is hard.",keywords:["track","submit","compliance","follow up","monitor","status","pending","overdue","missing"],color:"#e65100"},
+      {label:"Communication Reach",desc:"School-wide announcements don't reliably reach all teachers, students, or parents.",keywords:["communicat","reach","announce","inform","relay","message","notif","broadcast","circulate"],color:"#6a1b9a"},
+      {label:"Scattered Records",desc:"Student records are spread across paper files, spreadsheets, and various tools.",keywords:["scatter","paper","file","spreadsheet","multiple","tool","fragmented","disorganized","到处"],color:"#1565c0"},
+      {label:"Report Generation",desc:"Preparing DepEd-required reports (SF1, SF2, SF9, SF10) each period is time-consuming.",keywords:["report","SF1","SF2","SF9","SF10","deped","prepare","generate","quarterly","period"],color:"#2e7d32"},
+      {label:"Lack of Overview",desc:"No real-time snapshot of overall school attendance, grading, or compliance status.",keywords:["overview","clear","summary","snapshot","status","real-time","dashboard","visibility"],color:"#00695c"},
+      {label:"Audit Trails",desc:"Difficulty maintaining accountability logs for administrative actions.",keywords:["audit","trail","account","log","record","trace","history","accountability"],color:"#7b1fa2"}
     ],
     missing_features:[
-      {label:"Dashboard / Status Overview",keywords:["dashboard","overview","summary","status","real-time","snapshot"],color:"#B9532F"},
-      {label:"Automated Reports",keywords:["auto","generat","report","SF1","SF2","SF9","SF10","deped","compliant"],color:"#2e7d32"},
-      {label:"Compliance Monitoring",keywords:["compliance","track","submit","monitor","follow","pending","deadline"],color:"#e65100"},
-      {label:"Student Records Management",keywords:["student","record","enrollment","transfer","update","centraliz"],color:"#1565c0"},
-      {label:"Announcements / Broadcasting",keywords:["announce","broadcast","categor","emergency","general","event"],color:"#6a1b9a"},
-      {label:"User / Access Management",keywords:["account","user","access","role","permission","manage"],color:"#c62828"},
-      {label:"Audit Logging",keywords:["audit","log","timestamp","record","account","trace"],color:"#00695c"},
-      {label:"Data Backup / Export",keywords:["backup","export","data","save","download","csv"],color:"#6a1b9a"}
+      {label:"Dashboard / Status Overview",desc:"A consolidated view of school-wide attendance, grades, and compliance.",keywords:["dashboard","overview","summary","status","real-time","snapshot","consolidated","at a glance"],color:"#B9532F"},
+      {label:"Automated Reports",desc:"One-click generation of DepEd-compliant reports (SF1, SF2, SF9, SF10).",keywords:["auto","generat","report","SF1","SF2","SF9","SF10","deped","compliant","one-click"],color:"#2e7d32"},
+      {label:"Compliance Monitoring",desc:"Track which teachers have submitted required records and send reminders.",keywords:["compliance","track","submit","monitor","follow","pending","deadline","remind","overdue"],color:"#e65100"},
+      {label:"Student Records Management",desc:"Centralized system for enrollment, transfers, and student data updates.",keywords:["student","record","enrollment","transfer","update","centraliz","manage","database"],color:"#1565c0"},
+      {label:"Announcements / Broadcasting",desc:"Categorized announcement system for general, academic, emergency, and event notifications.",keywords:["announce","broadcast","categor","emergency","general","event","academic","holiday"],color:"#6a1b9a"},
+      {label:"User / Access Management",desc:"Control who can access what — teachers, students, and staff with different permissions.",keywords:["account","user","access","role","permission","manage","control","restrict"],color:"#c62828"},
+      {label:"Audit Logging",desc:"Automatic timestamped log of all important administrative actions.",keywords:["audit","log","timestamp","record","account","trace","history","activity"],color:"#00695c"},
+      {label:"Data Backup / Export",desc:"Ability to export data and backup records safely.",keywords:["backup","export","data","save","download","csv","archive","restore"],color:"#7b1fa2"}
     ],
     concerns:[
-      {label:"Staff Training / Adoption",keywords:["train","staff","learn","how to","complex","resist","change","adopt"],color:"#B9532F"},
-      {label:"Internet / Connectivity",keywords:["internet","connection","wifi","signal","online","access","slow"],color:"#c62828"},
-      {label:"Data Privacy / Security",keywords:["privacy","security","confidential","data","leak","safe","protect"],color:"#6a1b9a"},
-      {label:"Transition Period",keywords:["transition","adjust","change","time","parallel","old system","familiar"],color:"#e65100"},
-      {label:"Device Availability",keywords:["device","computer","phone","hardware","available","share"],color:"#1565c0"},
-      {label:"Reliability Concerns",keywords:["reliable","downtime","error","bug","server","stable","uptime"],color:"#2e7d32"}
+      {label:"Staff Training / Adoption",desc:"Teachers and staff may resist or struggle with a new digital system.",keywords:["train","staff","learn","how to","complex","resist","change","adopt","orientation","refuse"],color:"#B9532F"},
+      {label:"Internet / Connectivity",desc:"School or home internet may be unreliable for system access.",keywords:["internet","connection","wifi","signal","online","access","slow","bandwidth"],color:"#c62828"},
+      {label:"Data Privacy / Security",desc:"Protecting sensitive student and school data from breaches.",keywords:["privacy","security","confidential","data","leak","safe","protect","breach","confidentiality"],color:"#6a1b9a"},
+      {label:"Transition Period",desc:"Running the new system alongside old methods during migration.",keywords:["transition","adjust","change","time","parallel","old system","familiar","migration"],color:"#e65100"},
+      {label:"Device Availability",desc:"Shared or limited devices may hinder system access.",keywords:["device","computer","phone","hardware","available","share","limited","budget"],color:"#1565c0"},
+      {label:"Reliability Concerns",desc:"System downtime or bugs could disrupt school operations.",keywords:["reliable","downtime","error","bug","server","stable","uptime","crash","maintenance"],color:"#2e7d32"}
     ]
   },
   student:{
     biggest_challenge:[
-      {label:"Grade Visibility",keywords:["grade","see","check","view","know","report card","late","find out"],color:"#B9532F"},
-      {label:"Assignment Tracking",keywords:["assign","deadline","track","forget","miss","submission","homework"],color:"#c62828"},
-      {label:"Missed Announcements",keywords:["announce","miss","inform","know","reach","school","class"],color:"#e65100"},
-      {label:"Lost / Disorganized Materials",keywords:["material","lost","organize","module","handout","keep","damage"],color:"#6a1b9a"},
-      {label:"Communication Barriers",keywords:["ask","question","teacher","outside","class","contact","reach"],color:"#1565c0"},
-      {label:"Submission Confirmation",keywords:["submit","receive","confirm","sure","whether","got"],color:"#2e7d32"},
-      {label:"Attendance Tracking",keywords:["attend","record","track","absent","present","difficult"],color:"#00695c"}
+      {label:"Grade Visibility",desc:"Students can only see their grades when report cards are given, not in real-time.",keywords:["grade","see","check","view","know","report card","late","find out","reveal","announce"],color:"#B9532F"},
+      {label:"Assignment Tracking",desc:"Students forget or miss assignment deadlines due to lack of tracking.",keywords:["assign","deadline","track","forget","miss","submission","homework","due","overdue"],color:"#c62828"},
+      {label:"Missed Announcements",desc:"Important school or class announcements are sometimes not received.",keywords:["announce","miss","inform","know","reach","school","class","通知","unaware"],color:"#e65100"},
+      {label:"Lost / Disorganized Materials",desc:"Printed handouts and modules get lost, damaged, or hard to organize.",keywords:["material","lost","organize","module","handout","keep","damage","misplace","pile"],color:"#6a1b9a"},
+      {label:"Communication Barriers",desc:"No easy way to ask teachers questions outside class hours.",keywords:["ask","question","teacher","outside","class","contact","reach","available","after hours"],color:"#1565c0"},
+      {label:"Submission Confirmation",desc:"Students don't know if their teacher received their submitted work.",keywords:["submit","receive","confirm","sure","whether","got","acknowledge","delivered"],color:"#2e7d32"},
+      {label:"Attendance Tracking",desc:"Students have difficulty checking their own attendance records.",keywords:["attend","record","track","absent","present","difficult","check","view"],color:"#00695c"}
     ],
     missing_features:[
-      {label:"View Grades Online",keywords:["grade","view","check","see","online","anytime","track"],color:"#B9532F"},
-      {label:"Messaging / Direct Contact",keywords:["message","ask","question","teacher","chat","direct","contact"],color:"#6a1b9a"},
-      {label:"Online Materials Access",keywords:["material","access","online","module","download","upload","sheet"],color:"#2e7d32"},
-      {label:"Assignment Submission",keywords:["assign","submit","online","upload","confirm","received","track"],color:"#e65100"},
-      {label:"Notifications / Alerts",keywords:["notif","alert","remind","update","new","announce"],color:"#1565c0"},
-      {label:"Announcements",keywords:["announce","categor","general","academic","emergency","event"],color:"#c62828"},
-      {label:"Attendance View",keywords:["attend","view","record","check","personal"],color:"#00695c"}
+      {label:"View Grades Online",desc:"Ability to check grades anytime from a phone or computer.",keywords:["grade","view","check","see","online","anytime","track","real-time","digital"],color:"#B9532F"},
+      {label:"Messaging / Direct Contact",desc:"Send messages directly to teachers for questions and clarifications.",keywords:["message","ask","question","teacher","chat","direct","contact","inbox","send"],color:"#6a1b9a"},
+      {label:"Online Materials Access",desc:"Download or access modules, activity sheets, and learning materials online.",keywords:["material","access","online","module","download","upload","sheet","digital","repository"],color:"#2e7d32"},
+      {label:"Assignment Submission",desc:"Submit assignments online with confirmation of receipt.",keywords:["assign","submit","online","upload","confirm","received","track","digital","homework"],color:"#e65100"},
+      {label:"Notifications / Alerts",desc:"Get notified about new assignments, grades, and announcements.",keywords:["notif","alert","remind","update","new","announce","push","notification"],color:"#1565c0"},
+      {label:"Announcements",desc:"View categorized school announcements (academic, emergency, events).",keywords:["announce","categor","general","academic","emergency","event","school","bulletin"],color:"#c62828"},
+      {label:"Attendance View",desc:"View personal attendance record and history.",keywords:["attend","view","record","check","personal","history","daily","absent"],color:"#00695c"}
     ],
     concerns:[
-      {label:"Internet / Data Access",keywords:["internet","data","wifi","load","signal","connection","online"],color:"#B9532F"},
-      {label:"Device Access",keywords:["device","phone","computer","borrow","share","available","own"],color:"#c62828"},
-      {label:"Ease of Use / Learning",keywords:["easy","learn","how to","simple","complex","confusing","new"],color:"#e65100"},
-      {label:"Reliability / Downtime",keywords:["reliable","down","error","slow","load","server"],color:"#6a1b9a"},
-      {label:"Privacy / Safety",keywords:["privacy","safe","security","personal","info","data"],color:"#1565c0"}
+      {label:"Internet / Data Access",desc:"Students may not have reliable internet or mobile data at home.",keywords:["internet","data","wifi","load","signal","connection","online","mahal","expensive"],color:"#B9532F"},
+      {label:"Device Access",desc:"Students may need to borrow or share devices to access the system.",keywords:["device","phone","computer","borrow","share","available","own","afford","lack"],color:"#c62828"},
+      {label:"Ease of Use / Learning",desc:"The system must be simple enough for students to use without training.",keywords:["easy","learn","how to","simple","complex","confusing","new","intuitive","user-friendly"],color:"#e65100"},
+      {label:"Reliability / Downtime",desc:"The system must work reliably when students need it.",keywords:["reliable","down","error","slow","load","server","crash","available"],color:"#6a1b9a"},
+      {label:"Privacy / Safety",desc:"Students want their personal data to remain private and secure.",keywords:["privacy","safe","security","personal","info","data","protect","confidential"],color:"#1565c0"}
     ]
   }
 };
 
+function countWords(text){
+  return text.split(/\s+/).filter(function(w){return w.length>0}).length;
+}
+
 function extractThemes(text,themeList){
   if(!text)return null;
-  var lower=text.toLowerCase();
+  var lower=text.toLowerCase().trim();
+  var wordCount=countWords(lower);
   var scores=themeList.map(function(t){
     var score=0;
-    t.keywords.forEach(function(kw){if(lower.indexOf(kw)!==-1)score++});
-    return{theme:t,score:score};
+    var matchedKeywords=[];
+    t.keywords.forEach(function(kw){
+      var kwLower=kw.toLowerCase();
+      var patterns=[
+        new RegExp("\\b"+kwLower.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","i"),
+        new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i")
+      ];
+      var matched=false;
+      patterns.forEach(function(re){if(re.test(lower))matched=true});
+      if(matched){
+        var negations=["not","don't","doesn't","isn't","wasn't","no","never","cannot","can't","won't"];
+        var kwIndex=lower.indexOf(kwLower);
+        var preceding=lower.substring(Math.max(0,kwIndex-20),kwIndex);
+        var isNegated=false;
+        negations.forEach(function(neg){if(preceding.indexOf(neg)!==-1)isNegated=true});
+        if(!isNegated){
+          score+=1;
+          matchedKeywords.push(kw);
+        }
+      }
+    });
+    var lengthBonus=wordCount<10?1.5:wordCount<20?1.2:1;
+    return{theme:t,score:score,matchedKeywords:matchedKeywords,lengthBonus:lengthBonus};
   });
-  scores.sort(function(a,b){return b.score-a.score});
-  if(scores[0].score===0)return{primary:themeList[themeList.length-1],confidence:0};
-  return{primary:scores[0].theme,confidence:scores[0].score/(scores[0].score+1)};
+  scores.sort(function(a,b){return(b.score*b.lengthBonus)-(a.score*a.lengthBonus)});
+  if(scores[0].score===0)return{primary:themeList[themeList.length-1],confidence:0,matchedKeywords:[]};
+  var confidence=Math.min(1,scores[0].score/(scores[0].score+2));
+  return{primary:scores[0].theme,confidence:confidence,matchedKeywords:scores[0].matchedKeywords};
 }
 
 function renderThematic(r){
@@ -574,20 +601,25 @@ function renderThematic(r){
   var src=STATE.source;
   var themes=THEMES[src]||THEMES.teacher;
   var fields=[
-    {key:"biggest_challenge",label:"Biggest Challenge",themeKey:"biggest_challenge"},
-    {key:"missing_features",label:"Missing Features",themeKey:"missing_features"},
-    {key:"concerns",label:"Concerns",themeKey:"concerns"}
+    {key:"biggest_challenge",label:"Biggest Challenge",themeKey:"biggest_challenge",icon:"\u26A0"},
+    {key:"missing_features",label:"Missing Features",themeKey:"missing_features",icon:"\u2B50"},
+    {key:"concerns",label:"Concerns",themeKey:"concerns",icon:"\u2753"}
   ];
 
   html+='<div class="section-heading">Automatic Thematic Analysis</div>';
-  html+='<p style="font-size:12.5px;color:var(--muted);margin-bottom:20px">Responses are automatically categorized into themes using keyword extraction. Each response is assigned to the best-matching theme based on keyword overlap.</p>';
+  html+='<p style="font-size:12.5px;color:var(--muted);margin-bottom:20px">Responses are automatically categorized into themes using keyword extraction with negation detection and word-boundary matching. Each response is assigned to the best-matching theme with a confidence score.</p>';
+
+  var totalClassified=0;
+  var totalResponses=0;
+  var fieldStats=[];
 
   fields.forEach(function(field){
     var themeList=themes[field.themeKey];
     var responses=r.filter(function(res){return res[field.key]&&res[field.key].trim()});
     var themeCounts={};
     var themeExamples={};
-    themeList.forEach(function(t){themeCounts[t.label]=0;themeExamples[t.label]=[]});
+    var themeConfidence={};
+    themeList.forEach(function(t){themeCounts[t.label]=0;themeExamples[t.label]=[];themeConfidence[t.label]=[]});
 
     var unclassified=0;
     responses.forEach(function(res){
@@ -595,52 +627,97 @@ function renderThematic(r){
       if(result&&result.score>0){
         var label=result.primary.label;
         themeCounts[label]++;
-        if(themeExamples[label].length<3){
+        themeConfidence[label].push(result.confidence);
+        if(themeExamples[label].length<4){
           var dt=res.submitted_at?new Date(res.submitted_at).toLocaleDateString("en-US",{month:"short",day:"numeric"}):"";
-          themeExamples[label].push({text:res[field.key],name:res.respondent_name||"Anonymous",date:dt});
+          themeExamples[label].push({text:res[field.key],name:res.respondent_name||"Anonymous",date:dt,confidence:result.confidence,keywords:result.matchedKeywords});
         }
       }else{
         unclassified++;
       }
     });
 
-    var sorted=themeList.slice().sort(function(a,b){return themeCounts[b.label]-themeCounts[a.label]});
+    totalClassified+=responses.length-unclassified;
+    totalResponses+=responses.length;
 
-    html+='<div class="section-heading">'+field.label+' — Theme Distribution</div>';
+    var sorted=themeList.slice().sort(function(a,b){return themeCounts[b.label]-themeCounts[a.label]});
+    var topTheme=sorted[0];
+    var avgConfidence=0;
+    if(topTheme&&themeConfidence[topTheme.label].length){
+      avgConfidence=themeConfidence[topTheme.label].reduce(function(s,v){return s+v},0)/themeConfidence[topTheme.label].length;
+    }
+    fieldStats.push({field:field,total:responses.length,topTheme:topTheme?topTheme.label:"None",topCount:topTheme?themeCounts[topTheme.label]:0,avgConfidence:avgConfidence});
+
+    html+='<div class="section-heading">'+field.icon+' '+field.label+' — Theme Distribution ('+responses.length+' responses)</div>';
+
     html+='<div class="chart-card chart-card-wide" style="margin-bottom:20px"><canvas id="chart-theme-'+field.key+'" height="100"></canvas></div>';
 
-    html+='<div class="table-wrap"><table><thead><tr><th>Theme</th><th>Count</th><th>%</th><th>Example Response</th></tr></thead><tbody>';
+    html+='<div class="table-wrap"><table><thead><tr><th style="width:22%">Theme</th><th style="width:8%">Count</th><th style="width:8%">%</th><th style="width:12%">Avg Confidence</th><th style="width:50%">Top Example Response</th></tr></thead><tbody>';
     sorted.forEach(function(t){
       var count=themeCounts[t.label];
       var pct=responses.length?(count/responses.length*100).toFixed(1):0;
+      var avgConf=themeConfidence[t.label].length?themeConfidence[t.label].reduce(function(s,v){return s+v},0)/themeConfidence[t.label].length:0;
+      var confPct=Math.round(avgConf*100);
+      var confColor=confPct>=70?"var(--success)":confPct>=40?"var(--navy)":confPct>=20?"var(--gold)":"var(--muted)";
       var example=themeExamples[t.label][0];
       var exText=example?example.text:"";
-      if(exText.length>120)exText=exText.slice(0,117)+"...";
-      html+='<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+t.color+';margin-right:6px"></span>'+esc(t.label)+'</td>';
-      html+='<td style="font-weight:700">'+count+'</td>';
-      html+='<td>'+pct+'%</td>';
+      if(exText.length>140)exText=exText.slice(0,137)+"...";
+      html+='<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+t.color+';margin-right:6px;vertical-align:middle"></span><strong>'+esc(t.label)+'</strong><br><span style="font-size:10px;color:var(--muted);line-height:1.2">'+esc(t.desc)+'</span></td>';
+      html+='<td style="font-weight:700;text-align:center">'+count+'</td>';
+      html+='<td style="text-align:center">'+pct+'%</td>';
+      html+='<td style="text-align:center"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:'+confColor+'20;color:'+confColor+'">'+confPct+'%</span></td>';
       html+='<td style="font-size:11.5px;color:var(--muted);font-style:italic">"'+esc(exText)+'"</td></tr>';
     });
     if(unclassified>0){
-      html+='<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#9e9e9e;margin-right:6px"></span>Unclassified</td>';
-      html+='<td style="font-weight:700">'+unclassified+'</td>';
-      html+='<td>'+(responses.length?(unclassified/responses.length*100).toFixed(1):0)+'%</td>';
+      html+='<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#9e9e9e;margin-right:6px;vertical-align:middle"></span><strong>Unclassified</strong><br><span style="font-size:10px;color:var(--muted)">No matching theme keywords found</span></td>';
+      html+='<td style="font-weight:700;text-align:center">'+unclassified+'</td>';
+      html+='<td style="text-align:center">'+(responses.length?(unclassified/responses.length*100).toFixed(1):0)+'%</td>';
+      html+='<td style="text-align:center">—</td>';
       html+='<td style="font-size:11.5px;color:var(--muted)">—</td></tr>';
     }
     html+='</tbody></table></div>';
 
-    html+='<div class="section-heading">'+field.label+' — Detailed Theme Breakdown</div>';
+    html+='<div class="section-heading">'+field.icon+' '+field.label+' — Detailed Theme Breakdown</div>';
     sorted.forEach(function(t){
       var examples=themeExamples[t.label];
       if(!examples.length)return;
-      html+='<div style="margin-bottom:16px">';
-      html+='<div style="font-size:13px;font-weight:700;color:'+t.color+';margin-bottom:6px">'+esc(t.label)+' ('+themeCounts[t.label]+')</div>';
+      html+='<div style="margin-bottom:20px;padding:12px;border:1px solid var(--line);border-left:4px solid '+t.color+';border-radius:8px;background:var(--surface)">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+      html+='<div style="font-size:14px;font-weight:700;color:'+t.color+'">'+esc(t.label)+' <span style="font-size:12px;font-weight:400;color:var(--muted)">('+themeCounts[t.label]+' responses)</span></div>';
+      html+='</div>';
+      html+='<p style="font-size:11.5px;color:var(--muted);margin:0 0 10px;font-style:italic">'+esc(t.desc)+'</p>';
       examples.forEach(function(ex){
-        html+='<div class="open-text-card"><div class="ot-text">"'+esc(ex.text)+'"</div><div class="ot-meta">'+esc(ex.name)+(ex.date?" — "+ex.date:"")+'</div></div>';
+        html+='<div class="open-text-card" style="margin-bottom:6px">';
+        html+='<div class="ot-text">"'+esc(ex.text)+'"</div>';
+        html+='<div class="ot-meta">';
+        html+=esc(ex.name)+(ex.date?" \u2014 "+ex.date:"");
+        html+=' <span style="margin-left:8px;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:600;background:var(--paper);border:1px solid var(--line)">Confidence: '+Math.round(ex.confidence*100)+'%</span>';
+        if(ex.keywords&&ex.keywords.length){
+          html+=' <span style="margin-left:4px">';
+          ex.keywords.slice(0,3).forEach(function(kw){html+='<span style="display:inline-block;padding:1px 5px;border-radius:6px;font-size:9px;font-weight:600;background:var(--navy);color:#fff;margin-right:3px">'+esc(kw)+'</span>'});
+          html+='</span>';
+        }
+        html+='</div></div>';
       });
       html+='</div>';
     });
   });
+
+  html+='<div class="section-heading">Cross-Theme Summary</div>';
+  html+='<div class="stat-grid">';
+  html+='<div class="stat-card"><div class="label">Total Responses Analyzed</div><div class="value">'+totalResponses+'</div><div class="note">across all open-ended fields</div></div>';
+  html+='<div class="stat-card"><div class="label">Classification Rate</div><div class="value">'+(totalResponses?(totalClassified/totalResponses*100).toFixed(0):0)+'%</div><div class="note">'+totalClassified+' of '+totalResponses+' classified</div></div>';
+  html+='</div>';
+
+  html+='<div class="table-wrap"><table><thead><tr><th>Field</th><th>Responses</th><th>Top Theme</th><th>Top Theme Count</th><th>Avg Confidence</th></tr></thead><tbody>';
+  fieldStats.forEach(function(fs){
+    html+='<tr><td style="font-weight:600">'+fs.field.icon+' '+fs.field.label+'</td>';
+    html+='<td style="text-align:center">'+fs.total+'</td>';
+    html+='<td>'+esc(fs.topTheme)+'</td>';
+    html+='<td style="text-align:center;font-weight:700">'+fs.topCount+'</td>';
+    html+='<td style="text-align:center"><span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:var(--navy);color:#fff">'+Math.round(fs.avgConfidence*100)+'%</span></td></tr>';
+  });
+  html+='</tbody></table></div>';
 
   setTimeout(function(){
     destroyCharts();
