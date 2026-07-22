@@ -305,8 +305,8 @@ function renderOverview(r){
     var c=res.comfort_level||"Unknown";comfCounts[c]=(comfCounts[c]||0)+1;
   });
   var chMeans=[];var feMeans=[];
-  CHALLENGES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.challenge_answers||{})[String(i)];if(val)v.push(+val)});chMeans.push(mean(v))});
-  FEATURES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.feature_answers||{})[String(i)];if(val)v.push(+val)});feMeans.push(mean(v))});
+  CHALLENGES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.challenge_answers||{})["challenge_"+i];if(val)v.push(+val)});chMeans.push(mean(v))});
+  FEATURES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.feature_answers||{})["feature_"+i];if(val)v.push(+val)});feMeans.push(mean(v))});
   var avgComfort=0;var comfMap={"Not comfortable":1,"Slightly comfortable":2,"Comfortable":3,"Very comfortable":4};
   r.forEach(function(res){var v=comfMap[res.comfort_level];if(v)avgComfort+=v});
   avgComfort=r.length?avgComfort/r.length:0;
@@ -351,8 +351,8 @@ function renderCharts(r){
   var CHALLENGES=getChallenges();
   var FEATURES=getFeatures();
   var chMeans=[];var feMeans=[];
-  CHALLENGES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.challenge_answers||{})[String(i)];if(val)v.push(+val)});chMeans.push(mean(v))});
-  FEATURES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.feature_answers||{})[String(i)];if(val)v.push(+val)});feMeans.push(mean(v))});
+  CHALLENGES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.challenge_answers||{})["challenge_"+i];if(val)v.push(+val)});chMeans.push(mean(v))});
+  FEATURES.forEach(function(_,i){var v=[];r.forEach(function(res){var val=(res.feature_answers||{})["feature_"+i];if(val)v.push(+val)});feMeans.push(mean(v))});
 
   html+='<div class="chart-grid">';
   html+='<div class="chart-card chart-card-wide"><h3>Challenges \u2014 Mean Scores</h3><p class="sub">Horizontal bar chart with interpretation labels</p><canvas id="chart-challenges" height="120"></canvas></div>';
@@ -777,7 +777,10 @@ function exportCSV(){
   URL.revokeObjectURL(url);toast("CSV exported ("+r.length+" responses)");
 }
 
-render();
+supabaseClient.auth.getSession().then(function(res){
+  if(res.data.session){STATE.loggedIn=true;loadResponses()}
+  else{render()}
+});
 })();
 </script>
 </body>
