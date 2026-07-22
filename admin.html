@@ -222,7 +222,15 @@ function interpretChallenge(m){if(m>=3.5)return{l:"Critical",c:"poor"};if(m>=2.5
 function interpretFeature(m){if(m>=3.5)return{l:"Essential",c:"excellent"};if(m>=2.5)return{l:"Important",c:"good"};if(m>=1.5)return{l:"Desirable",c:"fair"};return{l:"Optional",c:"poor"}}
 function barClr(m){if(m>=3.5)return"var(--success)";if(m>=2.5)return"var(--navy)";if(m>=1.5)return"var(--gold)";return"var(--error)"}
 
-function toast(msg){var el=document.getElementById("toast");if(!el)return;el.textContent=msg;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show")},2500)}
+function toast(msg){var el=document.getElementById("toast");if(!el)return;el.textContent=msg;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show")},4000)}
+
+function checkOnline(){
+  if(!navigator.onLine){toast("You appear to be offline. Please check your internet connection.");return false}
+  return true;
+}
+
+window.addEventListener("offline",function(){toast("You are offline. Please check your internet connection.")});
+window.addEventListener("online",function(){toast("Connection restored.")});
 
 function renderLogin(){
   return '<div class="login-wrap"><h1 class="serif">PRISM Dashboard</h1><p class="sub">Sign in to access needs analysis results.</p>'
@@ -908,6 +916,19 @@ function applyFilters(){
   STATE.filtered=r;STATE.page=1;
 }
 
+function getErrorMessage(err){
+  if(!err)return"Unknown error occurred.";
+  var msg=err.message||String(err);
+  if(msg.indexOf("Failed to fetch")!==-1||msg.indexOf("NetworkError")!==-1)return"Network error \u2014 please check your internet connection and try again.";
+  if(msg.indexOf("403")!==-1||msg.indexOf("Forbidden")!==-1)return"Access denied \u2014 the server rejected the request. Please try again later.";
+  if(msg.indexOf("401")!==-1||msg.indexOf("Unauthorized")!==-1)return"Session expired \u2014 please sign in again.";
+  if(msg.indexOf("500")!==-1||msg.indexOf("Internal Server Error")!==-1)return"Server error \u2014 please try again in a few minutes.";
+  if(msg.indexOf("timeout")!==-1)return"Request timed out \u2014 please check your connection and try again.";
+  if(msg.indexOf("PGRST")!==-1)return"Database error \u2014 please contact the administrator.";
+  if(msg.indexOf("violates row-level security")!==-1)return"Permission error \u2014 please contact the administrator.";
+  return msg;
+}
+
 function loadResponses(){
   STATE.loading=true;render();
   Promise.all([
@@ -916,12 +937,16 @@ function loadResponses(){
     supabaseClient.from("needs_analysis_student_responses").select("*").order("submitted_at",{ascending:false})
   ]).then(function(results){
     var tErr=results[0].error;var aErr=results[1].error;var sErr=results[2].error;
-    if(tErr)toast("Teacher load error: "+tErr.message);
-    if(aErr)toast("Admin load error: "+aErr.message);
-    if(sErr)toast("Student load error: "+sErr.message);
+    if(tErr)toast("Teacher data: "+getErrorMessage(tErr));
+    if(aErr)toast("Admin data: "+getErrorMessage(aErr));
+    if(sErr)toast("Student data: "+getErrorMessage(sErr));
     STATE.teacherResponses=results[0].data||[];
     STATE.adminResponses=results[1].data||[];
     STATE.studentResponses=results[2].data||[];
+    STATE.loading=false;applyFilters();render();
+  }).catch(function(err){
+    console.error("Load error:",err);
+    toast("Failed to load data: "+getErrorMessage(err));
     STATE.loading=false;applyFilters();render();
   });
 }
@@ -940,10 +965,21 @@ function attachLoginHandlers(){
   var err=document.getElementById("login-err");
   function doLogin(){
     if(!email.value||!pass.value){err.textContent="Enter both email and password.";err.style.display="block";return}
-    btn.textContent="Signing in...";btn.disabled=true;
+    btn.textContent="Signing in...";btn.disabled=true;err.style.display="none";
     supabaseClient.auth.signInWithPassword({email:email.value,password:pass.value}).then(function(res){
-      if(res.error){err.textContent=res.error.message==="Invalid login credentials"?"Invalid email or password.":res.error.message;err.style.display="block";btn.textContent="Sign In";btn.disabled=false;return}
+      if(res.error){
+        var msg=res.error.message;
+        if(msg==="Invalid login credentials")msg="Invalid email or password.";
+        else if(msg.indexOf("Failed to fetch")!==-1||msg.indexOf("NetworkError")!==-1)msg="Network error \u2014 please check your internet connection.";
+        else if(msg.indexOf("timeout")!==-1)msg="Request timed out \u2014 please try again.";
+        else if(msg.indexOf("401")!==-1||msg.indexOf("Unauthorized")!==-1)msg="Session expired \u2014 please try again.";
+        err.textContent=msg;err.style.display="block";btn.textContent="Sign In";btn.disabled=false;return;
+      }
       STATE.loggedIn=true;loadResponses();
+    }).catch(function(e){
+      console.error("Login error:",e);
+      err.textContent="Connection failed \u2014 please check your internet connection and try again.";
+      err.style.display="block";btn.textContent="Sign In";btn.disabled=false;
     });
   }
   if(btn) btn.addEventListener("click",doLogin);
