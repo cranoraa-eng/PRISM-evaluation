@@ -530,11 +530,6 @@
 
 <script>
 (function(){
-  var PARTS = tArr('parts');
-  var CHALLENGES = tArr('challenges');
-  var FEATURES = tArr('features');
-  var FEATURE_SHORT = tArr('featureShort');
-
   var form = document.getElementById('prismForm');
   var rail = document.getElementById('rail');
   var backBtn = document.getElementById('backBtn');
@@ -759,6 +754,11 @@
     var val = LANG[lang] && LANG[lang][key] !== undefined ? LANG[lang][key] : LANG.en[key];
     return Array.isArray(val) ? val : (LANG.en[key] || []);
   }
+
+  var PARTS = tArr('parts');
+  var CHALLENGES = tArr('challenges');
+  var FEATURES = tArr('features');
+  var FEATURE_SHORT = tArr('featureShort');
 
   function applyLang(){
     localStorage.setItem('prism_lang', lang);
