@@ -94,6 +94,18 @@
   .role-nav-btn:hover{border-color:var(--navy); color:var(--navy);}
   .role-nav-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
 
+  .lang-switch{
+    max-width:760px; margin:0 auto; padding:.4rem 1.25rem;
+    display:flex; align-items:center; justify-content:flex-end; gap:.4rem;
+  }
+  .lang-btn{
+    font-size:.72rem; font-weight:600; padding:.25rem .6rem; border-radius:14px;
+    border:1px solid var(--paper-line); background:var(--card); color:var(--ink-soft);
+    cursor:pointer; transition:.15s; font-family:'Public Sans',sans-serif;
+  }
+  .lang-btn:hover{border-color:var(--navy); color:var(--navy);}
+  .lang-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+
   .purpose{
     background:var(--card);
     border:1px solid var(--paper-line);
@@ -294,18 +306,22 @@
 </header>
 
 <nav class="role-nav">
-  <span class="role-nav-label">I am a:</span>
-  <a href="index.html" class="role-nav-btn">Teacher</a>
-  <a href="admin-questionnaire.html" class="role-nav-btn active">Administrator</a>
-  <a href="student-questionnaire.html" class="role-nav-btn">Student</a>
+  <span class="role-nav-label" data-i18n="roleName">I am a:</span>
+  <a href="index.html" class="role-nav-btn" data-i18n="roleTeacher">Teacher</a>
+  <a href="admin-questionnaire.html" class="role-nav-btn active" data-i18n="roleAdmin">Administrator</a>
+  <a href="student-questionnaire.html" class="role-nav-btn" data-i18n="roleStudent">Student</a>
 </nav>
+<div class="lang-switch">
+  <button class="lang-btn active" data-lang="en">EN</button>
+  <button class="lang-btn" data-lang="fil">FIL</button>
+</div>
 
 <main class="wrap">
   <div class="purpose" id="purposeCard">
-    <strong>Purpose of this questionnaire.</strong>
-    This questionnaire is part of a needs analysis for PRISM, a proposed web-based school management system for Kiwalan National High School. As a member of the school's administrative staff, your experience consolidating records, generating reports, monitoring compliance, and coordinating school-wide communication is essential to designing a system that genuinely supports the school's operations.
+    <strong data-i18n="purposeTitle">Purpose of this questionnaire.</strong>
+    <span data-i18n="purposeBody">This questionnaire is part of a needs analysis for PRISM, a proposed web-based school management system for Kiwalan National High School. As a member of the school's administrative staff, your experience consolidating records, generating reports, monitoring compliance, and coordinating school-wide communication is essential to designing a system that genuinely supports the school's operations.</span>
     <br><br>
-    Responses are used solely for research purposes and treated with confidentiality in line with the Data Privacy Act of 2012 (RA 10173). Participation is voluntary — you may skip any item you prefer not to answer.
+    <span data-i18n="purposePrivacy">Responses are used solely for research purposes and treated with confidentiality in line with the Data Privacy Act of 2012 (RA 10173). Participation is voluntary — you may skip any item you prefer not to answer.</span>
   </div>
 
   <div class="rail-outer" id="railOuter">
@@ -316,53 +332,53 @@
     <!-- PART I -->
     <section class="step" data-step="0" role="group" aria-label="Part I: Respondent Profile">
       <div class="part-head">
-        <div class="part-eyebrow">Part I</div>
-        <h2 class="part-title">Respondent Profile</h2>
-        <p class="part-sub">Please provide the following information. Your name is optional.</p>
+        <div class="part-eyebrow" data-i18n="partI">Part I</div>
+        <h2 class="part-title" data-i18n="partITitle">Respondent Profile</h2>
+        <p class="part-sub" data-i18n="partISub">Please provide the following information. Your name is optional.</p>
       </div>
       <div class="card">
         <div class="field">
-          <label class="q-label" for="f-name">Name <span style="font-weight:400;color:var(--ink-soft)">(optional)</span></label>
+          <label class="q-label" for="f-name" data-i18n="lblName">Name <span style="font-weight:400;color:var(--ink-soft)">(optional)</span></label>
           <input type="text" id="f-name" name="name" placeholder="Juan Dela Cruz" autocomplete="name">
         </div>
         <div class="field">
-          <label class="q-label">Position / role at KNHS</label>
+          <label class="q-label" data-i18n="lblPosition">Position / role at KNHS</label>
           <div class="options" role="radiogroup" aria-label="Administrative position">
-            <label class="opt"><input type="radio" name="adminRole" value="School Head / Principal">School Head / Principal</label>
-            <label class="opt"><input type="radio" name="adminRole" value="Assistant School Head">Assistant School Head</label>
-            <label class="opt"><input type="radio" name="adminRole" value="Registrar">Registrar</label>
-            <label class="opt"><input type="radio" name="adminRole" value="Guidance Counselor">Guidance Counselor</label>
-            <label class="opt"><input type="radio" name="adminRole" value="Administrative / Office Staff">Administrative / Office Staff</label>
-            <label class="opt other"><input type="radio" name="adminRole" value="Other" data-other-toggle>Other
+            <label class="opt"><input type="radio" name="adminRole" value="School Head / Principal"><span data-i18n="optPos1">School Head / Principal</span></label>
+            <label class="opt"><input type="radio" name="adminRole" value="Assistant School Head"><span data-i18n="optPos2">Assistant School Head</span></label>
+            <label class="opt"><input type="radio" name="adminRole" value="Registrar"><span data-i18n="optPos3">Registrar</span></label>
+            <label class="opt"><input type="radio" name="adminRole" value="Guidance Counselor"><span data-i18n="optPos4">Guidance Counselor</span></label>
+            <label class="opt"><input type="radio" name="adminRole" value="Administrative / Office Staff"><span data-i18n="optPos5">Administrative / Office Staff</span></label>
+            <label class="opt other"><input type="radio" name="adminRole" value="Other" data-other-toggle><span data-i18n="optPos6">Other</span>
               <input type="text" class="other-input" name="adminRoleOther" placeholder="Please specify" aria-label="Specify other position">
             </label>
           </div>
         </div>
         <div class="field">
-          <label class="q-label">Years in this role at KNHS</label>
+          <label class="q-label" data-i18n="lblExperience">Years in this role at KNHS</label>
           <div class="options" role="radiogroup" aria-label="Years in role">
-            <label class="opt"><input type="radio" name="yearsExperience" value="Less than 1 year">Less than 1 year</label>
-            <label class="opt"><input type="radio" name="yearsExperience" value="1–3 years">1–3 years</label>
-            <label class="opt"><input type="radio" name="yearsExperience" value="4–7 years">4–7 years</label>
-            <label class="opt"><input type="radio" name="yearsExperience" value="8 years or more">8 years or more</label>
+            <label class="opt"><input type="radio" name="yearsExperience" value="Less than 1 year"><span data-i18n="optExp1">Less than 1 year</span></label>
+            <label class="opt"><input type="radio" name="yearsExperience" value="1–3 years"><span data-i18n="optExp2">1–3 years</span></label>
+            <label class="opt"><input type="radio" name="yearsExperience" value="4–7 years"><span data-i18n="optExp3">4–7 years</span></label>
+            <label class="opt"><input type="radio" name="yearsExperience" value="8 years or more"><span data-i18n="optExp4">8 years or more</span></label>
           </div>
         </div>
         <div class="field">
-          <label class="q-label">Comfort level using computers, smartphones, or web-based applications</label>
+          <label class="q-label" data-i18n="lblComfort">Comfort level using computers, smartphones, or web-based applications</label>
           <div class="options" role="radiogroup" aria-label="Comfort level with technology">
-            <label class="opt"><input type="radio" name="comfortLevel" value="Not comfortable">Not comfortable</label>
-            <label class="opt"><input type="radio" name="comfortLevel" value="Slightly comfortable">Slightly comfortable</label>
-            <label class="opt"><input type="radio" name="comfortLevel" value="Comfortable">Comfortable</label>
-            <label class="opt"><input type="radio" name="comfortLevel" value="Very comfortable">Very comfortable</label>
+            <label class="opt"><input type="radio" name="comfortLevel" value="Not comfortable"><span data-i18n="optComfort1">Not comfortable</span></label>
+            <label class="opt"><input type="radio" name="comfortLevel" value="Slightly comfortable"><span data-i18n="optComfort2">Slightly comfortable</span></label>
+            <label class="opt"><input type="radio" name="comfortLevel" value="Comfortable"><span data-i18n="optComfort3">Comfortable</span></label>
+            <label class="opt"><input type="radio" name="comfortLevel" value="Very comfortable"><span data-i18n="optComfort4">Very comfortable</span></label>
           </div>
         </div>
         <div class="field">
-          <label class="q-label">Device(s) most often used for school-related work <span style="font-weight:400;color:var(--ink-soft)">(check all that apply)</span></label>
+          <label class="q-label" data-i18n="lblDevices">Device(s) most often used for school-related work <span style="font-weight:400;color:var(--ink-soft)">(check all that apply)</span></label>
           <div class="options" role="group" aria-label="Devices used for school work">
-            <label class="opt"><input type="checkbox" name="devices" value="Desktop / laptop computer">Desktop / laptop computer</label>
-            <label class="opt"><input type="checkbox" name="devices" value="Smartphone">Smartphone</label>
-            <label class="opt"><input type="checkbox" name="devices" value="Tablet">Tablet</label>
-            <label class="opt other"><input type="checkbox" name="devices" value="Other" data-other-toggle>Other
+            <label class="opt"><input type="checkbox" name="devices" value="Desktop / laptop computer"><span data-i18n="optDesktop">Desktop / laptop computer</span></label>
+            <label class="opt"><input type="checkbox" name="devices" value="Smartphone"><span data-i18n="optSmartphone">Smartphone</span></label>
+            <label class="opt"><input type="checkbox" name="devices" value="Tablet"><span data-i18n="optTablet">Tablet</span></label>
+            <label class="opt other"><input type="checkbox" name="devices" value="Other" data-other-toggle><span data-i18n="optOther">Other</span>
               <input type="text" class="other-input" name="devicesOther" placeholder="Please specify" aria-label="Specify other device">
             </label>
           </div>
@@ -373,51 +389,51 @@
     <!-- PART II -->
     <section class="step" data-step="1" role="group" aria-label="Part II: Current Practices">
       <div class="part-head">
-        <div class="part-eyebrow">Part II</div>
-        <h2 class="part-title">Current Practices</h2>
-        <p class="part-sub">These items ask about how you currently handle school-wide records, reporting, and communication tasks.</p>
+        <div class="part-eyebrow" data-i18n="partII">Part II</div>
+        <h2 class="part-title" data-i18n="partIITitle">Current Practices</h2>
+        <p class="part-sub" data-i18n="partIISub">These items ask about how you currently handle school-wide records, reporting, and communication tasks.</p>
       </div>
       <div class="card">
         <div class="field">
-          <label class="q-label"><span class="q-num">1.</span>How do you currently generate DepEd/school reports (e.g., SF1, SF2, SF9, SF10, enrollment summaries)?</label>
+          <label class="q-label" data-i18n="qReports"><span class="q-num">1.</span>How do you currently generate DepEd/school reports (e.g., SF1, SF2, SF9, SF10, enrollment summaries)?</label>
           <div class="options" role="radiogroup" aria-label="Report generation method">
-            <label class="opt"><input type="radio" name="attendanceMethod" value="Manually compiling from paper/spreadsheet submissions">Manually compiling from paper/spreadsheet submissions</label>
-            <label class="opt"><input type="radio" name="attendanceMethod" value="Requesting data from teachers individually, then consolidating">Requesting data from teachers individually, then consolidating</label>
-            <label class="opt"><input type="radio" name="attendanceMethod" value="Using an existing digital tool/system">Using an existing digital tool/system</label>
-            <label class="opt other"><input type="radio" name="attendanceMethod" value="Other" data-other-toggle>Other
+            <label class="opt"><input type="radio" name="attendanceMethod" value="Manually compiling from paper/spreadsheet submissions"><span data-i18n="qReportsOpt1">Manually compiling from paper/spreadsheet submissions</span></label>
+            <label class="opt"><input type="radio" name="attendanceMethod" value="Requesting data from teachers individually, then consolidating"><span data-i18n="qReportsOpt2">Requesting data from teachers individually, then consolidating</span></label>
+            <label class="opt"><input type="radio" name="attendanceMethod" value="Using an existing digital tool/system"><span data-i18n="qReportsOpt3">Using an existing digital tool/system</span></label>
+            <label class="opt other"><input type="radio" name="attendanceMethod" value="Other" data-other-toggle><span data-i18n="optOther">Other</span>
               <input type="text" class="other-input" name="attendanceMethodOther" placeholder="Please specify" aria-label="Specify other report generation method">
             </label>
           </div>
         </div>
         <div class="field">
-          <label class="q-label"><span class="q-num">2.</span>How do you currently track whether teachers have submitted required records (attendance, grades, etc.) on time?</label>
+          <label class="q-label" data-i18n="qCompliance"><span class="q-num">2.</span>How do you currently track whether teachers have submitted required records (attendance, grades, etc.) on time?</label>
           <div class="options" role="radiogroup" aria-label="Compliance tracking method">
-            <label class="opt"><input type="radio" name="gradingMethod" value="Manual follow-up (in person, text, calls)">Manual follow-up (in person, text, calls)</label>
-            <label class="opt"><input type="radio" name="gradingMethod" value="Checklist or logbook">Checklist or logbook</label>
-            <label class="opt"><input type="radio" name="gradingMethod" value="Shared spreadsheet">Shared spreadsheet</label>
-            <label class="opt other"><input type="radio" name="gradingMethod" value="Other" data-other-toggle>Other
+            <label class="opt"><input type="radio" name="gradingMethod" value="Manual follow-up (in person, text, calls)"><span data-i18n="qComplianceOpt1">Manual follow-up (in person, text, calls)</span></label>
+            <label class="opt"><input type="radio" name="gradingMethod" value="Checklist or logbook"><span data-i18n="qComplianceOpt2">Checklist or logbook</span></label>
+            <label class="opt"><input type="radio" name="gradingMethod" value="Shared spreadsheet"><span data-i18n="qComplianceOpt3">Shared spreadsheet</span></label>
+            <label class="opt other"><input type="radio" name="gradingMethod" value="Other" data-other-toggle><span data-i18n="optOther">Other</span>
               <input type="text" class="other-input" name="gradingMethodOther" placeholder="Please specify" aria-label="Specify other tracking method">
             </label>
           </div>
         </div>
         <div class="field">
-          <label class="q-label"><span class="q-num">3.</span>How do you currently manage student enrollment and records (transfers, updates)?</label>
+          <label class="q-label" data-i18n="qEnrollment"><span class="q-num">3.</span>How do you currently manage student enrollment and records (transfers, updates)?</label>
           <div class="options" role="radiogroup" aria-label="Enrollment management method">
-            <label class="opt"><input type="radio" name="materialsMethod" value="Paper-based forms and filing">Paper-based forms and filing</label>
-            <label class="opt"><input type="radio" name="materialsMethod" value="Spreadsheet">Spreadsheet</label>
-            <label class="opt"><input type="radio" name="materialsMethod" value="Existing school information system">Existing school information system</label>
-            <label class="opt other"><input type="radio" name="materialsMethod" value="Other" data-other-toggle>Other
+            <label class="opt"><input type="radio" name="materialsMethod" value="Paper-based forms and filing"><span data-i18n="qEnrollmentOpt1">Paper-based forms and filing</span></label>
+            <label class="opt"><input type="radio" name="materialsMethod" value="Spreadsheet"><span data-i18n="qEnrollmentOpt2">Spreadsheet</span></label>
+            <label class="opt"><input type="radio" name="materialsMethod" value="Existing school information system"><span data-i18n="qEnrollmentOpt3">Existing school information system</span></label>
+            <label class="opt other"><input type="radio" name="materialsMethod" value="Other" data-other-toggle><span data-i18n="optOther">Other</span>
               <input type="text" class="other-input" name="materialsMethodOther" placeholder="Please specify" aria-label="Specify other enrollment method">
             </label>
           </div>
         </div>
         <div class="field">
-          <label class="q-label"><span class="q-num">4.</span>How do you currently send school-wide announcements to teachers, students, or parents?</label>
+          <label class="q-label" data-i18n="qAnnouncements"><span class="q-num">4.</span>How do you currently send school-wide announcements to teachers, students, or parents?</label>
           <div class="options" role="radiogroup" aria-label="Communication method">
-            <label class="opt"><input type="radio" name="commsMethod" value="Verbal / in-person during meetings or assembly">Verbal / in-person during meetings or assembly</label>
-            <label class="opt"><input type="radio" name="commsMethod" value="Group chat with teachers who relay to students">Group chat with teachers who relay to students</label>
-            <label class="opt"><input type="radio" name="commsMethod" value="Physical memos / circulars">Physical memos / circulars</label>
-            <label class="opt other"><input type="radio" name="commsMethod" value="Other" data-other-toggle>Other
+            <label class="opt"><input type="radio" name="commsMethod" value="Verbal / in-person during meetings or assembly"><span data-i18n="qAnnouncementsOpt1">Verbal / in-person during meetings or assembly</span></label>
+            <label class="opt"><input type="radio" name="commsMethod" value="Group chat with teachers who relay to students"><span data-i18n="qAnnouncementsOpt2">Group chat with teachers who relay to students</span></label>
+            <label class="opt"><input type="radio" name="commsMethod" value="Physical memos / circulars"><span data-i18n="qAnnouncementsOpt3">Physical memos / circulars</span></label>
+            <label class="opt other"><input type="radio" name="commsMethod" value="Other" data-other-toggle><span data-i18n="optOther">Other</span>
               <input type="text" class="other-input" name="commsMethodOther" placeholder="Please specify" aria-label="Specify other communication method">
             </label>
           </div>
@@ -428,12 +444,12 @@
     <!-- PART III -->
     <section class="step" data-step="2" role="group" aria-label="Part III: Challenges Encountered">
       <div class="part-head">
-        <div class="part-eyebrow">Part III</div>
-        <h2 class="part-title">Challenges Encountered</h2>
-        <p class="part-sub">Indicate how much you agree with each statement. 4 = Strongly Agree, 1 = Strongly Disagree.</p>
+        <div class="part-eyebrow" data-i18n="partIII">Part III</div>
+        <h2 class="part-title" data-i18n="partIIITitle">Challenges Encountered</h2>
+        <p class="part-sub" data-i18n="partIIISub">Indicate how much you agree with each statement. 4 = Strongly Agree, 1 = Strongly Disagree.</p>
       </div>
       <div class="card" style="overflow-x:auto;">
-        <p class="hint" style="margin-bottom:.6rem;">4 = Strongly Agree &nbsp; 3 = Agree &nbsp; 2 = Disagree &nbsp; 1 = Strongly Disagree</p>
+        <p class="hint" style="margin-bottom:.6rem;" data-i18n="tblStatement">4 = Strongly Agree &nbsp; 3 = Agree &nbsp; 2 = Disagree &nbsp; 1 = Strongly Disagree</p>
         <table class="likert" id="challengesTable">
           <thead><tr><th scope="col">Statement</th><th scope="col">4</th><th scope="col">3</th><th scope="col">2</th><th scope="col">1</th></tr></thead>
           <tbody></tbody>
@@ -444,12 +460,12 @@
     <!-- PART IV -->
     <section class="step" data-step="3" role="group" aria-label="Part IV: Feature Priorities">
       <div class="part-head">
-        <div class="part-eyebrow">Part IV</div>
-        <h2 class="part-title">Needs &amp; Feature Priorities for PRISM</h2>
-        <p class="part-sub">For each proposed feature, rate its importance to your work. 4 = Very Important, 1 = Not Important.</p>
+        <div class="part-eyebrow" data-i18n="partIV">Part IV</div>
+        <h2 class="part-title" data-i18n="partIVTitle">Needs &amp; Feature Priorities for PRISM</h2>
+        <p class="part-sub" data-i18n="partIVSub">For each proposed feature, rate its importance to your work. 4 = Very Important, 1 = Not Important.</p>
       </div>
       <div class="card" style="overflow-x:auto;">
-        <p class="hint" style="margin-bottom:.6rem;">4 = Very Important &nbsp; 3 = Important &nbsp; 2 = Slightly Important &nbsp; 1 = Not Important</p>
+        <p class="hint" style="margin-bottom:.6rem;" data-i18n="tblFeature">4 = Very Important &nbsp; 3 = Important &nbsp; 2 = Slightly Important &nbsp; 1 = Not Important</p>
         <table class="likert" id="featuresTable">
           <thead><tr><th scope="col">Feature</th><th scope="col">4</th><th scope="col">3</th><th scope="col">2</th><th scope="col">1</th></tr></thead>
           <tbody></tbody>
@@ -457,7 +473,7 @@
       </div>
       <div class="card">
         <div class="field" style="margin-bottom:0;">
-          <label class="q-label">Which THREE features would benefit you the most?</label>
+          <label class="q-label" data-i18n="top3Label">Which THREE features would benefit you the most?</label>
           <span class="counter" id="top3Counter" aria-live="polite">0 / 3 selected</span>
           <div class="options" id="top3Options" role="group" aria-label="Top 3 feature selections"></div>
         </div>
@@ -467,21 +483,21 @@
     <!-- PART V -->
     <section class="step" data-step="4" role="group" aria-label="Part V: Additional Feedback">
       <div class="part-head">
-        <div class="part-eyebrow">Part V</div>
-        <h2 class="part-title">Additional Feedback</h2>
-        <p class="part-sub">A few open questions in your own words.</p>
+        <div class="part-eyebrow" data-i18n="partV">Part V</div>
+        <h2 class="part-title" data-i18n="partVTitle">Additional Feedback</h2>
+        <p class="part-sub" data-i18n="partVSub">A few open questions in your own words.</p>
       </div>
       <div class="card">
         <div class="field">
-          <label class="q-label" for="f-biggestChallenge"><span class="q-num">1.</span>What is the single biggest challenge you currently face in consolidating records, generating reports, or monitoring compliance across the school?</label>
+          <label class="q-label" for="f-biggestChallenge" data-i18n="qChallenge"><span class="q-num">1.</span>What is the single biggest challenge you currently face in consolidating records, generating reports, or monitoring compliance across the school?</label>
           <textarea id="f-biggestChallenge" name="biggestChallenge"></textarea>
         </div>
         <div class="field">
-          <label class="q-label" for="f-missingFeatures"><span class="q-num">2.</span>Are there any features not listed above that you would like to see in PRISM?</label>
+          <label class="q-label" for="f-missingFeatures" data-i18n="qMissing"><span class="q-num">2.</span>Are there any features not listed above that you would like to see in PRISM?</label>
           <textarea id="f-missingFeatures" name="missingFeatures"></textarea>
         </div>
         <div class="field">
-          <label class="q-label" for="f-concerns"><span class="q-num">3.</span>Do you have any concerns about adopting a web-based system for administrative tasks (e.g., staff training, data security, internet access, transition time)?</label>
+          <label class="q-label" for="f-concerns" data-i18n="qConcerns"><span class="q-num">3.</span>Do you have any concerns about adopting a web-based system for administrative tasks (e.g., staff training, data security, internet access, transition time)?</label>
           <textarea id="f-concerns" name="concerns"></textarea>
         </div>
       </div>
@@ -491,22 +507,22 @@
   <!-- Thank you -->
   <div class="thanks" id="thanksView" style="display:none;">
     <div class="crest" aria-hidden="true">&#10003;</div>
-    <h2 class="serif">Thank you for your time and valuable input.</h2>
-    <p>Your responses will directly inform the design and development of PRISM.</p>
+    <h2 class="serif" data-i18n="thankTitle">Thank you for your time and valuable input.</h2>
+    <p data-i18n="thankBody">Your responses will directly inform the design and development of PRISM.</p>
     <div class="thanks-actions">
-      <button class="btn btn-primary" id="downloadBtn">Download my responses</button>
-      <button class="btn btn-ghost" id="anotherBtn">Submit another response</button>
+      <button class="btn btn-primary" id="downloadBtn" data-i18n="btnDownload">Download my responses</button>
+      <button class="btn btn-ghost" id="anotherBtn" data-i18n="btnAnother">Submit another response</button>
     </div>
-    <a href="index.html" class="admin-link">Are you a teacher? Take the Teacher Needs Analysis instead.</a>
-    <a href="student-questionnaire.html" class="admin-link">Are you a student? Take the Student Needs Analysis instead.</a>
+    <a href="index.html" class="admin-link" data-i18n="linkTeacherQ">Are you a teacher? Take the Teacher Needs Analysis instead.</a>
+    <a href="student-questionnaire.html" class="admin-link" data-i18n="linkStudentQ">Are you a student? Take the Student Needs Analysis instead.</a>
   </div>
 </main>
 
 <div class="nav-footer" id="navFooter">
   <div class="nav-inner">
-    <button type="button" class="btn btn-ghost" id="backBtn">Back</button>
+    <button type="button" class="btn btn-ghost" id="backBtn" data-i18n="btnBack">Back</button>
     <span class="step-count" id="stepCount" aria-live="polite">Part I of V</span>
-    <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+    <button type="button" class="btn btn-primary" id="nextBtn" data-i18n="btnNext">Next</button>
   </div>
 </div>
 
@@ -514,34 +530,10 @@
 
 <script>
 (function(){
-  var PARTS = ["Profile","Practices","Challenges","Priorities","Feedback"];
-  var CHALLENGES = [
-    "Consolidating reports from multiple teachers is time-consuming.",
-    "Verifying the accuracy of submitted grades or attendance data is difficult.",
-    "Tracking which teachers have or haven't submitted required records is hard to monitor.",
-    "Important announcements do not reliably reach all teachers, students, or parents.",
-    "Student records are scattered across multiple paper files, spreadsheets, and tools.",
-    "Preparing DepEd-required reports (SF1, SF2, SF9, SF10) each period takes significant time.",
-    "I lack a clear overview of overall school attendance, grading, or compliance status at any given time.",
-    "Maintaining accountability and audit trails for administrative actions is difficult."
-  ];
-  var FEATURES = [
-    "Consolidated, real-time dashboard of school-wide attendance, grades, and compliance status",
-    "Automated generation of DepEd-compliant reports (SF1, SF2, SF9, SF10)",
-    "Teacher submission tracking and compliance monitoring",
-    "Centralized student records management (enrollment, transfers, updates)",
-    "School-wide categorized announcement broadcasting (general, academic, emergency, event, holiday)",
-    "User account and access management for teachers, students, and staff",
-    "Audit logging that records and time-stamps important administrative actions",
-    "Data backup and export capabilities",
-    "Automatic notifications for pending submissions or compliance deadlines",
-    "A messaging system to communicate directly with teachers, students, or parents"
-  ];
-  var FEATURE_SHORT = [
-    "School-wide status dashboard","Automated DepEd report generation","Teacher compliance tracking",
-    "Centralized student records","School-wide announcement broadcasting","User account/access management",
-    "Audit logging","Data backup and export","Automatic compliance notifications","Messaging with teachers/students/parents"
-  ];
+  var PARTS = tArr('parts');
+  var CHALLENGES = tArr('challenges');
+  var FEATURES = tArr('features');
+  var FEATURE_SHORT = tArr('featureShort');
 
   var form = document.getElementById('prismForm');
   var rail = document.getElementById('rail');
@@ -555,6 +547,278 @@
   var current = 0;
   var submitting = false;
   var lastData = null;
+  var lang = localStorage.getItem('prism_lang') || 'en';
+
+  var LANG = {
+    en: {
+      roleName: "I am a:", roleTeacher: "Teacher", roleAdmin: "Administrator", roleStudent: "Student",
+      parts: ["Profile","Practices","Challenges","Priorities","Feedback"],
+      purposeTitle: "Purpose of this questionnaire.",
+      purposeBody: "This questionnaire is part of a needs analysis for PRISM, a proposed web-based school management system for Kiwalan National High School. As a member of the school\u2019s administrative staff, your experience consolidating records, generating reports, monitoring compliance, and coordinating school-wide communication is essential to designing a system that genuinely supports the school\u2019s operations.",
+      purposePrivacy: "Responses are used solely for research purposes and treated with confidentiality in line with the Data Privacy Act of 2012 (RA 10173). Participation is voluntary \u2014 you may skip any item you prefer not to answer.",
+      partI: "Part I", partITitle: "Respondent Profile", partISub: "Please provide the following information. Your name is optional.",
+      partII: "Part II", partIITitle: "Current Practices", partIISub: "These items ask about how you currently handle school-wide records, reporting, and communication tasks.",
+      partIII: "Part III", partIIITitle: "Challenges Encountered", partIIISub: "Indicate how much you agree with each statement. 4 = Strongly Agree, 1 = Strongly Disagree.",
+      partIV: "Part IV", partIVTitle: "Needs & Feature Priorities for PRISM", partIVSub: "For each proposed feature, rate its importance to your work. 4 = Very Important, 1 = Not Important.",
+      partV: "Part V", partVTitle: "Additional Feedback", partVSub: "A few open questions in your own words.",
+      lblName: "Name <span style=\"font-weight:400;color:var(--ink-soft)\">(optional)</span>",
+      lblPosition: "Position / role at KNHS",
+      lblExperience: "Years in this role at KNHS",
+      lblComfort: "Comfort level using computers, smartphones, or web-based applications",
+      lblDevices: "Device(s) most often used for school-related work <span style=\"font-weight:400;color:var(--ink-soft)\">(check all that apply)</span>",
+      optPos1: "School Head / Principal", optPos2: "Assistant School Head", optPos3: "Registrar",
+      optPos4: "Guidance Counselor", optPos5: "Administrative / Office Staff", optPos6: "Other",
+      optExp1: "Less than 1 year", optExp2: "1\u20133 years", optExp3: "4\u20137 years", optExp4: "8 years or more",
+      optComfort1: "Not comfortable", optComfort2: "Slightly comfortable", optComfort3: "Comfortable", optComfort4: "Very comfortable",
+      optDesktop: "Desktop / laptop computer", optSmartphone: "Smartphone", optTablet: "Tablet", optOther: "Other", optSpecify: "Please specify",
+      qReports: "<span class=\"q-num\">1.</span>How do you currently generate DepEd/school reports (e.g., SF1, SF2, SF9, SF10, enrollment summaries)?",
+      qReportsOpt1: "Manually compiling from paper/spreadsheet submissions",
+      qReportsOpt2: "Requesting data from teachers individually, then consolidating",
+      qReportsOpt3: "Using an existing digital tool/system",
+      qCompliance: "<span class=\"q-num\">2.</span>How do you currently track whether teachers have submitted required records (attendance, grades, etc.) on time?",
+      qComplianceOpt1: "Manual follow-up (in person, text, calls)",
+      qComplianceOpt2: "Checklist or logbook",
+      qComplianceOpt3: "Shared spreadsheet",
+      qEnrollment: "<span class=\"q-num\">3.</span>How do you currently manage student enrollment and records (transfers, updates)?",
+      qEnrollmentOpt1: "Paper-based forms and filing",
+      qEnrollmentOpt2: "Spreadsheet",
+      qEnrollmentOpt3: "Existing school information system",
+      qAnnouncements: "<span class=\"q-num\">4.</span>How do you currently send school-wide announcements to teachers, students, or parents?",
+      qAnnouncementsOpt1: "Verbal / in-person during meetings or assembly",
+      qAnnouncementsOpt2: "Group chat with teachers who relay to students",
+      qAnnouncementsOpt3: "Physical memos / circulars",
+      tblStatement: "4 = Strongly Agree &nbsp; 3 = Agree &nbsp; 2 = Disagree &nbsp; 1 = Strongly Disagree",
+      tblFeature: "4 = Very Important &nbsp; 3 = Important &nbsp; 2 = Slightly Important &nbsp; 1 = Not Important",
+      challenges: [
+        "Consolidating reports from multiple teachers is time-consuming.",
+        "Verifying the accuracy of submitted grades or attendance data is difficult.",
+        "Tracking which teachers have or haven't submitted required records is hard to monitor.",
+        "Important announcements do not reliably reach all teachers, students, or parents.",
+        "Student records are scattered across multiple paper files, spreadsheets, and tools.",
+        "Preparing DepEd-required reports (SF1, SF2, SF9, SF10) each period takes significant time.",
+        "I lack a clear overview of overall school attendance, grading, or compliance status at any given time.",
+        "Maintaining accountability and audit trails for administrative actions is difficult."
+      ],
+      features: [
+        "Consolidated, real-time dashboard of school-wide attendance, grades, and compliance status",
+        "Automated generation of DepEd-compliant reports (SF1, SF2, SF9, SF10)",
+        "Teacher submission tracking and compliance monitoring",
+        "Centralized student records management (enrollment, transfers, updates)",
+        "School-wide categorized announcement broadcasting (general, academic, emergency, event, holiday)",
+        "User account and access management for teachers, students, and staff",
+        "Audit logging that records and time-stamps important administrative actions",
+        "Data backup and export capabilities",
+        "Automatic notifications for pending submissions or compliance deadlines",
+        "A messaging system to communicate directly with teachers, students, or parents"
+      ],
+      featureShort: ["School-wide status dashboard","Automated DepEd report generation","Teacher compliance tracking","Centralized student records","School-wide announcement broadcasting","User account/access management","Audit logging","Data backup and export","Automatic compliance notifications","Messaging with teachers/students/parents"],
+      top3Label: "Which THREE features would benefit you the most?",
+      qChallenge: "<span class=\"q-num\">1.</span>What is the single biggest challenge you currently face in consolidating records, generating reports, or monitoring compliance across the school?",
+      qMissing: "<span class=\"q-num\">2.</span>Are there any features not listed above that you would like to see in PRISM?",
+      qConcerns: "<span class=\"q-num\">3.</span>Do you have any concerns about adopting a web-based system for administrative tasks (e.g., staff training, data security, internet access, transition time)?",
+      btnBack: "Back", btnNext: "Next", btnSubmit: "Submit", btnSubmitting: "Submitting\u2026",
+      stepCount: function(n){ return "Part "+["I","II","III","IV","V"][n]+" of V"; },
+      thankTitle: "Thank you for your time and valuable input.",
+      thankBody: "Your responses will directly inform the design and development of PRISM.",
+      btnDownload: "Download my responses", btnAnother: "Submit another response",
+      linkTeacherQ: "Are you a teacher? Take the Teacher Needs Analysis instead.",
+      linkStudentQ: "Are you a student? Take the Student Needs Analysis instead.",
+      downloadTitle: "PRISM \u2014 Administrator Needs Analysis Questionnaire",
+      dlProfile: "PART I \u2014 Respondent Profile",
+      dlName: "Name", dlPosition: "Position/Role", dlYears: "Years in role at KNHS",
+      dlComfort: "Comfort level", dlDevices: "Devices used", dlPractice: "PART II \u2014 Current Practices",
+      dlReports: "Report generation", dlCompliance: "Compliance tracking",
+      dlEnrollment: "Enrollment management", dlComms: "Communication",
+      dlChallenges: "PART III \u2014 Challenges (1=Strongly Disagree .. 4=Strongly Agree)",
+      dlFeatures: "PART IV \u2014 Feature Priorities (1=Not Important .. 4=Very Important)",
+      dlTop3: "Top 3 picks", dlFeedback: "PART V \u2014 Additional Feedback",
+      dlBiggest: "Biggest challenge", dlMissing: "Missing features", dlConcerns: "Concerns",
+      notProvided: "(not provided)", skipped: "(skipped)",
+      errNetwork: "Network error \u2014 please check your internet connection and try again.",
+      errAccess: "Access denied \u2014 the server rejected the request. Please try again later.",
+      errSession: "Session expired \u2014 please refresh the page.",
+      errServer: "Server error \u2014 please try again in a few minutes.",
+      errTimeout: "Request timed out \u2014 please check your connection and try again.",
+      errDatabase: "Database error \u2014 please contact the administrator.",
+      errRLS: "Permission error \u2014 please contact the administrator.",
+      errOffline: "You appear to be offline. Please check your internet connection.",
+      errOfflineTitle: "You are offline. Please check your internet connection.",
+      errRestored: "Connection restored.",
+      errUnknown: "Unknown error occurred.",
+      errSubmit: "Submission failed: ",
+      errCancel: "Submission cancelled. Your answers are still visible on this page.",
+      errRetry: "\n\nWould you like to retry?"
+    },
+    fil: {
+      roleName: "Ako ay isang:", roleTeacher: "Guro", roleAdmin: "Administrador", roleStudent: "Mag-aaral",
+      parts: ["Profil","Mga Gawain","Mga Hamon","Mga Priyoridad","Feedback"],
+      purposeTitle: "Layunin ng questionnaire na ito.",
+      purposeBody: "Ang questionnaire na ito ay bahagi ng pangangailangan ng PRISM, isang iminungkahing web-based na sistema ng pamamahala ng paaralan para sa Kiwalan National High School. Bilang miyembro ng administrative staff ng paaralan, ang iyong karanasan sa pagsasama-sama ng mga tala, paggawa ng mga ulat, pagsubaybay sa pagsunod, at pag-coordinate ng komunikasyon sa buong paaralan ay mahalaga sa pagdidisenyo ng isang sistema na tunay na sumusuporta sa operasyon ng paaralan.",
+      purposePrivacy: "Ang mga sagot ay ginagamit lamang para sa layuning pananaliksik at itinuturing na kompidensyal alinsunod sa Data Privacy Act of 2012 (RA 10173). Ang paglahok ay boluntaryo \u2014 maaari mong laktawan ang anumang item na ayaw mong sagutin.",
+      partI: "Bahagi I", partITitle: "Profil ng Respondent", partISub: "Mangyaring ibigay ang sumusunod na impormasyon. Ang iyong pangalan ay opsyonal.",
+      partII: "Bahagi II", partIITitle: "Mga Kasalukuyang Gawain", partIISub: "Ang mga item na ito ay nagtatanong kung paano mo hinahawakan ang mga tala, ulat, at gawain sa komunikasyon sa buong paaralan.",
+      partIII: "Bahagi III", partIIITitle: "Mga Hamong Nahaharap", partIIISub: "Tukuyin kung gaano ka sumasang-ayon sa bawat pahayag. 4 = Lubos na Sumasang-ayon, 1 = Lubos na Hindi Sumasang-ayon.",
+      partIV: "Bahagi IV", partIVTitle: "Mga Pangangailangan at Priyoridad ng Feature para sa PRISM", partIVSub: "Para sa bawat iminungkahing feature, i-rate ang kahalagahan nito sa iyong gawain. 4 = Napakahalaga, 1 = Hindi Mahalaga",
+      partV: "Bahagi V", partVTitle: "Karagdagang Feedback", partVSub: "Mga bukas na tanong sa sarili mong mga salita.",
+      lblName: "Pangalan <span style=\"font-weight:400;color:var(--ink-soft)\">(opsyonal)</span>",
+      lblPosition: "Posisyon / tungkulin sa KNHS",
+      lblExperience: "Taon sa tungkuling ito sa KNHS",
+      lblComfort: "Antas ng kinhahanayan sa paggamit ng computer, smartphone, o web-based na aplikasyon",
+      lblDevices: "Mga device na pinaka-madalas na ginagamit para sa school-related na gawain <span style=\"font-weight:400;color:var(--ink-soft)\">(piliin ang lahat ng naaangkop)</span>",
+      optPos1: "School Head / Principal", optPos2: "Assistant School Head", optPos3: "Registrar",
+      optPos4: "Guidance Counselor", optPos5: "Administrative / Office Staff", optPos6: "Iba pa",
+      optExp1: "Wala pang 1 taon", optExp2: "1\u20133 taon", optExp3: "4\u20137 taon", optExp4: "8 taon o higit pa",
+      optComfort1: "Hindi komportable", optComfort2: "Bahagyang komportable", optComfort3: "Komportable", optComfort4: "Napakakomportable",
+      optDesktop: "Desktop / laptop computer", optSmartphone: "Smartphone", optTablet: "Tablet", optOther: "Iba pa", optSpecify: "Mangyaring tukuyin",
+      qReports: "<span class=\"q-num\">1.</span>Paano mo kasalukuyang ginagawa ang DepEd/school reports (hal. SF1, SF2, SF9, SF10, enrollment summaries)?",
+      qReportsOpt1: "Manu-manong pagbubuo mula sa paper/spreadsheet submissions",
+      qReportsOpt2: "Humihingi ng data mula sa mga guro nang paisa-isa, pagkatapos ay pinagsasama-sama",
+      qReportsOpt3: "Gumagamit ng umiiral na digital tool/system",
+      qCompliance: "<span class=\"q-num\">2.</span>Paano mo kasalukuyang sinusubaybayan kung nakapagsumite na ang mga guro ng required na tala (attendance, grades, atbp.) sa tamang oras?",
+      qComplianceOpt1: "Manu-manong follow-up (sa personal, text, tawag)",
+      qComplianceOpt2: "Checklist o logbook",
+      qComplianceOpt3: "Shared spreadsheet",
+      qEnrollment: "<span class=\"q-num\">3.</span>Paano mo kasalukuyang pinamamahalaan ang enrollment at mga tala ng mag-aaral (transfer, update)?",
+      qEnrollmentOpt1: "Paper-based na form at filing",
+      qEnrollmentOpt2: "Spreadsheet",
+      qEnrollmentOpt3: "Umiiral na school information system",
+      qAnnouncements: "<span class=\"q-num\">4.</span>Paano mo kasalukuyang nagpapadala ng mga anunsyo sa buong paaralan sa mga guro, mag-aaral, o magulang?",
+      qAnnouncementsOpt1: "Verbal / sa personal sa mga meeting o assembly",
+      qAnnouncementsOpt2: "Group chat kasama ang mga guro na nagpapasa sa mga mag-aaral",
+      qAnnouncementsOpt3: "Pisikal na memo / circular",
+      tblStatement: "4 = Lubos na Sumasang-ayon &nbsp; 3 = Sumasang-ayon &nbsp; 2 = Hindi Sumasang-ayon &nbsp; 1 = Lubos na Hindi Sumasang-ayon",
+      tblFeature: "4 = Napakahalaga &nbsp; 3 = Mahalaga &nbsp; 2 = Bahagyang Mahalaga &nbsp; 1 = Hindi Mahalaga",
+      challenges: [
+        "Ang pagsasama-sama ng mga ulat mula sa maraming guro ay nakakainis ng oras.",
+        "Mahirap i-verify ang katumpakan ng mga submitted na grades o attendance data.",
+        "Mahirap subaybayan kung aling mga guro ang nakapagsumite o hindi pa nakapagsumite ng required na records.",
+        "Ang mahahalagang anunsyo ay hindi palaging naabot ang lahat ng guro, mag-aaral, o magulang.",
+        "Ang mga student record ay nakakalat sa iba't ibang paper files, spreadsheet, at tools.",
+        "Ang paghahanda ng DepEd-required na ulat (SF1, SF2, SF9, SF10) bawat period ay tumatagal ng malaking oras.",
+        "Wala akong malinaw na pangkalahatang-tanaw ng kabuuang attendance, grading, o compliance status ng paaralan.",
+        "Mahirap panatilihin ang accountability at audit trail para sa mga administrative na aksyon."
+      ],
+      features: [
+        "Pinagsama-sama, real-time dashboard ng attendance, grades, at compliance status sa buong paaralan",
+        "Awtomatikong paggawa ng DepEd-compliant na ulat (SF1, SF2, SF9, SF10)",
+        "Pagsubaybay sa submission ng mga guro at monitoring ng pagsunod",
+        "Sentralisadong pamamahala ng student records (enrollment, transfer, update)",
+        "Broadasting ng mga anunsyo sa buong paaralan na naka-categorize (pangkalahatan, akademiko, emergency, kaganapang, holiday)",
+        "Pamamahala ng user account at access para sa mga guro, mag-aaral, at staff",
+        "Audit logging na nagre-record at nag-time-stamp ng mahahalagang administrative na aksyon",
+        "Mga kakayahan sa data backup at export",
+        "Awtomatikong abiso para sa mga nakabinbing submission o compliance deadline",
+        "Messaging system para makipag-usap nang direkta sa mga guro, mag-aaral, o magulang"
+      ],
+      featureShort: ["Dashboard ng status sa buong paaralan","Awtomatikong DepEd report generation","Pagsubaybay sa compliance ng mga guro","Sentralisadong student records","Broadcasting ng anunsyo sa buong paaralan","Pamamahala ng user account/access","Audit logging","Data backup at export","Awtomatikong compliance notification","Messaging sa mga guro/mag-aaral/magulang"],
+      top3Label: "Alin sa TATLONG feature ang makakatulong sa iyo nang pinaka-marami?",
+      qChallenge: "<span class=\"q-num\">1.</span>Ang pinakamalaking hamon na iyong nararanasan sa pagsasama-sama ng mga tala, paggawa ng mga ulat, o pagsubaybay sa pagsunod sa buong paaralan?",
+      qMissing: "<span class=\"q-num\">2.</span>Meron bang mga feature na hindi nakalista sa itaas na gusto mong makita sa PRISM?",
+      qConcerns: "<span class=\"q-num\">3.</span>Meron ka bang mga alin tungkol sa paggamit ng web-based na sistema para sa mga administrative na gawain (hal. pagsasanay ng staff, seguridad ng data, internet access, oras ng transition)?",
+      btnBack: "Bumalik", btnNext: "Susunod", btnSubmit: "Isumite", btnSubmitting: "Isinusumite\u2026",
+      stepCount: function(n){ return "Bahagi "+["I","II","III","IV","V"][n]+" ng V"; },
+      thankTitle: "Salamat sa iyong oras at mahalagang kontribusyon.",
+      thankBody: "Ang iyong mga sagot ay direktang magiging batayan sa disenyo at pag-unlad ng PRISM.",
+      btnDownload: "I-download ang aking mga sagot", btnAnother: "Magsumite ng isa pang sagot",
+      linkTeacherQ: "Ikaw ba ay guro? Kunin ang Teacher Needs Analysis.",
+      linkStudentQ: "Ikaw ba ay mag-aaral? Kunin ang Student Needs Analysis.",
+      downloadTitle: "PRISM \u2014 Administrator Needs Analysis Questionnaire",
+      dlProfile: "BAHAGI I \u2014 Profil ng Respondent",
+      dlName: "Pangalan", dlPosition: "Posisyon/Tungkulin", dlYears: "Taon sa tungkulin sa KNHS",
+      dlComfort: "Antas ng kinhahanayan", dlDevices: "Mga device na ginamit", dlPractice: "BAHAGI II \u2014 Mga Kasalukuyang Gawain",
+      dlReports: "Paggawa ng ulat", dlCompliance: "Pagsubaybay sa pagsunod",
+      dlEnrollment: "Pamamahala ng enrollment", dlComms: "Komunikasyon",
+      dlChallenges: "BAHAGI III \u2014 Mga Hamon (1=Lubos na Hindi Sumasang-ayon .. 4=Lubos na Sumasang-ayon)",
+      dlFeatures: "BAHAGI IV \u2014 Priyoridad ng Feature (1=Hindi Mahalaga .. 4=Napakahalaga)",
+      dlTop3: "Top 3 na pinili", dlFeedback: "BAHAGI V \u2014 Karagdagang Feedback",
+      dlBiggest: "Pinakamalaking hamon", dlMissing: "Mga nawawalang feature", dlConcerns: "Mga alin tungkol sa",
+      notProvided: "(hindi ibinigay)", skipped: "(nilaktawan)",
+      errNetwork: "Error sa network \u2014 mangyaring suriin ang iyong internet connection at subukan muli.",
+      errAccess: "Tinanggihan ang access \u2014 tinanggihan ng server ang kahilingan. Mangyaring subukan muli mamaya.",
+      errSession: "Nag-expire ang session \u2014 mangyaring i-refresh ang pahina.",
+      errServer: "Error sa server \u2014 mangyaring subukan muli sa loob ng ilang minuto.",
+      errTimeout: "Nag-time out ang kahilingan \u2014 mangyaring suriin ang iyong koneksyon at subukan muli.",
+      errDatabase: "Error sa database \u2014 mangyaring makipag-ugnayan sa administrator.",
+      errRLS: "Error sa pahintulot \u2014 mangyaring makipag-ugnayan sa administrator.",
+      errOffline: "Tila offline ka. Mangyaring suriin ang iyong internet connection.",
+      errOfflineTitle: "Offline ka. Mangyaring suriin ang iyong internet connection.",
+      errRestored: "Naibalik ang koneksyon.",
+      errUnknown: "Nagkaroon ng hindi kilalang error.",
+      errSubmit: "Nabigo ang pagsumite: ",
+      errCancel: "Nakansela ang pagsumite. Nakikita pa rin ang iyong mga sagot sa pahinang ito.",
+      errRetry: "\n\nGusto mo bang subukan muli?"
+    }
+  };
+
+  function t(key){
+    var val = LANG[lang] && LANG[lang][key] !== undefined ? LANG[lang][key] : LANG.en[key];
+    if(typeof val === 'function') return val;
+    return val !== undefined ? val : key;
+  }
+  function tArr(key){
+    var val = LANG[lang] && LANG[lang][key] !== undefined ? LANG[lang][key] : LANG.en[key];
+    return Array.isArray(val) ? val : (LANG.en[key] || []);
+  }
+
+  function applyLang(){
+    localStorage.setItem('prism_lang', lang);
+    document.querySelectorAll('.lang-btn').forEach(function(b){
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var key = el.getAttribute('data-i18n');
+      var val = t(key);
+      if(typeof val === 'string') el.innerHTML = val;
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
+      var key = el.getAttribute('data-i18n-ph');
+      var val = t(key);
+      if(typeof val === 'string') el.placeholder = val;
+    });
+  }
+
+  function rebuildDynamic(){
+    var railEl = document.getElementById('rail');
+    railEl.innerHTML = '';
+    var p = tArr('parts');
+    p.forEach(function(label,i){
+      var btn = document.createElement('button');
+      btn.type='button'; btn.className='rail-step'; btn.dataset.i=i;
+      btn.setAttribute('aria-label', 'Go to Part ' + toRoman(i+1) + ': ' + label);
+      btn.innerHTML = '<span class="rail-dot">'+toRoman(i+1)+'</span><span class="rail-label">'+label+'</span>';
+      btn.addEventListener('click',function(){goTo(i);});
+      railEl.appendChild(btn);
+    });
+    var cTable = document.querySelector('#challengesTable tbody');
+    cTable.innerHTML = '';
+    buildLikert('challengesTable', tArr('challenges'), 'challenge');
+    var fTable = document.querySelector('#featuresTable tbody');
+    fTable.innerHTML = '';
+    buildLikert('featuresTable', tArr('features'), 'feature');
+    var top3El = document.getElementById('top3Options');
+    top3El.innerHTML = '';
+    var fs = tArr('featureShort');
+    fs.forEach(function(label){
+      var opt = document.createElement('label');
+      opt.className='opt';
+      opt.innerHTML = '<input type="checkbox" name="top3" value="'+label+'">'+label;
+      top3El.appendChild(opt);
+    });
+    var top3Counter = document.getElementById('top3Counter');
+    top3Counter.textContent = '0 / 3 selected';
+    top3Counter.classList.remove('full');
+    render();
+  }
+
+  document.querySelectorAll('.lang-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      lang = btn.dataset.lang;
+      applyLang();
+      rebuildDynamic();
+    });
+  });
+
+  applyLang();
 
   function showToast(msg, ms){
     toastEl.textContent = msg;
@@ -564,28 +828,28 @@
   }
 
   function getErrorMessage(err){
-    if(!err) return 'Unknown error occurred.';
+    if(!err) return t('errUnknown');
     var msg = err.message || String(err);
-    if(msg.indexOf('Failed to fetch')!==-1 || msg.indexOf('NetworkError')!==-1) return 'Network error \u2014 please check your internet connection and try again.';
-    if(msg.indexOf('403')!==-1 || msg.indexOf('Forbidden')!==-1) return 'Access denied \u2014 the server rejected the request. Please try again later.';
-    if(msg.indexOf('401')!==-1 || msg.indexOf('Unauthorized')!==-1) return 'Session expired \u2014 please refresh the page.';
-    if(msg.indexOf('500')!==-1 || msg.indexOf('Internal Server Error')!==-1) return 'Server error \u2014 please try again in a few minutes.';
-    if(msg.indexOf('timeout')!==-1) return 'Request timed out \u2014 please check your connection and try again.';
-    if(msg.indexOf('PGRST')!==-1) return 'Database error \u2014 please contact the administrator.';
-    if(msg.indexOf('violates row-level security')!==-1) return 'Permission error \u2014 please contact the administrator.';
-    return 'Submission failed: ' + msg;
+    if(msg.indexOf('Failed to fetch')!==-1 || msg.indexOf('NetworkError')!==-1) return t('errNetwork');
+    if(msg.indexOf('403')!==-1 || msg.indexOf('Forbidden')!==-1) return t('errAccess');
+    if(msg.indexOf('401')!==-1 || msg.indexOf('Unauthorized')!==-1) return t('errSession');
+    if(msg.indexOf('500')!==-1 || msg.indexOf('Internal Server Error')!==-1) return t('errServer');
+    if(msg.indexOf('timeout')!==-1) return t('errTimeout');
+    if(msg.indexOf('PGRST')!==-1) return t('errDatabase');
+    if(msg.indexOf('violates row-level security')!==-1) return t('errRLS');
+    return t('errSubmit') + msg;
   }
 
   function checkOnline(){
     if(!navigator.onLine){
-      showToast('You appear to be offline. Please check your internet connection.', 6000);
+      showToast(t('errOffline'), 6000);
       return false;
     }
     return true;
   }
 
-  window.addEventListener('offline', function(){ showToast('You are offline. Please check your internet connection.', 6000); });
-  window.addEventListener('online', function(){ showToast('Connection restored.', 3000); });
+  window.addEventListener('offline', function(){ showToast(t('errOfflineTitle'), 6000); });
+  window.addEventListener('online', function(){ showToast(t('errRestored'), 3000); });
 
   function toRoman(n){return ["I","II","III","IV","V"][n-1]||n;}
 
@@ -653,9 +917,9 @@
       b.classList.toggle('done', i<current);
       b.setAttribute('aria-current', i===current ? 'step' : 'false');
     });
-    stepCount.textContent = 'Part '+toRoman(current+1)+' of V';
+    stepCount.textContent = t('stepCount')(current+1);
     backBtn.disabled = current===0;
-    nextBtn.textContent = current===steps.length-1 ? 'Submit' : 'Next';
+    nextBtn.textContent = current===steps.length-1 ? t('btnSubmit') : t('btnNext');
     purposeCard.style.display = current===0 ? 'block' : 'none';
     window.scrollTo({top:0, behavior:'smooth'});
   }
@@ -693,7 +957,7 @@
     if(submitting) return;
     submitting = true;
     nextBtn.disabled = true;
-    nextBtn.textContent = 'Submitting\u2026';
+    nextBtn.textContent = t('btnSubmitting');
 
     var data = collect();
     var id = genId();
@@ -754,17 +1018,17 @@
     }catch(err){
       console.error('Submit error:', err);
       var errMsg = getErrorMessage(err);
-      var retry = confirm(errMsg + '\n\nWould you like to retry?');
+      var retry = confirm(errMsg + t('errRetry'));
       if(retry){
         submitting = false;
         nextBtn.disabled = false;
-        nextBtn.textContent = 'Submit';
+        nextBtn.textContent = t('btnSubmit');
         return;
       }
-      showToast('Submission cancelled. Your answers are still visible on this page.', 5000);
+      showToast(t('errCancel'), 5000);
       submitting = false;
       nextBtn.disabled = false;
-      nextBtn.textContent = 'Submit';
+      nextBtn.textContent = t('btnSubmit');
       return;
     }
 
@@ -779,35 +1043,35 @@
 
   function summaryText(data){
     var lines = [];
-    lines.push('PRISM \u2014 Administrator Needs Analysis Questionnaire');
+    lines.push(t('downloadTitle'));
     lines.push('Kiwalan National High School \u00b7 '+new Date().toLocaleString());
     lines.push('');
-    lines.push('PART I \u2014 Respondent Profile');
-    lines.push('Name: '+(data.name||'(not provided)'));
-    lines.push('Position/Role: '+(data.adminRole||'')+(data.adminRoleOther?(' ('+data.adminRoleOther+')'):''));
-    lines.push('Years in role at KNHS: '+(data.yearsExperience||''));
-    lines.push('Comfort level: '+(data.comfortLevel||''));
+    lines.push(t('dlProfile'));
+    lines.push(t('dlName')+': '+(data.name||t('notProvided')));
+    lines.push(t('dlPosition')+': '+(data.adminRole||'')+(data.adminRoleOther?(' ('+data.adminRoleOther+')'):''));
+    lines.push(t('dlYears')+': '+(data.yearsExperience||''));
+    lines.push(t('dlComfort')+': '+(data.comfortLevel||''));
     var devices = data.devices ? (Array.isArray(data.devices)?data.devices:[data.devices]) : [];
-    lines.push('Devices used: '+devices.join(', ')+(data.devicesOther?(' ('+data.devicesOther+')'):''));
+    lines.push(t('dlDevices')+': '+devices.join(', ')+(data.devicesOther?(' ('+data.devicesOther+')'):''));
     lines.push('');
-    lines.push('PART II \u2014 Current Practices');
-    lines.push('Report generation: '+(data.attendanceMethod||'')+(data.attendanceMethodOther?(' ('+data.attendanceMethodOther+')'):''));
-    lines.push('Compliance tracking: '+(data.gradingMethod||'')+(data.gradingMethodOther?(' ('+data.gradingMethodOther+')'):''));
-    lines.push('Enrollment management: '+(data.materialsMethod||'')+(data.materialsMethodOther?(' ('+data.materialsMethodOther+')'):''));
-    lines.push('Communication: '+(data.commsMethod||'')+(data.commsMethodOther?(' ('+data.commsMethodOther+')'):''));
+    lines.push(t('dlPractice'));
+    lines.push(t('dlReports')+': '+(data.attendanceMethod||'')+(data.attendanceMethodOther?(' ('+data.attendanceMethodOther+')'):''));
+    lines.push(t('dlCompliance')+': '+(data.gradingMethod||'')+(data.gradingMethodOther?(' ('+data.gradingMethodOther+')'):''));
+    lines.push(t('dlEnrollment')+': '+(data.materialsMethod||'')+(data.materialsMethodOther?(' ('+data.materialsMethodOther+')'):''));
+    lines.push(t('dlComms')+': '+(data.commsMethod||'')+(data.commsMethodOther?(' ('+data.commsMethodOther+')'):''));
     lines.push('');
-    lines.push('PART III \u2014 Challenges (1=Strongly Disagree .. 4=Strongly Agree)');
-    CHALLENGES.forEach(function(c,i){ lines.push('- '+c+' \u2192 '+(data['challenge_'+i]||'(skipped)')); });
+    lines.push(t('dlChallenges'));
+    CHALLENGES.forEach(function(c,i){ lines.push('- '+c+' \u2192 '+(data['challenge_'+i]||t('skipped'))); });
     lines.push('');
-    lines.push('PART IV \u2014 Feature Priorities (1=Not Important .. 4=Very Important)');
-    FEATURES.forEach(function(f,i){ lines.push('- '+f+' \u2192 '+(data['feature_'+i]||'(skipped)')); });
+    lines.push(t('dlFeatures'));
+    FEATURES.forEach(function(f,i){ lines.push('- '+f+' \u2192 '+(data['feature_'+i]||t('skipped'))); });
     var top3 = data.top3 ? (Array.isArray(data.top3)?data.top3:[data.top3]) : [];
-    lines.push('Top 3 picks: '+top3.join(', '));
+    lines.push(t('dlTop3')+': '+top3.join(', '));
     lines.push('');
-    lines.push('PART V \u2014 Additional Feedback');
-    lines.push('Biggest challenge: '+(data.biggestChallenge||''));
-    lines.push('Missing features: '+(data.missingFeatures||''));
-    lines.push('Concerns: '+(data.concerns||''));
+    lines.push(t('dlFeedback'));
+    lines.push(t('dlBiggest')+': '+(data.biggestChallenge||''));
+    lines.push(t('dlMissing')+': '+(data.missingFeatures||''));
+    lines.push(t('dlConcerns')+': '+(data.concerns||''));
     return lines.join('\n');
   }
 

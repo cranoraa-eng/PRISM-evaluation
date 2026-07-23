@@ -94,6 +94,18 @@
   .role-nav-btn:hover{border-color:var(--navy); color:var(--navy);}
   .role-nav-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
 
+  .lang-switch{
+    max-width:760px; margin:0 auto; padding:.4rem 1.25rem;
+    display:flex; align-items:center; justify-content:flex-end; gap:.4rem;
+  }
+  .lang-btn{
+    font-size:.72rem; font-weight:600; padding:.25rem .6rem; border-radius:14px;
+    border:1px solid var(--paper-line); background:var(--card); color:var(--ink-soft);
+    cursor:pointer; transition:.15s; font-family:'Public Sans',sans-serif;
+  }
+  .lang-btn:hover{border-color:var(--navy); color:var(--navy);}
+  .lang-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+
   .purpose{
     background:var(--card);
     border:1px solid var(--paper-line);
@@ -294,18 +306,22 @@
 </header>
 
 <nav class="role-nav">
-  <span class="role-nav-label">I am a:</span>
-  <a href="index.html" class="role-nav-btn">Teacher</a>
-  <a href="admin-questionnaire.html" class="role-nav-btn">Administrator</a>
-  <a href="student-questionnaire.html" class="role-nav-btn active">Student</a>
+  <span class="role-nav-label" data-i18n="roleName">I am a:</span>
+  <a href="index.html" class="role-nav-btn" data-i18n="roleTeacher">Teacher</a>
+  <a href="admin-questionnaire.html" class="role-nav-btn" data-i18n="roleAdmin">Administrator</a>
+  <a href="student-questionnaire.html" class="role-nav-btn active" data-i18n="roleStudent">Student</a>
 </nav>
+<div class="lang-switch">
+  <button class="lang-btn active" data-lang="en">EN</button>
+  <button class="lang-btn" data-lang="fil">FIL</button>
+</div>
 
 <main class="wrap">
   <div class="purpose" id="purposeCard">
-    <strong>Purpose of this questionnaire.</strong>
-    This questionnaire is part of a needs analysis for PRISM, a proposed web-based school management system for Kiwalan National High School. Your experience checking your grades and attendance, receiving learning materials, and getting announcements from your teachers is important for designing a system that works well for students like you.
+    <strong data-i18n="purposeTitle">Purpose of this questionnaire.</strong>
+    <span data-i18n="purposeBody">This questionnaire is part of a needs analysis for PRISM, a proposed web-based school management system for Kiwalan National High School. Your experience checking your grades and attendance, receiving learning materials, and getting announcements from your teachers is important for designing a system that works well for students like you.</span>
     <br><br>
-    Responses are used solely for research purposes and treated with confidentiality in line with the Data Privacy Act of 2012 (RA 10173). Participation is voluntary — you may skip any item you prefer not to answer.
+    <span data-i18n="purposePrivacy">Responses are used solely for research purposes and treated with confidentiality in line with the Data Privacy Act of 2012 (RA 10173). Participation is voluntary — you may skip any item you prefer not to answer.</span>
   </div>
 
   <div class="rail-outer" id="railOuter">
@@ -316,21 +332,21 @@
     <!-- PART I -->
     <section class="step" data-step="0" role="group" aria-label="Part I: Respondent Profile">
       <div class="part-head">
-        <div class="part-eyebrow">Part I</div>
-        <h2 class="part-title">Respondent Profile</h2>
-        <p class="part-sub">Please provide the following information. Your name is optional.</p>
+        <div class="part-eyebrow" data-i18n="partI">Part I</div>
+        <h2 class="part-title" data-i18n="partITitle">Respondent Profile</h2>
+        <p class="part-sub" data-i18n="partISub">Please provide the following information. Your name is optional.</p>
       </div>
       <div class="card">
         <div class="field">
-          <label class="q-label" for="f-name">Name <span style="font-weight:400;color:var(--ink-soft)">(optional)</span></label>
+          <label class="q-label" for="f-name"><span data-i18n="lblName">Name (optional)</span></label>
           <input type="text" id="f-name" name="name" placeholder="Juan Dela Cruz" autocomplete="name">
         </div>
         <div class="field">
-          <label class="q-label" for="f-gradeSubject">Grade level &amp; section</label>
+          <label class="q-label" for="f-gradeSubject" data-i18n="lblGrade">Grade level &amp; section</label>
           <input type="text" id="f-gradeSubject" name="gradeSubject" placeholder="e.g., Grade 9 – Narra">
         </div>
         <div class="field">
-          <label class="q-label">Comfort level using computers, smartphones, or web-based applications</label>
+          <label class="q-label" data-i18n="lblComfort">Comfort level using computers, smartphones, or web-based applications</label>
           <div class="options" role="radiogroup" aria-label="Comfort level with technology">
             <label class="opt"><input type="radio" name="comfortLevel" value="Not comfortable">Not comfortable</label>
             <label class="opt"><input type="radio" name="comfortLevel" value="Slightly comfortable">Slightly comfortable</label>
@@ -339,7 +355,7 @@
           </div>
         </div>
         <div class="field">
-          <label class="q-label">Device(s) most often used for school-related work <span style="font-weight:400;color:var(--ink-soft)">(check all that apply)</span></label>
+          <label class="q-label"><span data-i18n="lblDevices">Device(s) most often used for school-related work</span> <span style="font-weight:400;color:var(--ink-soft)">(check all that apply)</span></label>
           <div class="options" role="group" aria-label="Devices used for school work">
             <label class="opt"><input type="checkbox" name="devices" value="Desktop / laptop computer">Desktop / laptop computer</label>
             <label class="opt"><input type="checkbox" name="devices" value="Smartphone">Smartphone</label>
@@ -355,9 +371,9 @@
     <!-- PART II -->
     <section class="step" data-step="1" role="group" aria-label="Part II: Current Practices">
       <div class="part-head">
-        <div class="part-eyebrow">Part II</div>
-        <h2 class="part-title">Current Practices</h2>
-        <p class="part-sub">These items ask about how you currently keep track of your grades, materials, and school updates.</p>
+        <div class="part-eyebrow" data-i18n="partII">Part II</div>
+        <h2 class="part-title" data-i18n="partIITitle">Current Practices</h2>
+        <p class="part-sub" data-i18n="partIISub">These items ask about how you currently keep track of your grades, materials, and school updates.</p>
       </div>
       <div class="card">
         <div class="field">
@@ -410,14 +426,14 @@
     <!-- PART III -->
     <section class="step" data-step="2" role="group" aria-label="Part III: Challenges Encountered">
       <div class="part-head">
-        <div class="part-eyebrow">Part III</div>
-        <h2 class="part-title">Challenges Encountered</h2>
-        <p class="part-sub">Indicate how much you agree with each statement. 4 = Strongly Agree, 1 = Strongly Disagree.</p>
+        <div class="part-eyebrow" data-i18n="partIII">Part III</div>
+        <h2 class="part-title" data-i18n="partIIITitle">Challenges Encountered</h2>
+        <p class="part-sub" data-i18n="partIIISub">Indicate how much you agree with each statement. 4 = Strongly Agree, 1 = Strongly Disagree.</p>
       </div>
       <div class="card" style="overflow-x:auto;">
         <p class="hint" style="margin-bottom:.6rem;">4 = Strongly Agree &nbsp; 3 = Agree &nbsp; 2 = Disagree &nbsp; 1 = Strongly Disagree</p>
         <table class="likert" id="challengesTable">
-          <thead><tr><th scope="col">Statement</th><th scope="col">4</th><th scope="col">3</th><th scope="col">2</th><th scope="col">1</th></tr></thead>
+          <thead><tr><th scope="col" data-i18n="tblStatement">Statement</th><th scope="col">4</th><th scope="col">3</th><th scope="col">2</th><th scope="col">1</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -426,20 +442,20 @@
     <!-- PART IV -->
     <section class="step" data-step="3" role="group" aria-label="Part IV: Feature Priorities">
       <div class="part-head">
-        <div class="part-eyebrow">Part IV</div>
-        <h2 class="part-title">Needs &amp; Feature Priorities for PRISM</h2>
-        <p class="part-sub">For each proposed feature, rate its importance to your work. 4 = Very Important, 1 = Not Important.</p>
+        <div class="part-eyebrow" data-i18n="partIV">Part IV</div>
+        <h2 class="part-title" data-i18n="partIVTitle">Needs &amp; Feature Priorities for PRISM</h2>
+        <p class="part-sub" data-i18n="partIVSub">For each proposed feature, rate its importance to your work. 4 = Very Important, 1 = Not Important.</p>
       </div>
       <div class="card" style="overflow-x:auto;">
         <p class="hint" style="margin-bottom:.6rem;">4 = Very Important &nbsp; 3 = Important &nbsp; 2 = Slightly Important &nbsp; 1 = Not Important</p>
         <table class="likert" id="featuresTable">
-          <thead><tr><th scope="col">Feature</th><th scope="col">4</th><th scope="col">3</th><th scope="col">2</th><th scope="col">1</th></tr></thead>
+          <thead><tr><th scope="col" data-i18n="tblFeature">Feature</th><th scope="col">4</th><th scope="col">3</th><th scope="col">2</th><th scope="col">1</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
       <div class="card">
         <div class="field" style="margin-bottom:0;">
-          <label class="q-label">Which THREE features would benefit you the most?</label>
+          <label class="q-label" data-i18n="top3Label">Which THREE features would benefit you the most?</label>
           <span class="counter" id="top3Counter" aria-live="polite">0 / 3 selected</span>
           <div class="options" id="top3Options" role="group" aria-label="Top 3 feature selections"></div>
         </div>
@@ -449,21 +465,21 @@
     <!-- PART V -->
     <section class="step" data-step="4" role="group" aria-label="Part V: Additional Feedback">
       <div class="part-head">
-        <div class="part-eyebrow">Part V</div>
-        <h2 class="part-title">Additional Feedback</h2>
-        <p class="part-sub">A few open questions in your own words.</p>
+        <div class="part-eyebrow" data-i18n="partV">Part V</div>
+        <h2 class="part-title" data-i18n="partVTitle">Additional Feedback</h2>
+        <p class="part-sub" data-i18n="partVSub">A few open questions in your own words.</p>
       </div>
       <div class="card">
         <div class="field">
-          <label class="q-label" for="f-biggestChallenge"><span class="q-num">1.</span>What is the single biggest challenge you currently face in keeping track of your grades, assignments, or school announcements?</label>
+          <label class="q-label" for="f-biggestChallenge"><span class="q-num">1.</span><span data-i18n="qChallenge">What is the single biggest challenge you currently face in keeping track of your grades, assignments, or school announcements?</span></label>
           <textarea id="f-biggestChallenge" name="biggestChallenge"></textarea>
         </div>
         <div class="field">
-          <label class="q-label" for="f-missingFeatures"><span class="q-num">2.</span>Are there any features not listed above that you would like to see in PRISM?</label>
+          <label class="q-label" for="f-missingFeatures"><span class="q-num">2.</span><span data-i18n="qMissing">Are there any features not listed above that you would like to see in PRISM?</span></label>
           <textarea id="f-missingFeatures" name="missingFeatures"></textarea>
         </div>
         <div class="field">
-          <label class="q-label" for="f-concerns"><span class="q-num">3.</span>Do you have any concerns about using a web-based system for your schoolwork (e.g., internet access, device access, ease of use)?</label>
+          <label class="q-label" for="f-concerns"><span class="q-num">3.</span><span data-i18n="qConcerns">Do you have any concerns about using a web-based system for your schoolwork (e.g., internet access, device access, ease of use)?</span></label>
           <textarea id="f-concerns" name="concerns"></textarea>
         </div>
       </div>
@@ -473,22 +489,22 @@
   <!-- Thank you -->
   <div class="thanks" id="thanksView" style="display:none;">
     <div class="crest" aria-hidden="true">&#10003;</div>
-    <h2 class="serif">Thank you for your time and valuable input.</h2>
-    <p>Your responses will directly inform the design and development of PRISM.</p>
+    <h2 class="serif" data-i18n="thankTitle">Thank you for your time and valuable input.</h2>
+    <p data-i18n="thankBody">Your responses will directly inform the design and development of PRISM.</p>
     <div class="thanks-actions">
-      <button class="btn btn-primary" id="downloadBtn">Download my responses</button>
-      <button class="btn btn-ghost" id="anotherBtn">Submit another response</button>
+      <button class="btn btn-primary" id="downloadBtn" data-i18n="btnDownload">Download my responses</button>
+      <button class="btn btn-ghost" id="anotherBtn" data-i18n="btnAnother">Submit another response</button>
     </div>
-    <a href="index.html" class="admin-link">Are you a teacher? Take the Teacher Needs Analysis instead.</a>
-    <a href="admin-questionnaire.html" class="admin-link">Are you an administrator? Take the Administrator Needs Analysis instead.</a>
+    <a href="index.html" class="admin-link" data-i18n="linkTeacherQ">Are you a teacher? Take the Teacher Needs Analysis instead.</a>
+    <a href="admin-questionnaire.html" class="admin-link" data-i18n="linkAdminQ">Are you an administrator? Take the Administrator Needs Analysis instead.</a>
   </div>
 </main>
 
 <div class="nav-footer" id="navFooter">
   <div class="nav-inner">
-    <button type="button" class="btn btn-ghost" id="backBtn">Back</button>
+    <button type="button" class="btn btn-ghost" id="backBtn" data-i18n="btnBack">Back</button>
     <span class="step-count" id="stepCount" aria-live="polite">Part I of V</span>
-    <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+    <button type="button" class="btn btn-primary" id="nextBtn" data-i18n="btnNext">Next</button>
   </div>
 </div>
 
@@ -496,32 +512,10 @@
 
 <script>
 (function(){
-  var PARTS = ["Profile","Practices","Challenges","Priorities","Feedback"];
-  var CHALLENGES = [
-    "I often don't find out about my grades until report cards are given.",
-    "It's hard to keep track of my assignments and their deadlines.",
-    "I sometimes miss important announcements from my teachers or the school.",
-    "Learning materials (modules, handouts) get lost, damaged, or are hard to keep organized.",
-    "I don't have an easy way to ask my teacher questions outside of class hours.",
-    "I'm not always sure whether my teacher received my submitted assignment.",
-    "Keeping track of my own attendance record is difficult.",
-    "Communicating with the school when I'm absent is inconvenient."
-  ];
-  var FEATURES = [
-    "View my grades online, anytime",
-    "View my own attendance record",
-    "Access learning materials (modules, activity sheets) online",
-    "Submit assignments online and confirm they were received",
-    "Receive notifications about new assignments, grades, and announcements",
-    "Message my teachers directly with questions",
-    "View categorized school announcements (general, academic, emergency, event, holiday)",
-    "A personal dashboard summarizing my grades, attendance, and recent updates"
-  ];
-  var FEATURE_SHORT = [
-    "View grades online","View attendance record","Access learning materials online",
-    "Submit assignments online","Notifications for updates","Message teachers directly",
-    "Categorized announcements","Personal dashboard"
-  ];
+  var PARTS = tArr('parts');
+  var CHALLENGES = tArr('challenges');
+  var FEATURES = tArr('features');
+  var FEATURE_SHORT = tArr('featureShort');
 
   var form = document.getElementById('prismForm');
   var rail = document.getElementById('rail');
@@ -535,6 +529,227 @@
   var current = 0;
   var submitting = false;
   var lastData = null;
+  var lang = localStorage.getItem('prism_lang') || 'en';
+
+  var LANG = {
+    en: {
+      roleName: 'I am a:', roleTeacher: 'Teacher', roleAdmin: 'Administrator', roleStudent: 'Student',
+      parts: ['Profile','Practices','Challenges','Priorities','Feedback'],
+      purposeTitle: 'Purpose of this questionnaire.',
+      purposeBody: 'This questionnaire is part of a needs analysis for PRISM, a proposed web-based school management system for Kiwalan National High School. Your experience checking your grades and attendance, receiving learning materials, and getting announcements from your teachers is important for designing a system that works well for students like you.',
+      purposePrivacy: 'Responses are used solely for research purposes and treated with confidentiality in line with the Data Privacy Act of 2012 (RA 10173). Participation is voluntary \u2014 you may skip any item you prefer not to answer.',
+      partI: 'Part I', partITitle: 'Respondent Profile', partISub: 'Please provide the following information. Your name is optional.',
+      partII: 'Part II', partIITitle: 'Current Practices', partIISub: 'These items ask about how you currently keep track of your grades, materials, and school updates.',
+      partIII: 'Part III', partIIITitle: 'Challenges Encountered', partIIISub: 'Indicate how much you agree with each statement. 4 = Strongly Agree, 1 = Strongly Disagree.',
+      partIV: 'Part IV', partIVTitle: 'Needs & Feature Priorities for PRISM', partIVSub: 'For each proposed feature, rate its importance to your work. 4 = Very Important, 1 = Not Important.',
+      partV: 'Part V', partVTitle: 'Additional Feedback', partVSub: 'A few open questions in your own words.',
+      lblName: 'Name (optional)', lblGrade: 'Grade level & section', lblComfort: 'Comfort level using computers, smartphones, or web-based applications',
+      lblDevices: 'Device(s) most often used for school-related work (check all that apply)',
+      optDesktop: 'Desktop / laptop computer', optSmartphone: 'Smartphone', optTablet: 'Tablet', optOther: 'Other', optSpecify: 'Please specify',
+      optComfort1: 'Not comfortable', optComfort2: 'Slightly comfortable', optComfort3: 'Comfortable', optComfort4: 'Very comfortable',
+      qGrades: 'How do you currently check your grades?',
+      optGrade1: 'Teacher announces/shows grades in class', optGrade2: 'Ask my teacher directly', optGrade3: 'Only from my printed report card',
+      qMaterials: 'How do you currently receive learning materials (modules, activity sheets, assignments) from your teachers?',
+      optMat1: 'Printed handouts', optMat2: 'Messenger / group chat', optMat3: 'Email or cloud storage link (e.g., Google Drive)',
+      qAnnouncements: 'How do you currently receive school or class announcements?',
+      optAnn1: 'Verbal announcement in class', optAnn2: 'Group chat (e.g., Messenger, GC)', optAnn3: 'School or class Facebook page',
+      qComms: 'How do you currently communicate with your teachers about your schoolwork?',
+      optComms1: 'Talk in person during/after class', optComms2: 'Message through Messenger/GC', optComms3: 'Through my parents/guardians',
+      tblStatement: 'Statement', tblFeature: 'Feature',
+      challenges: [
+        "I often don't find out about my grades until report cards are given.",
+        "It's hard to keep track of my assignments and their deadlines.",
+        "I sometimes miss important announcements from my teachers or the school.",
+        "Learning materials (modules, handouts) get lost, damaged, or are hard to keep organized.",
+        "I don't have an easy way to ask my teacher questions outside of class hours.",
+        "I'm not always sure whether my teacher received my submitted assignment.",
+        "Keeping track of my own attendance record is difficult.",
+        "Communicating with the school when I'm absent is inconvenient."
+      ],
+      features: [
+        "View my grades online, anytime",
+        "View my own attendance record",
+        "Access learning materials (modules, activity sheets) online",
+        "Submit assignments online and confirm they were received",
+        "Receive notifications about new assignments, grades, and announcements",
+        "Message my teachers directly with questions",
+        "View categorized school announcements (general, academic, emergency, event, holiday)",
+        "A personal dashboard summarizing my grades, attendance, and recent updates"
+      ],
+      featureShort: ["View grades online","View attendance record","Access learning materials online","Submit assignments online","Notifications for updates","Message teachers directly","Categorized announcements","Personal dashboard"],
+      top3Label: 'Which THREE features would benefit you the most?',
+      qChallenge: "What is the single biggest challenge you currently face in keeping track of your grades, assignments, or school announcements?",
+      qMissing: "Are there any features not listed above that you would like to see in PRISM?",
+      qConcerns: "Do you have any concerns about using a web-based system for your schoolwork (e.g., internet access, device access, ease of use)?",
+      btnBack: 'Back', btnNext: 'Next', btnSubmit: 'Submit', btnSubmitting: 'Submitting\u2026',
+      stepCount: function(r){ return 'Part '+r+' of V'; },
+      thankTitle: 'Thank you for your time and valuable input.',
+      thankBody: 'Your responses will directly inform the design and development of PRISM.',
+      btnDownload: 'Download my responses', btnAnother: 'Submit another response',
+      linkTeacherQ: 'Are you a teacher? Take the Teacher Needs Analysis instead.',
+      linkAdminQ: 'Are you an administrator? Take the Administrator Needs Analysis instead.',
+      downloadTitle: 'PRISM \u2014 Student Needs Analysis Questionnaire',
+      dlProfile: 'PART I \u2014 Respondent Profile', dlName: 'Name:', dlGrade: 'Grade level & section:', dlComfort: 'Comfort level:', dlDevices: 'Devices used:',
+      dlPractice: 'PART II \u2014 Current Practices', dlGrades: 'Grade checking:', dlMaterials: 'Materials receiving:', dlAnnouncements: 'Announcements:', dlComms: 'Communication:',
+      dlChallenges: 'PART III \u2014 Challenges (1=Strongly Disagree .. 4=Strongly Agree)',
+      dlFeatures: 'PART IV \u2014 Feature Priorities (1=Not Important .. 4=Very Important)',
+      dlTop3: 'Top 3 picks:', dlFeedback: 'PART V \u2014 Additional Feedback', dlBiggest: 'Biggest challenge:', dlMissing: 'Missing features:', dlConcerns: 'Concerns:',
+      notProvided: '(not provided)', skipped: '(skipped)',
+      errNetwork: 'Network error \u2014 please check your internet connection and try again.',
+      errAccess: 'Access denied \u2014 the server rejected the request. Please try again later.',
+      errSession: 'Session expired \u2014 please refresh the page.',
+      errServer: 'Server error \u2014 please try again in a few minutes.',
+      errTimeout: 'Request timed out \u2014 please check your connection and try again.',
+      errDatabase: 'Database error \u2014 please contact the administrator.',
+      errRLS: 'Permission error \u2014 please contact the administrator.',
+      errOffline: 'You appear to be offline. Please check your internet connection.',
+      errOfflineTitle: 'You are offline. Please check your internet connection.',
+      errRestored: 'Connection restored.',
+      errUnknown: 'Unknown error occurred.',
+      errSubmit: 'Submission failed: ',
+      errCancel: 'Submission cancelled. Your answers are still visible on this page.',
+      errRetry: '\n\nWould you like to retry?'
+    },
+    fil: {
+      roleName: 'Ako ay isang:', roleTeacher: 'Guro', roleAdmin: 'Tagapangasiwa', roleStudent: 'Mag-aaral',
+      parts: ['Profile','Kasanayan','Mga Hamon','Priyoridad','Feedback'],
+      purposeTitle: 'Layunin ng questionnaire na ito.',
+      purposeBody: 'Ang questionnaire na ito ay bahagi ng pagsusuri ng pangangailangan para sa PRISM, isang iminungkahing web-based school management system para sa Kiwalan National High School. Ang iyong karanasan sa pag-check ng grades at attendance, pagtanggap ng learning materials, at pagtanggap ng mga anunsyo mula sa iyong mga guro ay mahalaga sa pagdisenyo ng isang sistema na gumagana nang maayos para sa mga mag-aaral na tulad mo.',
+      purposePrivacy: 'Ang mga sagot ay ginagamit lamang para sa pananaliksik at itinuturing na kumpidensyal alinsunod sa Data Privacy Act of 2012 (RA 10173). Ang paglahok ay boluntaryo \u2014 maaari mong laktawan ang anumang item na ayaw mong sagutin.',
+      partI: 'Part I', partITitle: 'Profile ng Respondent', partISub: 'Mangyaring magbigay ng mga sumusunod na impormasyon. Ang iyong pangalan ay opsyonal.',
+      partII: 'Part II', partIITitle: 'Kasalukuyang Kasanayan', partIISub: 'Ang mga item na ito ay tungkol sa kung paano mo sinusubaybayan ang iyong mga grades, materyales, at school updates.',
+      partIII: 'Part III', partIIITitle: 'Mga Hamong Nararanasan', partIIISub: 'Tukuyin kung gaano ka sumasang-ayon sa bawat pahayag. 4 = Lubos na Sumasang-ayon, 1 = Lubos na Hindi Sumasang-ayon.',
+      partIV: 'Part IV', partIVTitle: 'Pangangailangan at Priyoridad ng Feature para sa PRISM', partIVSub: 'Sa bawat iminungkahing feature, i-rate ang kahalagahan nito sa iyong gawain. 4 = Napakahalaga, 1 = Hindi Mahalaga.',
+      partV: 'Part V', partVTitle: 'Karagdagang Feedback', partVSub: 'Ilang bukas na tanong sa iyong sariling salita.',
+      lblName: 'Pangalan (opsyonal)', lblGrade: 'Grade level at section', lblComfort: 'Antas ng kumpormasyon sa paggamit ng computer, smartphone, o web-based application',
+      lblDevices: 'Mga device na madalas ginagamit para sa school-related work (i-check lahat na applicable)',
+      optDesktop: 'Desktop / laptop computer', optSmartphone: 'Smartphone', optTablet: 'Tablet', optOther: 'Iba pa', optSpecify: 'Mangyaring tukuyin',
+      optComfort1: 'Hindi komportable', optComfort2: 'Bahagyang komportable', optComfort3: 'Komportable', optComfort4: 'Napakakomportable',
+      qGrades: 'Paano mo kinoc-check ang iyong mga grades?',
+      optGrade1: 'Nag-aanunsyo/nagpapakita ng grades sa klase', optGrade2: 'Direktang tinatanong ang aking guro', optGrade3: 'Mula lang sa aking printed report card',
+      qMaterials: 'Paano mo tumatanggap ng mga learning materials (modules, activity sheets, assignments) mula sa iyong mga guro?',
+      optMat1: 'Printed handouts', optMat2: 'Messenger / group chat', optMat3: 'Email o cloud storage link (hal. Google Drive)',
+      qAnnouncements: 'Paano mo tumatanggap ng mga school o class announcements?',
+      optAnn1: 'Verbal na anunsyo sa klase', optAnn2: 'Group chat (hal. Messenger, GC)', optAnn3: 'School o class Facebook page',
+      qComms: 'Paano mo nakikipag-ugnayan sa iyong mga guro tungkol sa iyong schoolwork?',
+      optComms1: 'Nagsasalita nang personal sa/pagkatapos ng klase', optComms2: 'Nagme-message sa Messenger/GC', optComms3: 'Sa pamamagitan ng aking magulang/guardian',
+      tblStatement: 'Pahayag', tblFeature: 'Feature',
+      challenges: [
+        "Madalas hindi ko nalalaman ang aking mga grades hanggang ibigay ang report card.",
+        "Mahirap subaybayan ang aking mga assignment at ang mga deadline nila.",
+        "Minsan namimiss ko ang mahahalagang anunsyo mula sa aking mga guro o paaralan.",
+        "Ang mga learning materials (modules, handouts) ay nawawala, nasasira, o mahirap ayusin.",
+        "Wala akong madaling paraan para magtanong sa aking guro sa labas ng oras ng klase.",
+        "Hindi ako palaging sigurado kung natanggap ng aking guro ang aking na-submit na assignment.",
+        "Mahirap subaybayan ang aking sariling attendance record.",
+        "Hindi komportable makipag-ugnayan sa paaralan kapag absent ako."
+      ],
+      features: [
+        "Tingnan ang aking mga grades online, kahit kailan",
+        "Tingnan ang aking sariling attendance record",
+        "I-access ang mga learning materials (modules, activity sheets) online",
+        "Mag-submit ng assignments online at kumpirmahing natanggap na",
+        "Tanggapin ang mga notification tungkol sa bagong assignments, grades, at mga anunsyo",
+        "Mag-message sa aking mga guro nang direkta para sa mga tanong",
+        "Tingnan ang mga categorized school announcements (general, academic, emergency, event, holiday)",
+        "Isang personal dashboard na nagbubuod sa aking mga grades, attendance, at mga kamakailang update"
+      ],
+      featureShort: ["Tingnan grades online","Tingnan attendance record","I-access learning materials online","Mag-submit assignments online","Notifications para sa updates","Mag-message sa guro nang direkta","Categorized announcements","Personal dashboard"],
+      top3Label: 'Aling TATLONG feature ang makakatulong sa iyo nang pinakamarami?',
+      qChallenge: "Ano ang pinakamalaking hamon na hinaharap mo sa pagsusubaybayan ng iyong mga grades, assignments, o school announcements?",
+      qMissing: "May mga feature ba na hindi nakalista sa itaas na gusto mong makita sa PRISM?",
+      qConcerns: "May mga alinman ka bang pag-aalala sa paggamit ng web-based system para sa iyong schoolwork (hal. internet access, device access, kadalian ng paggamit)?",
+      btnBack: 'Bumalik', btnNext: 'Susunod', btnSubmit: 'Isumite', btnSubmitting: 'Isinusumite\u2026',
+      stepCount: function(r){ return 'Part '+r+' ng V'; },
+      thankTitle: 'Salamat sa iyong oras at mahalagang input.',
+      thankBody: 'Ang iyong mga sagot ang magiging direktsang batayan ng disenyo at pag-unlad ng PRISM.',
+      btnDownload: 'I-download ang aking mga sagot', btnAnother: 'Magsumite ng isa pang sagot',
+      linkTeacherQ: 'Ikaw ba ay guro? Kumuha ng Teacher Needs Analysis sa halip.',
+      linkAdminQ: 'Ikaw ba ay tagapangasiwa? Kumuha ng Administrator Needs Analysis sa halip.',
+      downloadTitle: 'PRISM \u2014 Student Needs Analysis Questionnaire',
+      dlProfile: 'PART I \u2014 Profile ng Respondent', dlName: 'Pangalan:', dlGrade: 'Grade level at section:', dlComfort: 'Antas ng kumpormasyon:', dlDevices: 'Mga device na ginamit:',
+      dlPractice: 'PART II \u2014 Kasalukuyang Kasanayan', dlGrades: 'Pag-check ng grades:', dlMaterials: 'Pagtanggap ng materyales:', dlAnnouncements: 'Mga anunsyo:', dlComms: 'Komunikasyon:',
+      dlChallenges: 'PART III \u2014 Mga Hamon (1=Lubos na Hindi Sumasang-ayon .. 4=Lubos na Sumasang-ayon)',
+      dlFeatures: 'PART IV \u2014 Priyoridad ng Feature (1=Hindi Mahalaga .. 4=Napakahalaga)',
+      dlTop3: 'Top 3 picks:', dlFeedback: 'PART V \u2014 Karagdagang Feedback', dlBiggest: 'Pinakamalaking hamon:', dlMissing: 'Mga kulang na feature:', dlConcerns: 'Mga pag-aalala:',
+      notProvided: '(hindi ibinigay)', skipped: '(nilaktawan)',
+      errNetwork: 'Error sa network \u2014 mangyaring suriin ang iyong internet connection at subukan muli.',
+      errAccess: 'Tinanggihan ang access \u2014 tinanggihan ng server ang request. Mangyaring subukan muli mamaya.',
+      errSession: 'Nag-expire ang session \u2014 mangyaring i-refresh ang page.',
+      errServer: 'Server error \u2014 mangyaring subukan muli sa loob ng ilang minuto.',
+      errTimeout: 'Nag-timeout ang request \u2014 mangyaring suriin ang iyong connection at subukan muli.',
+      errDatabase: 'Database error \u2014 mangyaring makipag-ugnayan sa administrator.',
+      errRLS: 'Permission error \u2014 mangyaring makipag-ugnayan sa administrator.',
+      errOffline: 'Mukhang offline ka. Mangyaring suriin ang iyong internet connection.',
+      errOfflineTitle: 'Offline ka. Mangyaring suriin ang iyong internet connection.',
+      errRestored: 'Naibalik ang connection.',
+      errUnknown: 'Nagkaroon ng hindi kilalang error.',
+      errSubmit: 'Nabigo ang pagsusumite: ',
+      errCancel: 'Nakansela ang pagsusumite. Nakikita pa rin sa pahina ang iyong mga sagot.',
+      errRetry: '\n\nGusto mo bang subukan muli?'
+    }
+  };
+
+  function t(key){ return (LANG[lang] && LANG[lang][key]) || (LANG.en[key]) || key; }
+  function tArr(key){ return (LANG[lang] && LANG[lang][key]) || (LANG.en[key]) || []; }
+
+  function applyLang(){
+    localStorage.setItem('prism_lang', lang);
+    document.querySelectorAll('.lang-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.lang===lang); });
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var key = el.getAttribute('data-i18n');
+      el.textContent = t(key);
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
+      el.placeholder = t(el.getAttribute('data-i18n-ph'));
+    });
+  }
+
+  function rebuildDynamic(){
+    PARTS = tArr('parts');
+    CHALLENGES = tArr('challenges');
+    FEATURES = tArr('features');
+    FEATURE_SHORT = tArr('featureShort');
+    rail.innerHTML = '';
+    PARTS.forEach(function(label,i){
+      var btn = document.createElement('button');
+      btn.type='button'; btn.className='rail-step'; btn.dataset.i=i;
+      btn.setAttribute('aria-label', 'Go to Part ' + toRoman(i+1) + ': ' + label);
+      btn.innerHTML = '<span class="rail-dot">'+toRoman(i+1)+'</span><span class="rail-label">'+label+'</span>';
+      btn.addEventListener('click',function(){goTo(i);});
+      rail.appendChild(btn);
+    });
+    document.querySelector('#challengesTable tbody').innerHTML = '';
+    document.querySelector('#featuresTable tbody').innerHTML = '';
+    buildLikert('challengesTable', CHALLENGES, 'challenge');
+    buildLikert('featuresTable', FEATURES, 'feature');
+    top3Wrap.innerHTML = '';
+    FEATURE_SHORT.forEach(function(label){
+      var opt = document.createElement('label');
+      opt.className='opt';
+      opt.innerHTML = '<input type="checkbox" name="top3" value="'+label+'">'+label;
+      var cb = opt.querySelector('input');
+      cb.addEventListener('change', function(){
+        var checked = top3Wrap.querySelectorAll('input:checked').length;
+        top3Counter.textContent = checked + ' / 3 selected';
+        top3Counter.classList.toggle('full', checked>=3);
+        top3Wrap.querySelectorAll('input:not(:checked)').forEach(function(c){ c.disabled = checked>=3; });
+        top3Wrap.querySelectorAll('input:checked').forEach(function(c){ c.disabled = false; });
+      });
+      top3Wrap.appendChild(opt);
+    });
+    render();
+  }
+
+  document.querySelectorAll('.lang-btn').forEach(function(b){
+    b.addEventListener('click', function(){
+      lang = b.dataset.lang;
+      applyLang();
+      rebuildDynamic();
+    });
+  });
+
+  applyLang();
 
   function showToast(msg, ms){
     toastEl.textContent = msg;
@@ -544,28 +759,28 @@
   }
 
   function getErrorMessage(err){
-    if(!err) return 'Unknown error occurred.';
+    if(!err) return t('errUnknown');
     var msg = err.message || String(err);
-    if(msg.indexOf('Failed to fetch')!==-1 || msg.indexOf('NetworkError')!==-1) return 'Network error \u2014 please check your internet connection and try again.';
-    if(msg.indexOf('403')!==-1 || msg.indexOf('Forbidden')!==-1) return 'Access denied \u2014 the server rejected the request. Please try again later.';
-    if(msg.indexOf('401')!==-1 || msg.indexOf('Unauthorized')!==-1) return 'Session expired \u2014 please refresh the page.';
-    if(msg.indexOf('500')!==-1 || msg.indexOf('Internal Server Error')!==-1) return 'Server error \u2014 please try again in a few minutes.';
-    if(msg.indexOf('timeout')!==-1) return 'Request timed out \u2014 please check your connection and try again.';
-    if(msg.indexOf('PGRST')!==-1) return 'Database error \u2014 please contact the administrator.';
-    if(msg.indexOf('violates row-level security')!==-1) return 'Permission error \u2014 please contact the administrator.';
-    return 'Submission failed: ' + msg;
+    if(msg.indexOf('Failed to fetch')!==-1 || msg.indexOf('NetworkError')!==-1) return t('errNetwork');
+    if(msg.indexOf('403')!==-1 || msg.indexOf('Forbidden')!==-1) return t('errAccess');
+    if(msg.indexOf('401')!==-1 || msg.indexOf('Unauthorized')!==-1) return t('errSession');
+    if(msg.indexOf('500')!==-1 || msg.indexOf('Internal Server Error')!==-1) return t('errServer');
+    if(msg.indexOf('timeout')!==-1) return t('errTimeout');
+    if(msg.indexOf('PGRST')!==-1) return t('errDatabase');
+    if(msg.indexOf('violates row-level security')!==-1) return t('errRLS');
+    return t('errSubmit') + msg;
   }
 
   function checkOnline(){
     if(!navigator.onLine){
-      showToast('You appear to be offline. Please check your internet connection.', 6000);
+      showToast(t('errOffline'), 6000);
       return false;
     }
     return true;
   }
 
-  window.addEventListener('offline', function(){ showToast('You are offline. Please check your internet connection.', 6000); });
-  window.addEventListener('online', function(){ showToast('Connection restored.', 3000); });
+  window.addEventListener('offline', function(){ showToast(t('errOfflineTitle'), 6000); });
+  window.addEventListener('online', function(){ showToast(t('errRestored'), 3000); });
 
   function toRoman(n){return ["I","II","III","IV","V"][n-1]||n;}
 
@@ -633,9 +848,9 @@
       b.classList.toggle('done', i<current);
       b.setAttribute('aria-current', i===current ? 'step' : 'false');
     });
-    stepCount.textContent = 'Part '+toRoman(current+1)+' of V';
+    stepCount.textContent = t('stepCount')(toRoman(current+1));
     backBtn.disabled = current===0;
-    nextBtn.textContent = current===steps.length-1 ? 'Submit' : 'Next';
+    nextBtn.textContent = current===steps.length-1 ? t('btnSubmit') : t('btnNext');
     purposeCard.style.display = current===0 ? 'block' : 'none';
     window.scrollTo({top:0, behavior:'smooth'});
   }
@@ -673,7 +888,7 @@
     if(submitting) return;
     submitting = true;
     nextBtn.disabled = true;
-    nextBtn.textContent = 'Submitting\u2026';
+    nextBtn.textContent = t('btnSubmitting');
 
     var data = collect();
     var id = genId();
@@ -732,17 +947,17 @@
     }catch(err){
       console.error('Submit error:', err);
       var errMsg = getErrorMessage(err);
-      var retry = confirm(errMsg + '\n\nWould you like to retry?');
+      var retry = confirm(errMsg + t('errRetry'));
       if(retry){
         submitting = false;
         nextBtn.disabled = false;
-        nextBtn.textContent = 'Submit';
+        nextBtn.textContent = t('btnSubmit');
         return;
       }
-      showToast('Submission cancelled. Your answers are still visible on this page.', 5000);
+      showToast(t('errCancel'), 5000);
       submitting = false;
       nextBtn.disabled = false;
-      nextBtn.textContent = 'Submit';
+      nextBtn.textContent = t('btnSubmit');
       return;
     }
 
@@ -757,34 +972,34 @@
 
   function summaryText(data){
     var lines = [];
-    lines.push('PRISM \u2014 Student Needs Analysis Questionnaire');
+    lines.push(t('downloadTitle'));
     lines.push('Kiwalan National High School \u00b7 '+new Date().toLocaleString());
     lines.push('');
-    lines.push('PART I \u2014 Respondent Profile');
-    lines.push('Name: '+(data.name||'(not provided)'));
-    lines.push('Grade level & section: '+(data.gradeSubject||''));
-    lines.push('Comfort level: '+(data.comfortLevel||''));
+    lines.push(t('dlProfile'));
+    lines.push(t('dlName')+' '+(data.name||t('notProvided')));
+    lines.push(t('dlGrade')+' '+(data.gradeSubject||''));
+    lines.push(t('dlComfort')+' '+(data.comfortLevel||''));
     var devices = data.devices ? (Array.isArray(data.devices)?data.devices:[data.devices]) : [];
-    lines.push('Devices used: '+devices.join(', ')+(data.devicesOther?(' ('+data.devicesOther+')'):''));
+    lines.push(t('dlDevices')+' '+devices.join(', ')+(data.devicesOther?(' ('+data.devicesOther+')'):''));
     lines.push('');
-    lines.push('PART II \u2014 Current Practices');
-    lines.push('Grade checking: '+(data.attendanceMethod||'')+(data.attendanceMethodOther?(' ('+data.attendanceMethodOther+')'):''));
-    lines.push('Materials receiving: '+(data.gradingMethod||'')+(data.gradingMethodOther?(' ('+data.gradingMethodOther+')'):''));
-    lines.push('Announcements: '+(data.materialsMethod||'')+(data.materialsMethodOther?(' ('+data.materialsMethodOther+')'):''));
-    lines.push('Communication: '+(data.commsMethod||'')+(data.commsMethodOther?(' ('+data.commsMethodOther+')'):''));
+    lines.push(t('dlPractice'));
+    lines.push(t('dlGrades')+' '+(data.attendanceMethod||'')+(data.attendanceMethodOther?(' ('+data.attendanceMethodOther+')'):''));
+    lines.push(t('dlMaterials')+' '+(data.gradingMethod||'')+(data.gradingMethodOther?(' ('+data.gradingMethodOther+')'):''));
+    lines.push(t('dlAnnouncements')+' '+(data.materialsMethod||'')+(data.materialsMethodOther?(' ('+data.materialsMethodOther+')'):''));
+    lines.push(t('dlComms')+' '+(data.commsMethod||'')+(data.commsMethodOther?(' ('+data.commsMethodOther+')'):''));
     lines.push('');
-    lines.push('PART III \u2014 Challenges (1=Strongly Disagree .. 4=Strongly Agree)');
-    CHALLENGES.forEach(function(c,i){ lines.push('- '+c+' \u2192 '+(data['challenge_'+i]||'(skipped)')); });
+    lines.push(t('dlChallenges'));
+    CHALLENGES.forEach(function(c,i){ lines.push('- '+c+' \u2192 '+(data['challenge_'+i]||t('skipped'))); });
     lines.push('');
-    lines.push('PART IV \u2014 Feature Priorities (1=Not Important .. 4=Very Important)');
-    FEATURES.forEach(function(f,i){ lines.push('- '+f+' \u2192 '+(data['feature_'+i]||'(skipped)')); });
+    lines.push(t('dlFeatures'));
+    FEATURES.forEach(function(f,i){ lines.push('- '+f+' \u2192 '+(data['feature_'+i]||t('skipped'))); });
     var top3 = data.top3 ? (Array.isArray(data.top3)?data.top3:[data.top3]) : [];
-    lines.push('Top 3 picks: '+top3.join(', '));
+    lines.push(t('dlTop3')+' '+top3.join(', '));
     lines.push('');
-    lines.push('PART V \u2014 Additional Feedback');
-    lines.push('Biggest challenge: '+(data.biggestChallenge||''));
-    lines.push('Missing features: '+(data.missingFeatures||''));
-    lines.push('Concerns: '+(data.concerns||''));
+    lines.push(t('dlFeedback'));
+    lines.push(t('dlBiggest')+' '+(data.biggestChallenge||''));
+    lines.push(t('dlMissing')+' '+(data.missingFeatures||''));
+    lines.push(t('dlConcerns')+' '+(data.concerns||''));
     return lines.join('\n');
   }
 
